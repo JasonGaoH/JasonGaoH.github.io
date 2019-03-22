@@ -105,6 +105,7 @@
 
 
   <meta name="description" content="本文的微信公众号链接：关于TabLayout的indicator宽度的一次探索  关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。  先来看看下面一张图， 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的">
+<meta name="keywords" content="Android,TabLayout">
 <meta property="og:type" content="article">
 <meta property="og:title" content="关于TabLayout的indicator宽度的一次探索">
 <meta property="og:url" content="JasonGaoH.github.io/2019/03/22/关于TabLayout的indicator宽度的一次探索/index.html">
@@ -124,7 +125,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png">
-<meta property="og:updated_time" content="2019-03-22T15:11:36.733Z">
+<meta property="og:updated_time" content="2019-03-22T15:51:41.899Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="关于TabLayout的indicator宽度的一次探索">
 <meta name="twitter:description" content="本文的微信公众号链接：关于TabLayout的indicator宽度的一次探索  关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。  先来看看下面一张图， 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的">
@@ -415,7 +416,7 @@
                 
               
 
-              <time title="创建时间：2019-03-22 18:34:27 / 修改时间：23:11:36" itemprop="dateCreated datePublished" datetime="2019-03-22T18:34:27+08:00">2019-03-22</time>
+              <time title="创建时间：2019-03-22 18:34:27 / 修改时间：23:51:41" itemprop="dateCreated datePublished" datetime="2019-03-22T18:34:27+08:00">2019-03-22</time>
             
 
             
@@ -426,6 +427,24 @@
           </span>
 
           
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -433,6 +452,17 @@
           
 
           
+          
+            <span id="/2019/03/22/关于TabLayout的indicator宽度的一次探索/" class="leancloud_visitors" data-flag-title="关于TabLayout的indicator宽度的一次探索">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读次数：</span>
+              
+                <span class="leancloud-visitors-count"></span>
+            </span>
           
 
           
@@ -542,6 +572,14 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/TabLayout/" rel="tag"># TabLayout</a>
+          
+        </div>
+      
 
       
       
@@ -621,7 +659,35 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  
+                </div>
+              
 
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
               
             </nav>
           
@@ -844,6 +910,66 @@
 
 
   
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $('.leancloud_visitors');
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', '/classes/Counter/' + counter.objectId, JSON.stringify({ time: { '__op': 'Increment', 'amount': 1 } }))
+            
+              .done(function() {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.time + 1);
+              })
+            
+              .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+              })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! More info at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log('LeanCloud Counter Error: ' + responseJSON.code + ' ' + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + 'vex9N80hYlcpojwko8ThNz8y-gzGzoHsz')
+        .done(function({ api_server }) {
+          var Counter = function(method, url, data) {
+            return $.ajax({
+              method: method,
+              url: 'https://' + api_server + '/1.1' + url,
+              headers: {
+                'X-LC-Id': 'vex9N80hYlcpojwko8ThNz8y-gzGzoHsz',
+                'X-LC-Key': 'S3DL77nfrMJeROoKjY7z8EUH',
+                'Content-Type': 'application/json',
+              },
+              data: data
+            });
+          };
+          
+            addCount(Counter);
+          
+        });
+    });
+  </script>
+
+
 
   
 
