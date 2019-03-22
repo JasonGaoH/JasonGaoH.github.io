@@ -38,6 +38,10 @@
 
 
 
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
 
 
 
@@ -75,7 +79,7 @@
     sidebar: {"position":"left","Gemini":240,"display":"post","offset":12,"onmobile":false,"dimmer":false},
     back2top: true,
     back2top_sidebar: false,
-    fancybox: false,
+    fancybox: true,
     fastclick: false,
     lazyload: false,
     tabs: true,
@@ -116,7 +120,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png">
-<meta property="og:updated_time" content="2019-03-22T09:53:04.325Z">
+<meta property="og:updated_time" content="2019-03-22T10:35:09.365Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="关于TabLayout的indicator宽度的一次探索">
 <meta name="twitter:description" content="本文的微信公众号链接：关于TabLayout的indicator宽度的一次探索  关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。  先来看看下面一张图， 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的">
@@ -407,7 +411,7 @@
                 
               
 
-              <time title="Created: 2019-03-22 17:48:45 / Modified: 17:53:04" itemprop="dateCreated datePublished" datetime="2019-03-22T17:48:45+08:00">2019-03-22</time>
+              <time title="Created: 2019-03-22 18:34:27 / Modified: 18:35:09" itemprop="dateCreated datePublished" datetime="2019-03-22T18:34:27+08:00">2019-03-22</time>
             
 
             
@@ -450,8 +454,7 @@
 <blockquote>
 <p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
 </blockquote>
-<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
- <a id="more"></a>
+<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。<br> <a id="more"></a></p>
 <p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
 <p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
 <p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
@@ -709,6 +712,8 @@
 
 
 
+  
+
 
 
 
@@ -733,6 +738,9 @@
 
   
   <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
 
   
   <script src="/lib/reading_progress/reading_progress.js"></script>
