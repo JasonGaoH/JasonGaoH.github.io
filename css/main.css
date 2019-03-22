@@ -1917,7 +1917,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #ff0aec;
+  background: #fa934f;
 }
 .links-of-blogroll {
   margin-top: 10px;
@@ -2112,6 +2112,9 @@ pre .javascript .function {
   50%, 70% {
     transform: scale(1.1);
   }
+}
+i.fa {
+  font-family: FontAwesome !important;
 }
 .local-search-pop-overlay {
   position: fixed;
@@ -2664,6 +2667,7 @@ hr {
   margin-bottom: 20px;
 }
 .posts-expand .post-title {
+  text-align: left;
   position: relative;
   font-size: 26px;
   font-weight: 400;
@@ -2791,4 +2795,18 @@ hr {
     width: auto;
     text-align: center;
   }
+}
+.posts-expand .post-title,
+.posts-expand .post-meta {
+  text-align: center;
+}
+.posts-expand .post-tags {
+  text-align: center;
+}
+.footer-inner {
+  margin: 0 auto;
+  text-align: center;
+}
+.pagination {
+  text-align: center;
 }
