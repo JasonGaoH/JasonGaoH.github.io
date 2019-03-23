@@ -427,13 +427,6 @@
           
 
   
-    <div class="comments" id="comments">
-      
-        <div id="gitment-container"></div>
-      
-    </div>
-
-  
 
 
 
@@ -629,6 +622,15 @@
 
 
 
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66237095";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
 
 
 
@@ -742,38 +744,6 @@
 
   
 
-
-  
-    <!-- LOCAL: You can save these files to your site and update links -->
-
-  
-<script src="https://www.wenjunjiang.win/js/gitment.js"></script>
-
-<link rel="stylesheet" href="https://jjeejj.github.io/css/gitment.css">
-<!-- END LOCAL -->
-
-<script>
-  function renderGitment() {
-    var gitment = new Gitment({
-      id: window.location.pathname,
-      owner: 'JasonGaoH',
-      repo: 'JasonGaoH.github.io',
-      
-      oauth: {
-      
-      
-        client_secret: 'ef0888fc0c1afccdfdd755fd85877feea116a421',
-      
-        client_id: 'd35c006645a68d7850e9'
-      }
-    });
-    gitment.render('gitment-container');
-  }
-
-  
-    renderGitment();
-  
-</script>
 
   
 
