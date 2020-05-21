@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.0.1',
+    sidebar: {"position":"left","Gemini":240,"display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="文章已同步发表于微信公众号JasonGaoH，synchronized关键字的原理  什么是synchronizedJDK官网对synchronized关键字有个比较权威的解释。 Synchronized keyword enable a simple strategy for preventing thread interference and memory consistency error">
+<meta name="keywords" content="synchronized">
+<meta property="og:type" content="article">
+<meta property="og:title" content="synchronized关键字的原理">
+<meta property="og:url" content="JasonGaoH.github.io/2020/05/21/synchronized关键字的原理/index.html">
+<meta property="og:site_name" content="JasonGaoH&#39;s Blog">
+<meta property="og:description" content="文章已同步发表于微信公众号JasonGaoH，synchronized关键字的原理  什么是synchronizedJDK官网对synchronized关键字有个比较权威的解释。 Synchronized keyword enable a simple strategy for preventing thread interference and memory consistency error">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="JasonGaoH.github.io/2020/05/21/img/jstack_print_info.png">
+<meta property="og:updated_time" content="2020-05-21T01:23:40.281Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="synchronized关键字的原理">
+<meta name="twitter:description" content="文章已同步发表于微信公众号JasonGaoH，synchronized关键字的原理  什么是synchronizedJDK官网对synchronized关键字有个比较权威的解释。 Synchronized keyword enable a simple strategy for preventing thread interference and memory consistency error">
+<meta name="twitter:image" content="JasonGaoH.github.io/2020/05/21/img/jstack_print_info.png">
+
+
+
+
+
+
+  <link rel="canonical" href="JasonGaoH.github.io/2020/05/21/synchronized关键字的原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>synchronized关键字的原理 | JasonGaoH's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">JasonGaoH's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+  
+  
+  
+  
+
+  
+
+  <a href="https://github.com/JasonGaoH" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewbox="0 0 250 250" style="fill: #222; color: #fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a>
+
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="JasonGaoH.github.io/2020/05/21/synchronized关键字的原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="JasonGaoH">
+      <meta itemprop="description" content="坚持输出，坚持书写，才可以持续成长">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="JasonGaoH's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">synchronized关键字的原理
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-21 09:15:50 / 修改时间：09:23:40" itemprop="dateCreated datePublished" datetime="2020-05-21T09:15:50+08:00">2020-05-21</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/源码分析/" itemprop="url" rel="index"><span itemprop="name">源码分析</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">6 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483807&amp;idx=1&amp;sn=3bdf01201a329fe98a98c045f5387e1b&amp;chksm=fa237977cd54f061e46fee3727e51208c01931ef704a83526d0fe5e5a15eab386376927888ae&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">synchronized关键字的原理</a></p>
+</blockquote>
+<h3 id="什么是synchronized"><a href="#什么是synchronized" class="headerlink" title="什么是synchronized"></a>什么是synchronized</h3><p>JDK官网对synchronized关键字有个比较权威的解释。</p>
+<p>Synchronized keyword enable a simple strategy for preventing thread interference and memory consistency errors: if an object is visible to more than one thread, all reads or writes to that object’s variables ard done through synchronized methods.</p>
+ <a id="more"></a>
+<p>上述解释的意思是：synchronized关键字可以实现一个简单的策略来防止线程干扰和内存一致性错误，如果一个对象对多个线程是可见的，那么对该对象的所有读或者写都将通过同步的方式来进行，具体表现如下：</p>
+<ul>
+<li>synchronized关键字提供了一种锁的机制，能够确保共享变量的互斥访问，从而防止数据不一致的问题出现。</li>
+<li>synchronized关键字包括monitor enter和monitor exit两个JVM指令，它能够保证在任何时候任何线程执行到monitor enter成功之前都必须从主内存中获取数据，而不是缓存中，在monitor exit运行成功之后，共享变量被更新后的值必须刷入主内存。</li>
+<li>synchronized的执行严格遵守java happens-before 规则，一个monitor exit指令之前必定要有一个monitor enter。</li>
+</ul>
+<h3 id="synchronized关键字的用法"><a href="#synchronized关键字的用法" class="headerlink" title="synchronized关键字的用法"></a>synchronized关键字的用法</h3><p>synchronized可以用于对代码块或方法进行修饰，而不能够用于对class以及变量进行修饰。</p>
+<ul>
+<li>同步方法</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public synchronized void sync() &#123;</span><br><span class="line">    //...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>同步方法块</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">private final Object lock = new Object();</span><br><span class="line">public void sync() &#123;</span><br><span class="line">    synchronized(lock) &#123;</span><br><span class="line">        //...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于同步代码块和同步方法的区别之前写过一个关于这个对比，具体可以看这篇文章。<br><a href="https://blog.csdn.net/h_gao/article/details/52266950" target="_blank" rel="noopener">java中的synchronized（同步代码块和同步方法的区别）</a></p>
+<h3 id="深入分析Synchronized关键字"><a href="#深入分析Synchronized关键字" class="headerlink" title="深入分析Synchronized关键字"></a>深入分析Synchronized关键字</h3><h4 id="线程堆栈分析"><a href="#线程堆栈分析" class="headerlink" title="线程堆栈分析"></a>线程堆栈分析</h4><p>synchronized关键字提供了一种互斥机制，也就是说在同一时刻，只能有一个线程访问同步资源。</p>
+<p>看下面这段程序：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">import java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line">public class TestSync &#123;</span><br><span class="line">	</span><br><span class="line">	private final static Object lock = new Object();</span><br><span class="line">	</span><br><span class="line">	public void accessResource() &#123;</span><br><span class="line">		synchronized(lock) &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				TimeUnit.MINUTES.sleep(10);</span><br><span class="line">			&#125; catch (InterruptedException e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		final TestSync sync = new TestSync();</span><br><span class="line">		for(int i =0;i&lt;5;i++) &#123;</span><br><span class="line">			new Thread()&#123;</span><br><span class="line">				@Override</span><br><span class="line">				public void run() &#123;</span><br><span class="line">					sync.accessResource();</span><br><span class="line">				&#125;	</span><br><span class="line">			&#125;.start();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的代码定义一个方法accessResource，并且使用synchronized来对代码进行同步，同时定义了5个线程调用accessResource方法，由于synchronized的互斥性，只能有一个线程获得lock的monitor锁，其他线程只能进入阻塞状态，等待获取lock的monitor锁。</p>
+<p>针对这个monitor锁我们如何从线程堆栈信息来看呢？</p>
+<p>其实，jstack命令在Java中可以用来打印进程的线程堆栈信息。</p>
+<p>我们来运行这个Java程序，在终端通过top命令查看运行起来的Java程序的进程id，然后执行jstack ‘pid’。</p>
+<p>我们来看下打印出来的信息：<br><img src="../img/jstack_print_info.png" alt></p>
+<p>通过截图可以看到Thread-0持有monitor<0x00000007955f2130>的锁并且处于休眠状态中，而其他几个线程则是处于BLOCKED状态中，它们是在等待着获取monitor<0x00000007955f2130>的锁。</0x00000007955f2130></0x00000007955f2130></p>
+<h4 id="JVM指令分析"><a href="#JVM指令分析" class="headerlink" title="JVM指令分析"></a>JVM指令分析</h4><p>从JVM指令角度再来分析synchronized关键字。</p>
+<p>我们可以使用javap这个命令来对上面这个TestSync类生成的class字节码进行反编译，得到下面的JVM指令。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">Compiled from &quot;TestSync.java&quot;</span><br><span class="line">public class main.TestSync &#123;</span><br><span class="line">  static &#123;&#125;;</span><br><span class="line">    Code:</span><br><span class="line">       0: new           #3                  // class java/lang/Object</span><br><span class="line">       3: dup</span><br><span class="line">       4: invokespecial #10                 // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       7: putstatic     #13                 // Field lock:Ljava/lang/Object;</span><br><span class="line">      10: return</span><br><span class="line"></span><br><span class="line">  public main.TestSync();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #10                 // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public void accessResource();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #13                 // Field lock:Ljava/lang/Object;</span><br><span class="line">       3: dup</span><br><span class="line">       4: astore_1</span><br><span class="line">       5: monitorenter</span><br><span class="line">       6: getstatic     #20                 // Field java/util/concurrent/TimeUnit.MINUTES:Ljava/util/concurrent/TimeUnit;</span><br><span class="line">       9: ldc2_w        #26                 // long 10l</span><br><span class="line">      12: invokevirtual #28                 // Method java/util/concurrent/TimeUnit.sleep:(J)V</span><br><span class="line">      15: goto          23</span><br><span class="line">      18: astore_2</span><br><span class="line">      19: aload_2</span><br><span class="line">      20: invokevirtual #32                 // Method java/lang/InterruptedException.printStackTrace:()V</span><br><span class="line">      23: aload_1</span><br><span class="line">      24: monitorexit</span><br><span class="line">      25: goto          31</span><br><span class="line">      28: aload_1</span><br><span class="line">      29: monitorexit</span><br><span class="line">      30: athrow</span><br><span class="line">      31: return</span><br><span class="line">    Exception table:</span><br><span class="line">       from    to  target type</span><br><span class="line">           6    15    18   Class java/lang/InterruptedException</span><br><span class="line">           6    25    28   any</span><br><span class="line">          28    30    28   any</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: new           #1                  // class main/TestSync</span><br><span class="line">       3: dup</span><br><span class="line">       4: invokespecial #44                 // Method &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       7: astore_1</span><br><span class="line">       8: iconst_0</span><br><span class="line">       9: istore_2</span><br><span class="line">      10: goto          27</span><br><span class="line">      13: new           #45                 // class main/TestSync$1</span><br><span class="line">      16: dup</span><br><span class="line">      17: aload_1</span><br><span class="line">      18: invokespecial #47                 // Method main/TestSync$1.&quot;&lt;init&gt;&quot;:(Lmain/TestSync;)V</span><br><span class="line">      21: invokevirtual #50                 // Method main/TestSync$1.start:()V</span><br><span class="line">      24: iinc          2, 1</span><br><span class="line">      27: iload_2</span><br><span class="line">      28: iconst_5</span><br><span class="line">      29: if_icmplt     13</span><br><span class="line">      32: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上面的指令中可以看到，在accessResource()方法中，先后出现了一个monitor enter和两个monitor exit。</p>
+<p>我们主要选取accessResource()这部分代码块来重点分析。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public void accessResource();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #13                 //①获取lock</span><br><span class="line">       3: dup</span><br><span class="line">       4: astore_1</span><br><span class="line">       5: monitorenter                      //②执行monitorenter JVM指令</span><br><span class="line">       6: getstatic     #20                 // Field java/util/concurrent/TimeUnit.MINUTES:Ljava/util/concurrent/TimeUnit;</span><br><span class="line">       9: ldc2_w        #26                 // long 10l</span><br><span class="line">      12: invokevirtual #28                 // Method java/util/concurrent/TimeUnit.sleep:(J)V</span><br><span class="line">      15: goto          23                  //③跳转到23行</span><br><span class="line">      18: astore_2</span><br><span class="line">      19: aload_2</span><br><span class="line">      20: invokevirtual #32                 // Method java/lang/InterruptedException.printStackTrace:()V</span><br><span class="line">      23: aload_1                           //④</span><br><span class="line">      24: monitorexit                       //⑤ 执行monitor exit JVM指令</span><br><span class="line">      25: goto          31</span><br><span class="line">      28: aload_1</span><br><span class="line">      29: monitorexit</span><br><span class="line">      30: athrow</span><br><span class="line">      31: return</span><br></pre></td></tr></table></figure></p>
+<p>首先①获取到lock引用，然后执行②monitorenter JVM指令，休眠结束后goto至③monitorexit的位置<br>（astore_n表示存储引用到本地变量表；aload_n表示从本地变量表加载应用；getstatic表示从class中获取静态属性）</p>
+<p>monitorenter</p>
+<blockquote>
+<p>每一个对象都与一个monitor相关联，一个monitor的lock的锁只能被一个线程在同一时间获得，在一个线程尝试获得与对象关联的monitor的所有权时会发生如下的几件事情。</p>
+</blockquote>
+<ul>
+<li>如果monitor的计数器为0，则意味着该monitor的lock还没有被获得，，某个线程获得之后将立即对该计数器加一，从此该线程就是这个monitor的所有者了。</li>
+<li>如果一个已经拥有该线程所有权的线程重入，则会导致monitor的计数器再次累加。</li>
+<li>如果monitor已经被其他线程所拥有，则其他线程尝试获取该monitor所有权时，会被陷入阻塞状态直到monitor变为0，才能再次尝试获取对monitor的所有权。</li>
+</ul>
+<p>monitorexit</p>
+<p>释放对monitor的所有权，想要释放某个对象关联的monitor所有权的前提是，你曾经拥有了所有权。释放monitor所有权的过程比较简单，就是将monitor的计数器减一，如果计数器的结果为0，则意味着该线程不在拥有对该monitor的所有权，通俗地讲就是解锁。</p>
+<h4 id="synchronized的锁优化"><a href="#synchronized的锁优化" class="headerlink" title="synchronized的锁优化"></a>synchronized的锁优化</h4><p>在虚拟机规范对monitorenter和monitorexit的行为描述中，有两点是需要特别注意的，首先，synchronized同步块对于同一条线程是可重入的，不会出现自己锁死自己的问题。其次，同步块在已进入的线程执行完以前，会阻塞后面其他线程的进入。</p>
+<p>Java的线程是映射到操作系统线程上的，要阻塞或唤醒一个线程，都需要操作系统来帮忙完成，这就需要从用户态切到核心态，因此状态转换需要耗费很多的处理器时间，对于简单的同步块（如被synchronized修饰的getter或setter方法），状态转换消耗的时间有可能比用户代码执行的时间还要长。所以synchronized是Java语言中的一个重量级的操作。</p>
+<p>其实大多数时候，共享数据的锁定状态一般只会持续很短的一段时间，为了这段时间去挂起和恢复线程其实并不值得。</p>
+<p>如果物理机上有多个处理器，可以让多个线程同时执行的话。我们就可以让后面来的线程“稍微等一下”，但是并不放弃处理器的执行时间，看看持有锁的线程会不会很快释放锁。这个“稍微等一下”的过程就是自旋。</p>
+<p>自旋锁在JDK 1.4中已经引入，在JDK 1.6中默认开启。只是将当前线程不停地执行循环体，不进行线程状态的改变，所以响应速度更快，因为上面刚说到，线程的状态切换会耗费很多CPU时间。但当线程数不停增加时，性能下降明显，因为每个线程都需要执行，占用CPU时间。如果线程竞争不激烈，并且保持锁的时间段，适合使用自旋锁。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/synchronized/" rel="tag"># synchronized</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/21/关于HashMap你需要知道的一些细节/" rel="next" title="关于HashMap你需要知道的一些细节">
+                <i class="fa fa-chevron-left"></i> 关于HashMap你需要知道的一些细节
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/21/深入解析volatile关键字/" rel="prev" title="深入解析volatile关键字">
+                深入解析volatile关键字 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="gitalk-container">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="JasonGaoH">
+            
+              <p class="site-author-name" itemprop="name">JasonGaoH</p>
+              <div class="site-description motion-element" itemprop="description">坚持输出，坚持书写，才可以持续成长</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/JasonGaoH" title="GitHub &rarr; https://github.com/JasonGaoH" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:jasongaohui@gmail.com" title="E-Mail &rarr; mailto:jasongaohui@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是synchronized"><span class="nav-number">1.</span> <span class="nav-text">什么是synchronized</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#synchronized关键字的用法"><span class="nav-number">2.</span> <span class="nav-text">synchronized关键字的用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#深入分析Synchronized关键字"><span class="nav-number">3.</span> <span class="nav-text">深入分析Synchronized关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#线程堆栈分析"><span class="nav-number">3.1.</span> <span class="nav-text">线程堆栈分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM指令分析"><span class="nav-number">3.2.</span> <span class="nav-text">JVM指令分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#synchronized的锁优化"><span class="nav-number">3.3.</span> <span class="nav-text">synchronized的锁优化</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">JasonGaoH</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">115k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">1:45</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66237095";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+  
+  <script src="/lib/reading_progress/reading_progress.js"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+    
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+
+
+<script src="//cdn.jsdelivr.net/npm/js-md5@0.7.3/src/md5.min.js"></script>
+
+<script>
+  var gitalk = new Gitalk({
+    clientID: 'd35c006645a68d7850e9',
+    clientSecret: 'ef0888fc0c1afccdfdd755fd85877feea116a421',
+    repo: 'JasonGaoH.github.io',
+    owner: 'JasonGaoH',
+    admin: ['JasonGaoH'],
+    id: md5(location.pathname),
+    
+      language: 'zh-CN',
+    
+    distractionFreeMode: 'true'
+  });
+  gitalk.render('gitalk-container');
+</script>
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+  $('.highlight').each(function(i, e) {
+    var $wrap = $('<div>').addClass('highlight-wrap');
+    $(e).after($wrap);
+    $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function(e) {
+      var code = $(this).parent().find('.code').find('.line').map(function(i, e) {
+        return $(e).text();
+      }).toArray().join('\n');
+      var ta = document.createElement('textarea');
+      var yPosition = window.pageYOffset || document.documentElement.scrollTop;
+      ta.style.top = yPosition + 'px'; // Prevent page scroll
+      ta.style.position = 'absolute';
+      ta.style.opacity = '0';
+      ta.readOnly = true;
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, code.length);
+      ta.readOnly = false;
+      var result = document.execCommand('copy');
+      
+      ta.blur(); // For iOS
+      $(this).blur();
+    })).on('mouseleave', function(e) {
+      var $b = $(this).find('.copy-btn');
+      setTimeout(function() {
+        $b.text('复制');
+      }, 300);
+    }).append(e);
+  })
+</script>
+
+
+  
+
+  
+
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+  <script type="text/javascript" src="http://tajs.qq.com/stats?sId=66237095" charset="UTF-8"></script>
+  
+</body>
+</html>
