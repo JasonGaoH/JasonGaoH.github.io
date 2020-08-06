@@ -113,7 +113,7 @@
 <meta property="og:description" content="之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。 这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。 请看下">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png">
-<meta property="og:updated_time" content="2020-08-06T05:18:45.098Z">
+<meta property="og:updated_time" content="2020-08-06T05:21:32.564Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Feed流上的优化实践.md">
 <meta name="twitter:description" content="之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。 这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。 请看下">
@@ -404,7 +404,7 @@
                 
               
 
-              <time title="创建时间：2020-08-06 13:16:21 / 修改时间：13:18:45" itemprop="dateCreated datePublished" datetime="2020-08-06T13:16:21+08:00">2020-08-06</time>
+              <time title="创建时间：2020-08-06 13:16:21 / 修改时间：13:21:32" itemprop="dateCreated datePublished" datetime="2020-08-06T13:16:21+08:00">2020-08-06</time>
             
 
             
@@ -474,6 +474,7 @@
         <p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
 <p>这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。</p>
 <p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png" alt></p>
+ <a id="more"></a>
 <h3 id="关于优化"><a href="#关于优化" class="headerlink" title="关于优化"></a>关于优化</h3><p>优化整体可以分为两大类，软优化和硬优化。那么什么是软优化呢？软优化并不会改变某段代码的执行效率，而是通过调整这段代码的执行时机，来优化整体代码的运行性能。软优化里由分为三大类，分别为预加载，异步加载和懒加载。</p>
 <h4 id="软优化"><a href="#软优化" class="headerlink" title="软优化"></a>软优化</h4><ul>
 <li>预加载<br>这几种加载方式都很好理解，改变的都是执行时机，预加载就是提前加载，把一些重要的数据提前加载好，等到合适的时机，就可以直接展示给用户，而不是在这个合适的时机才去加载数据，这种方式给用户地感觉是加载变快了。</li>
