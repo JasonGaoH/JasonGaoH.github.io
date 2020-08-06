@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.0.1',
+    sidebar: {"position":"left","Gemini":240,"display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。 这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。 请看下">
+<meta name="keywords" content="性能优化 RecyclerView缓存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Feed流上的优化实践.md">
+<meta property="og:url" content="JasonGaoH.github.io/2020/08/06/Feed流上的优化实践/index.html">
+<meta property="og:site_name" content="JasonGaoH&#39;s Blog">
+<meta property="og:description" content="之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。 这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。 请看下">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png">
+<meta property="og:updated_time" content="2020-08-06T05:18:45.098Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Feed流上的优化实践.md">
+<meta name="twitter:description" content="之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。 这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。 请看下">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png">
+
+
+
+
+
+
+  <link rel="canonical" href="JasonGaoH.github.io/2020/08/06/Feed流上的优化实践/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Feed流上的优化实践.md | JasonGaoH's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">JasonGaoH's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+  
+  
+  
+  
+
+  
+
+  <a href="https://github.com/JasonGaoH" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewbox="0 0 250 250" style="fill: #222; color: #fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a>
+
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="JasonGaoH.github.io/2020/08/06/Feed流上的优化实践/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="JasonGaoH">
+      <meta itemprop="description" content="坚持输出，坚持书写，才可以持续成长">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="JasonGaoH's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Feed流上的优化实践.md
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-08-06 13:16:21 / 修改时间：13:18:45" itemprop="dateCreated datePublished" datetime="2020-08-06T13:16:21+08:00">2020-08-06</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">3.3k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">3 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
+<p>这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。</p>
+<p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png" alt></p>
+<h3 id="关于优化"><a href="#关于优化" class="headerlink" title="关于优化"></a>关于优化</h3><p>优化整体可以分为两大类，软优化和硬优化。那么什么是软优化呢？软优化并不会改变某段代码的执行效率，而是通过调整这段代码的执行时机，来优化整体代码的运行性能。软优化里由分为三大类，分别为预加载，异步加载和懒加载。</p>
+<h4 id="软优化"><a href="#软优化" class="headerlink" title="软优化"></a>软优化</h4><ul>
+<li>预加载<br>这几种加载方式都很好理解，改变的都是执行时机，预加载就是提前加载，把一些重要的数据提前加载好，等到合适的时机，就可以直接展示给用户，而不是在这个合适的时机才去加载数据，这种方式给用户地感觉是加载变快了。</li>
+<li>异步加载<br>而异步加载在Android中则很常见了，移动应用中有主线程的概念，主线程需要实时地对用户的操作予以反馈，这种反馈要非常及时，否则就会让用户觉得卡顿。因此，主线程的工作不宜有耗时操作，而且对于一些执行比较慢的代码，而且不需要同步执行的代码，我们可以考虑将它放到异步线程去执行。</li>
+<li>懒加载<br>最后就是懒加载了，懒加载就是把一些不是需要立即展示的东西往后放，因为我们的手机性能，内存是有限的，有些功能用户不是需要马上看到，则可以考虑在后续的某个适当的时机执行加载。</li>
+</ul>
+<h4 id="硬优化"><a href="#硬优化" class="headerlink" title="硬优化"></a>硬优化</h4><p>接下来说说硬优化，硬优化这个东西就比较偏细节了。一段逻辑，我们用两层循环实现，功能肯定是OK的，但是如果在实现功能的情况下，我们用一层循环就可以解决了，这样不就提高了这段代码的运行效率了。这种方式的优化就是硬优化了，关于硬优化往往没有具体的方法，很多都是各种见仁见智，通过调整代码的逻辑来提高运行效率都可以称为硬优化。</p>
+<h4 id="Feed流上的问题发现和解决"><a href="#Feed流上的问题发现和解决" class="headerlink" title="Feed流上的问题发现和解决"></a>Feed流上的问题发现和解决</h4><p>很多人会说，上面说了这么多软优化和硬优化，有什么用呢？别急，我们慢慢来说。上面说的算是一种对于优化的指导思想吧，下次我们遇到类似的问题可以从这几个维度来进行分析。</p>
+<p>我们要做优化，首先肯定是要发现问题，也就是对症下药。</p>
+<p>我之前主要处理的是Feed流的卡顿优化，所以我基本上都是通过Android Studio的Profiler工具来查看问题，现在Profiler的体验相对之前功能算是更加强大了，我每次都是使用Profiler来尝试抓一下Feed流滑动时的代码执行情况。<br>然后一个一个查看滑动过程中我们的耗时是在哪些地方。</p>
+<h5 id="通过Profiler发现的问题"><a href="#通过Profiler发现的问题" class="headerlink" title="通过Profiler发现的问题"></a>通过Profiler发现的问题</h5><p>通过Profiler发现了以下几点问题：</p>
+<ol>
+<li>发现有一些比较耗时的方法，比如图文笔记上的滤镜的回收方法比较耗时，针对这样的可以考虑做这个release操作放到异步里面去；</li>
+<li>另外也发现一些业务的打点会在OnBindViewHolder中调用的很频繁，虽然点位数据的发送是在异步线程里，但是在发送数据之前会有数据的拼装操作，多少会有些性能损耗，而且打点这一类数据完全可以放到异步线程中去，因为这种打点并不需要很高的实时性；</li>
+<li>对于一些跨进程的操作，比如从Context中拿Service获取WiFi状态，这种在onBind中回调是非常不好的，所以针对这个我们只需要构造一个广播来监听WIFI状态变化即可，然后每次只需要拿那个记录好的网络状态变量即可</li>
+<li>还有关于视频笔记的处理，我们需要根据RecyclerView滑动过程中当前item中的视频start，stop和prepare做相应的调整，正常情况下，当RecyclerView处于滑动状态是不应该去prepare和start的，而且也不应该创建播放器实例和Texture View的；</li>
+<li>最后，通过Profiler我们还发现TextView的setText是很耗时的，当我们复杂多行文本的情况时，TextView去setText的时候需要进行复杂的测量，在测量完之后还需要绘制，所以针对这个场景可以考虑使用StaticLayout对Feed流中的文本作预渲染，关于StaticLayout的教程网上也有不少，后面有时间我也会抽空写下关于这块的实践。</li>
+</ol>
+<p>上面都是通过Profiler来发现的一些问题。</p>
+<h5 id="View层级"><a href="#View层级" class="headerlink" title="View层级"></a>View层级</h5><p>另外还有一些算是基础的优化吧。因为View的层级随着Feed流的业务变得越来越深，我们需要进可能地减少View的层级，同时也尽量减少View的个数，可以考虑使用ConstraintLayout，但是ConstraintLayout这个东西要慎用，对于一些迭代比较快的业务场景，使用ConstraintLayout会增加我们的维护成本，而且会有一些比较坑的问题。</p>
+<p>关于View层级的缩减基本没啥可讲的，尽量用merge和ViewStub，这个就是根据实际情况去消除一些不必要的层级。</p>
+<h5 id="RecyclerView缓存的利用"><a href="#RecyclerView缓存的利用" class="headerlink" title="RecyclerView缓存的利用"></a>RecyclerView缓存的利用</h5><p>最后，我们也尝试了从RecyclerView缓存的角度来解决这个问题，RecyclerView默认会有四级缓存的概念，正常情况下，当我们的RecyclerView的卡片撑满屏幕的时候，我们进入该页面的时候，我们的RecyclerView会先创建ViewHolder，然后再bind这个ViewHolder，然后当我们向下滑动的时候，会再次创建一个ViewHolder，接着再执行Bind操作，只有当我们的RecycledView Pool的池子满了之后才不会继续创建ViewHolder，往后的滑动RecyclerViwe就只会执行bind操作了，这个时候我们发现这个OnCreateViewHolder需要从xml里去解析view，并且创建这个ViewHolder，这个创建对于我们的滑动是会有性能损耗，其实还是因为我们的这个卡片太复杂了。</p>
+<p>所以，我们可以考虑提前创建一些ViewHolder，放到ViewHolder的池子里去，这样我们在滑动的时候，就不需要先Create再Bind了。</p>
+<p>提前创建ViewHolder，在主线程Idle的状态下提前创建ViewHolder放到RecycledViewPool中，这个pool的size默认是5。<br>   <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">recyclerView.setRecycledViewPool(RecyclerView.RecycledViewPool().apply &#123;</span><br><span class="line">	LightExecutor.postIdle(Runnable &#123;</span><br><span class="line">		repeat(<span class="number">5</span>) &#123;</span><br><span class="line">			<span class="comment">//RecycledViewPool 默认size为5个，RecyclerView内部会有判断，如果满了不会create</span></span><br><span class="line">			<span class="comment">//注意这里取得是typePool的倒数第一个和第二个位置，需要保证注册的时候视频卡片和笔记在最后两个位置</span></span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">1</span>))</span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">2</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><p>在做完这些优化之后，在Feed流上的卡顿就有很大改善了，另外，对于业务侧的指标也有一定的数据提升。</p>
+<h4 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h4><p>对于这块业务的性能监控可以实施起来，这样有利于我们尽早发现卡顿问题，另外，对于一些优化的点其实还可以继续深挖，比如前创建ViewHolder是否可以使用AsyncLayoutInflator进行inflate，还有针对文本的预渲染可以考虑抽成组件形式，方便其他业务使用。</p>
+<p>感谢您的阅读，如果觉得我的文章对你有帮助，请帮忙点赞，有问题可以评论留言。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/性能优化-RecyclerView缓存/" rel="tag"># 性能优化 RecyclerView缓存</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/21/深入解析volatile关键字/" rel="next" title="深入解析volatile关键字">
+                <i class="fa fa-chevron-left"></i> 深入解析volatile关键字
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="gitalk-container">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="JasonGaoH">
+            
+              <p class="site-author-name" itemprop="name">JasonGaoH</p>
+              <div class="site-description motion-element" itemprop="description">坚持输出，坚持书写，才可以持续成长</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/JasonGaoH" title="GitHub &rarr; https://github.com/JasonGaoH" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:jasongaohui@gmail.com" title="E-Mail &rarr; mailto:jasongaohui@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于优化"><span class="nav-number">1.</span> <span class="nav-text">关于优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#软优化"><span class="nav-number">1.1.</span> <span class="nav-text">软优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#硬优化"><span class="nav-number">1.2.</span> <span class="nav-text">硬优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Feed流上的问题发现和解决"><span class="nav-number">1.3.</span> <span class="nav-text">Feed流上的问题发现和解决</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#通过Profiler发现的问题"><span class="nav-number">1.3.1.</span> <span class="nav-text">通过Profiler发现的问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#View层级"><span class="nav-number">1.3.2.</span> <span class="nav-text">View层级</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RecyclerView缓存的利用"><span class="nav-number">1.3.3.</span> <span class="nav-text">RecyclerView缓存的利用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结果"><span class="nav-number">1.4.</span> <span class="nav-text">结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#后续"><span class="nav-number">1.5.</span> <span class="nav-text">后续</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">JasonGaoH</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">118k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">1:48</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66237095";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js"></script>
+
+  
+  <script src="/lib/reading_progress/reading_progress.js"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+    
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+
+
+<script src="//cdn.jsdelivr.net/npm/js-md5@0.7.3/src/md5.min.js"></script>
+
+<script>
+  var gitalk = new Gitalk({
+    clientID: 'd35c006645a68d7850e9',
+    clientSecret: 'ef0888fc0c1afccdfdd755fd85877feea116a421',
+    repo: 'JasonGaoH.github.io',
+    owner: 'JasonGaoH',
+    admin: ['JasonGaoH'],
+    id: md5(location.pathname),
+    
+      language: 'zh-CN',
+    
+    distractionFreeMode: 'true'
+  });
+  gitalk.render('gitalk-container');
+</script>
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script>
+  $('.highlight').each(function(i, e) {
+    var $wrap = $('<div>').addClass('highlight-wrap');
+    $(e).after($wrap);
+    $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function(e) {
+      var code = $(this).parent().find('.code').find('.line').map(function(i, e) {
+        return $(e).text();
+      }).toArray().join('\n');
+      var ta = document.createElement('textarea');
+      var yPosition = window.pageYOffset || document.documentElement.scrollTop;
+      ta.style.top = yPosition + 'px'; // Prevent page scroll
+      ta.style.position = 'absolute';
+      ta.style.opacity = '0';
+      ta.readOnly = true;
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, code.length);
+      ta.readOnly = false;
+      var result = document.execCommand('copy');
+      
+      ta.blur(); // For iOS
+      $(this).blur();
+    })).on('mouseleave', function(e) {
+      var $b = $(this).find('.copy-btn');
+      setTimeout(function() {
+        $b.text('复制');
+      }, 300);
+    }).append(e);
+  })
+</script>
+
+
+  
+
+  
+
+
+  
+  <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+  <script type="text/javascript" src="http://tajs.qq.com/stats?sId=66237095" charset="UTF-8"></script>
+  
+</body>
+</html>
