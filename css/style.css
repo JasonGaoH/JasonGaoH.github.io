@@ -366,6 +366,14 @@ h2.article-head {
   height: 40px;
   margin-right: 10px;
 }
+.qrcode {
+  background: url("images/qrcode.jpg");
+  margin: 0 auto;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 180px;
+  height: 160px;
+}
 .home-link {
   display: flex;
   align-items: center;
