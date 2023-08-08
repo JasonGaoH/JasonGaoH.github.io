@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      深入解析volatile关键字 | JasonGao Thoughts
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    <script src="/js/qrious.js"></script>
+  
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+  
+    <script src="/js/local-search.js"></script>
+
+<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>JasonGao Thoughts</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/series/" class="item-link">Series</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+      
+        <li class="menu-item menu-item-search right-list">
+    <a role="button" class="popup-trigger">
+        <i class="fa fa-search fa-fw"></i>
+    </a>
+</li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/series/" class="menu-link">Series</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+    
+      <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+            <span class="search-icon">
+                <i class="fa fa-search"></i>
+            </span>
+            <div class="search-input-container">
+                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa fa-times-circle"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>深入解析volatile关键字</h2>
+  <p class="post-date">2020-05-21</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><blockquote>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483805&amp;idx=1&amp;sn=a6240f582ec81d047a59f206f8d5ba54&amp;chksm=fa237975cd54f063470a8eb7d68774c474ddab37cf88ff16ac873b47f0ac1b514b8be8254344&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">深入解析volatile关键字</a></p>
+</blockquote>
+<p><code>volatile关键字</code>和<code>synchronized关键字</code>一样，在Java多线程开发中，是一道必须要跨越的槛。之前有篇文章已经分析过<code>synchronized关键字</code>的原理，<a href="https://blog.csdn.net/H_Gao/article/details/98593198" target="_blank" rel="noopener">synchronized关键字的原理</a>，这一次，我们来一步一步分析下<code>volatile关键字</code>的工作原理。</p>
+ <a id="more"></a>
+<p>本文篇幅稍微有点长，希望您能耐心看下去，并有所收获。</p>
+<h3 id="volatile关键字的使用"><a href="#volatile关键字的使用" class="headerlink" title="volatile关键字的使用"></a>volatile关键字的使用</h3><p>首先，我们从一个简单的程序来入手。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileFoo</span> </span>&#123;</span><br><span class="line">	<span class="comment">//init_value的最大值</span></span><br><span class="line">	<span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> MAX = <span class="number">5</span>;</span><br><span class="line">	<span class="comment">//init_value的初始值</span></span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">int</span> init_value = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		<span class="comment">//启动一个Reader线程，当发现local_value和init_value不同时，</span></span><br><span class="line">		<span class="comment">//则输出init_value被修改的信息</span></span><br><span class="line">		<span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">			<span class="keyword">int</span> localValue = init_value;</span><br><span class="line">			<span class="keyword">while</span>(localValue &lt; MAX) &#123;</span><br><span class="line">				<span class="keyword">if</span>(init_value != localValue) &#123;</span><br><span class="line">					System.out.println(<span class="string">"this init_value is updated to "</span> + init_value);</span><br><span class="line">					<span class="comment">//对local_value重新赋值</span></span><br><span class="line">					localValue = init_value;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;,<span class="string">"Readder"</span>).start();</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">			<span class="keyword">int</span> localValue = init_value;</span><br><span class="line">			<span class="keyword">while</span>(localValue &lt; MAX) &#123;</span><br><span class="line">				System.out.println(<span class="string">"this init_value will be changed to "</span> + ++localValue);</span><br><span class="line">				<span class="comment">//对local_value重新赋值</span></span><br><span class="line">				init_value = localValue;</span><br><span class="line">				<span class="keyword">try</span> &#123;</span><br><span class="line">					Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">				&#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">					e.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;,<span class="string">"Updater"</span>).start();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的程序分别启动了两个线程，一个线程负责对变量进行修改，一个线程负责对变量进行输出。</p>
+<p>运行程序，输出结果如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">1</span></span><br><span class="line"><span class="keyword">this</span> init_value is updated to <span class="number">1</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">2</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">3</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">4</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">5</span></span><br></pre></td></tr></table></figure>
+<p>从输出信息我们发现，Reader线程没有感知到init_value的变化，我们期望的是在Updater进程更新init_value的值之后，Reader进程能够打印出变化的init_value的值，但结果并不是我们期望的那样。</p>
+<p>我们尝试在init_value前面加上<code>volatile</code>。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> init_value = <span class="number">0</span>;</span><br></pre></td></tr></table></figure></p>
+<p>接着我们再运行下这个程序，输出结果如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">1</span></span><br><span class="line"><span class="keyword">this</span> init_value is updated to <span class="number">1</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">2</span></span><br><span class="line"><span class="keyword">this</span> init_value is updated to <span class="number">2</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">3</span></span><br><span class="line"><span class="keyword">this</span> init_value is updated to <span class="number">3</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">4</span></span><br><span class="line"><span class="keyword">this</span> init_value is updated to <span class="number">4</span></span><br><span class="line"><span class="keyword">this</span> init_value will be changed to <span class="number">5</span></span><br><span class="line"><span class="keyword">this</span> init_value is updated to <span class="number">5</span></span><br></pre></td></tr></table></figure></p>
+<p>这个时候Reader线程就能够感受到init_value的值的变化了，并且在条件不满足时程序就退出了运行。</p>
+<p>那么为什么加了个volatile就正常了呢， volatile关键字的作用到底是什么呢？</p>
+<p>想要彻底搞清楚<code>volatile关键字</code>，还需要具备Java内存模型、CPU缓存模型、汇编指令等相关知识的，接下来，我们接下来一步一步来拆解问题。</p>
+<h3 id="CPU缓存模型"><a href="#CPU缓存模型" class="headerlink" title="CPU缓存模型"></a>CPU缓存模型</h3><p>要想对volatile有比较深刻的理解，首先我们需要对CPU的缓存模型有一定的认识。</p>
+<p>在计算机中，所有的运算操作都是由CPU的寄存器来完成的，CPU指令的执行过程需要涉及数据的读取和写入操作，CPU所能访问的所有数据只能是计算机的主存（通常是指RAM），虽然CPU的发展频率不断得到提升，但受制于制造工艺以及成本的限制，计算机的内存反倒在访问速度上没有多大的突破，因此CPU的处理速度和内存的访问速度之间的差距越拉越大，通常这种差距可以达到上千倍，极端情况下甚至会在上万倍以上。</p>
+<p>由于两边速度严重的不对等，通过传统FSB直连内存的访问方式会导致CPU资源受到极大的限制，降低CPU整体的吞吐量，于是就有了CPU和主内存直接增加缓存的设计，现在缓存数量都可以增加到3级了，最靠近CPU的缓存为L1,然后依次是L2,L3和主内存，CPU缓存模型图如下所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/KnowledgeSummary/master/Docs/img/cpu_cache.png" alt="CPU缓存模型图"><br>Cache的出现是为了解决CPU直接访问内存效率低下的问题，程序在运行的过程中，会将运算所需要的数据从主内存复制一份到CPU Cache中，这样CPU计算时就可以直接对CPU Cache中的数据进行读取和写入，当运算结束之后，再将CPU Cache中最新的数据刷新到主内存当中，CPU通过直接访问Cache的方式提到直接访问主内存的方式极大地提高了CPU的吞吐能力，有个CPU Cache之后，整体的CPU和主内存之间的交互的架构大致如下图所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/KnowledgeSummary/master/Docs/img/cpu_cache_framework.png" alt="CPU与主内存交互图"></p>
+<h3 id="Java内存模型"><a href="#Java内存模型" class="headerlink" title="Java内存模型"></a>Java内存模型</h3><p>由于缓存的出现，极大地提高了CPU的吞吐能力，但是同时也引入了缓存不一致的问题。在多处理器系统中，每个处理器都有自己的的高速缓存，而它们又共享同一主内存，当多个处理器的运算任务都设计到同一块内存区域时，将可能导致各自的缓存数据不一致，这个时候就需要通过<code>缓存一致性协议</code>来保证数据的正确性，不同的操作系统使用缓存一致性协议都各不相同。</p>
+<p>因为各种硬件和操作系统的内存访问是有差异的，Java为了程序能在各种平台下运行达到一致的内存访问效果，于是定义了Java内存模型（Java Memory Mode，JMM）来对特定内存或高速缓存的读写访问过程进行抽象。</p>
+<p>Java内存模型定义了线程和主内存之间的抽象关系，具体如下。</p>
+<ul>
+<li>共享变量存储于主内存之中，每个线程都可以访问。</li>
+<li>每个线程都有私有的工作内存和本地内存。</li>
+<li>工作内存值存储该线程对共享变量的副本。</li>
+<li>线程不能直接操作主内存，只有先操作了工作内存之后才能写入主内存。</li>
+<li>工作内存和Java内存模型一样也是一个抽象的概念，它其实并不存在，它涵盖了缓存、寄存器、编译优化以及硬件等。<br><img src="https://raw.githubusercontent.com/JasonGaoH/KnowledgeSummary/master/Docs/img/java_memory_model.png" alt="image"><br><code>Java内存模型</code>定义了一套主内存和工作内存的交互协议，即一个变量如何从主内存拷贝到工作内存、如何从工作内存同步到主内存之类的实现细节。具体有8种操作来完成，分别为lock、unlock、read、load、use、assign、store和write。除此之外，<code>Java内存模型</code>还规定在执行这8种操作的时候必须满足8种规则，由于篇幅问题，这里就不一一列举了，具体可参看深入理解Java虚拟机第12章的Java内存模型与线程。</li>
+</ul>
+<p><code>Java内存模型</code>是一个抽象的概念，其与计算机硬件的结构并不完全一样，比如计算机物理内存不会存在栈内存和堆内存的划分，无论是堆内存还是虚拟机栈内存都会对应到物理的主内存，当然也有一部分堆栈内存数据可能会存入CPU Cache寄存器中。具体可参考下图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/KnowledgeSummary/master/Docs/img/cpu_hardware.png" alt="image"></p>
+<h3 id="对于volatile变量的特殊规则"><a href="#对于volatile变量的特殊规则" class="headerlink" title="对于volatile变量的特殊规则"></a>对于volatile变量的特殊规则</h3><p>介绍了<code>CPU缓存模型</code>以及<code>Java内存模型</code>之后，我们再来说<code>volatile关键字</code>，这样更能加深我们对于<code>volatile关键字</code>的理解。<br><code>volatile关键字</code>是Java虚拟机提供的最轻量级的同步机制，很多人由于对它理解不够，往往更愿意使用synchronized来做同步。</p>
+<p><code>Java内存模型</code>对<code>volatile关键字</code>定义了一些特殊的访问规则，当一个变量被volatile修饰后，它将具备两种特性，或者说volatile具有下列两层语义：</p>
+<ul>
+<li>第一、保证了不同线程对这个变量进行读取时的可见性， 即一个线程修改了某个变量的值， 这新值对其他线程来说是立即可见的。 (volatile 解决了线程间共享变量的可见性问题)。</li>
+<li>第二、禁止进行指令重排序， 阻止编译器对代码的优化。</li>
+</ul>
+<p>针对第一点，<code>volatile</code>保证了不同线程对这个变量进行读取时的可见性，具体表现为：</p>
+<ul>
+<li>第一： 使用 volatile 关键字会强制将在某个线程中修改的共享变量的值立即写入主内存。</li>
+<li>第二： 使用 volatile 关键字的话， 当线程 2 进行修改时， 会导致线程 1 的工作内存中变量的缓存行无效（反映到硬件层的话， 就是 CPU 的 L1或者 L2 缓存中对应的缓存行无效);</li>
+<li>第三： 由于线程 1 的工作内存中变量的缓存行无效， 所以线程 1再次读取变量的值时会去主存读取。</li>
+</ul>
+<p>基于这一点，所以我们经常会看到文章中或者书本中会说volatile 能够保证可见性。</p>
+<p>volatile 能够保证可见性，但是volatile不能保证程序的原子性。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileTest</span> </span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> race = <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		race ++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> THREAD_COUNT = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Thread[] threads = <span class="keyword">new</span> Thread[THREAD_COUNT];</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span> ;i&lt;THREAD_COUNT;i++) &#123;</span><br><span class="line">			threads[i] = <span class="keyword">new</span> Thread(() -&gt;&#123;</span><br><span class="line">				<span class="keyword">for</span>(<span class="keyword">int</span> j =<span class="number">0</span>;j&lt; <span class="number">10000</span>;j++) &#123;</span><br><span class="line">					increase();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;);</span><br><span class="line">			threads[i].start();</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">while</span>(Thread.activeCount() &gt; <span class="number">1</span>)</span><br><span class="line">			Thread.yield();</span><br><span class="line">		</span><br><span class="line">		System.out.println(race);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这段代码发起了20个线程，每个线程对race变量进行10000次自增操作，如果这段代码能够正确并发的话，最后输出的结果应该是200000。我们运行完这段代码之后，并没有获得期望的结果，而且发现每次运行程序。输出的结果都不一样，都是一个小于200000的数字。</p>
+<p>问题就出在自增运算”race++“之中，我们用javap反编译这段代码后发现只有一行代码的increase()方法在Class文件中是由4条字节码指令构成的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increase</span><span class="params">()</span></span>;</span><br><span class="line">  Code:</span><br><span class="line">     0: getstatic     #13                 // Field race:I</span><br><span class="line">     <span class="number">3</span>: iconst_1</span><br><span class="line">     <span class="number">4</span>: iadd</span><br><span class="line">     5: putstatic     #13                 // Field race:I</span><br><span class="line">     <span class="number">8</span>: <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<p>从字节码层面上很容易分析出原因了：当getstatic指令把race的值取到操作栈时，volatile关键字保证了race的值此时是正确的，但是在执行iconst_1、iAdd这些指令的时候，其他线程可能已经把race的值加大了，而在操作栈订的值就变成了过期的数据，所以putstati指令执行后就可能把较小的值同步回主内存中去了。</p>
+<p>其实这里我们通过字节码来分析这个问题是不严谨的，因为即使编译出来的只有一条字节指令，也并不意味执行这条指令就是一个原子操作。一条字节码指令在解释执行时，解释器将要运行许多行代码才能实现它的语义，如果是编译执行，一条字节码指令也可能转化成若干条本地机器码指令。关于解释执行和编译执行，我们还会再讲到。</p>
+<p>由于volatile变量只能保证可见性，在不符合以下两条规则的运算场景中，我们仍然要通过加锁（synchronized或java.util.concurrent中的原子类）来保证原子性。</p>
+<ul>
+<li>运输结果并不依赖变量的当前值，或者能够确保只有单一的线程修改变量的值。</li>
+<li>变量不需要与其他状态变量共同参与不变约束。</li>
+</ul>
+<p>类似下面的场景就时候采用volatile来控制并发。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="keyword">boolean</span> shutdownRequested;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">shutdown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	shutdownRequested = <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doWork</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">while</span>(!shutdownRequested) &#123;</span><br><span class="line">		<span class="comment">//do stuff</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果我们想让上面的那个自增操作保持原子性，我们可以使用AtomicInteger，具体程序如下，这里就不多做介绍了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileTest</span> </span>&#123;</span><br><span class="line"><span class="comment">//	public static volatile int race = 0;</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> AtomicInteger race =<span class="keyword">new</span>  AtomicInteger(<span class="number">0</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increase</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="comment">//		race ++;</span></span><br><span class="line">		race.incrementAndGet();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> THREAD_COUNT = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Thread[] threads = <span class="keyword">new</span> Thread[THREAD_COUNT];</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span> ;i&lt;THREAD_COUNT;i++) &#123;</span><br><span class="line">			threads[i] = <span class="keyword">new</span> Thread(() -&gt;&#123;</span><br><span class="line">				<span class="keyword">for</span>(<span class="keyword">int</span> j =<span class="number">0</span>;j&lt; <span class="number">10000</span>;j++) &#123;</span><br><span class="line">					increase();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;);</span><br><span class="line">			threads[i].start();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">while</span>(Thread.activeCount() &gt; <span class="number">1</span>)</span><br><span class="line">			Thread.yield();</span><br><span class="line">		</span><br><span class="line">		System.out.println(race.get());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>回到<code>volatile关键字</code>的第二层语义：禁止指令重排。<br>普通的变量仅仅会保证在该方法的执行过程中所有依赖赋值结果的地方都能获取到正确的结果，而不能保证变量赋值操作的顺序与程序代码中的执行顺序一致。</p>
+<p>我们用一段伪代码来帮助下理解：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Map configOptions;</span><br><span class="line"><span class="keyword">char</span>[] configText;</span><br><span class="line"><span class="comment">//此变量必须定义为volatile</span></span><br><span class="line"><span class="keyword">volatile</span> <span class="keyword">boolean</span> initialized = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//假设一下代码在线程A中执行</span></span><br><span class="line"><span class="comment">//模拟读取配置信息，当读取完成后将initialized设置为true以通知其他线程配置可用</span></span><br><span class="line">configOptions = <span class="keyword">new</span> HashMap();</span><br><span class="line">configText = readConfigFile(fileName);</span><br><span class="line">processCongigOptions(configText,configOptions);</span><br><span class="line">initialized = <span class="keyword">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//假设一下代码在线程B中执行</span></span><br><span class="line"><span class="comment">//等待initialized为true，代表线程A已经吧配置信息初始化完成</span></span><br><span class="line"><span class="keyword">while</span>(!initialized) &#123;</span><br><span class="line">	sleep();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//使用线程A中初始化好的配置信息</span></span><br><span class="line">doSomethingWithConfig();</span><br></pre></td></tr></table></figure></p>
+<p>上面这段代码如果定义的initialized没有使用volatile来修饰，就可能会由于指令重排序的优化，导致位于线程A中最后一句代码<code>initialized = true</code>被提前执行（这里虽然使用Java作为伪代码，但所指的重排序优化是机器级的优化操作，提前执行时值这句话对于的汇编代码被提前执行），这样在线程B中使用配置信息的代码就可能出现错误，而volatile能避免此类情况的发生。</p>
+<h3 id="volatile关键字深入解析"><a href="#volatile关键字深入解析" class="headerlink" title="volatile关键字深入解析"></a>volatile关键字深入解析</h3><p>上面讲到<code>volatile关键字的两层语义</code>，那么volatile保证可见性以及有序性到底是如何做到的呢？它的底层逻辑是什么呢？</p>
+<p>这里我们尝试获得Java程序的汇编代码，通过比较变量加入volatile修饰和未加入volatile修饰的区别。</p>
+<p>这里主要使用的是HSDIS插件，HSDIS是一个Sun官方推荐的HotSpot虚拟机JIT编译代码的反汇编插件，网上有关于这个插件的下载，不过有的链接已经失效，我这里是从这里获取的，<a href="https://github.com/liuzhengyang/hsdis" target="_blank" rel="noopener">hsdis</a>，再把这个clone下来之后，编译成功之后，使用下面这个命令拷贝到jre的server目录,具体可以查看这个repo中README文件，里面写的很详细。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo cp build/macosx-amd64/hsdis-amd64.dylib /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/lib/server/</span><br></pre></td></tr></table></figure>
+<p>接下来就可以尝试反汇编了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(instance ==<span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">synchronized</span>(Singleton.class) &#123;</span><br><span class="line">				<span class="keyword">if</span>(instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">					instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Singleton.getInstance();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面这个是我们尝试反汇编的程序代码，如果是命令行，我们可以使用下面这个指令。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly Singleton</span><br></pre></td></tr></table></figure>
+<p>如果是eclipse，在下图的VM arguments中添加<code>XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly</code>,然后运行程序，这样在控制台就会输出汇编代码。<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/eclipse_jit.png" alt="image"><br>程序运行后，在控制台会输出很多内容,由于输出太大，所以截取了前面一段输出。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Java <span class="title">HotSpot</span><span class="params">(TM)</span> 64-Bit Server VM warning: PrintAssembly is enabled</span>; turning on DebugNonSafepoints to gain additional output</span><br><span class="line">Loaded disassembler from /Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home/jre/lib/server/hsdis-amd64.dylib</span><br><span class="line">Decoding compiled method <span class="number">0x0000000112e9ad50</span>:</span><br><span class="line">Code:</span><br><span class="line">[Disassembling <span class="keyword">for</span> mach=<span class="string">'i386:x86-64'</span>]</span><br><span class="line">[Entry Point]</span><br><span class="line">[Constants]</span><br><span class="line">  # &#123;method&#125; &#123;0x000000010ce1f000&#125; 'hashCode' '()I' in 'java/lang/String'</span><br><span class="line">  #           [sp+0x40]  (sp of caller)</span><br><span class="line">  <span class="number">0x0000000112e9aec0</span>: mov    <span class="number">0x8</span>(%rsi),%r10d</span><br><span class="line">  <span class="number">0x0000000112e9aec4</span>: shl    $<span class="number">0x3</span>,%r10</span><br><span class="line">  <span class="number">0x0000000112e9aec8</span>: cmp    %rax,%r10</span><br><span class="line">  <span class="number">0x0000000112e9aecb</span>: jne    <span class="number">0x0000000112de0e60</span>  ;   &#123;runtime_call&#125;</span><br><span class="line">  <span class="number">0x0000000112e9aed1</span>: data16 data16 nopw <span class="number">0x0</span>(%rax,%rax,<span class="number">1</span>)</span><br><span class="line">  <span class="number">0x0000000112e9aedc</span>: data16 data16 xchg %ax,%ax</span><br><span class="line">[Verified Entry Point]</span><br><span class="line">  <span class="number">0x0000000112e9aee0</span>: mov    %eax,-<span class="number">0x14000</span>(%rsp)</span><br><span class="line">  .....</span><br></pre></td></tr></table></figure>
+<p>得到这个输出之后，我使用<code>Singleton</code>全局搜索了下，发现还无结果。<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/XmXvXX.png" alt="image"><br>反编译的却没有得到相应的内容，这是什么问题呢？<br>带着这个问题Google了好久，终于搞明白原因了。</p>
+<p>于是我们又要来补充些虚拟机编译的知识了。<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/NiZjK5.png" alt="image"><br>我们在使用<code>java -version</code>查看JDK版本的时候，可以看到最后有个<code>mixed mode</code>，这里其实表明的是Java 虚拟机的编译方式，在HotSpot虚拟机中，提供了两种编译模式：解释执行 和 即时编译（JIT，Just-In-Time），即时编译也可以称为编译执行，解释执行即逐条翻译字节码为可运行的机器码，而即时编译则以方法为单位将字节码翻译成机器码。</p>
+<p>我们在反编译Singleton这个类的时候，因为虚拟机使用的是解释执行，这样我们是得不到汇编代码的。在深入理解Java虚拟机一书中介绍可以加上<code>-Xcomp</code>来触发JIT编译，但是我用的是JDK1.8，这个 -Xcomp`已经被移除了，具体哪个版本被移除了，目前我也没仔细研究过了。</p>
+<p>那要怎样才能触发JIT编译呢？答案是循环。通过足够多次数的循环来触发JIT编译。我们需要确保写的Java方法被调用的次数足够多，以触发C1（客户端）编译，并大约10000次触发C2（服务器）编译器并打开高级优化。换句话说，要想查看汇编代码，我们所写的Java源代码文件不能太过于简单，要足够复杂。</p>
+<blockquote>
+<p>注意：C1，C2都是HotSpot虚拟机内置的即时编译器。C1：即Client编译器，面向对启动性能有要求的客户端GUI程序，采用的优化手段比较简单，因此编译的时间较短。C2：即Server编译器，面向对性能峰值有要求的服务端程序，采用的优化手段复杂，因此编译时间长，但是在运行过程中性能更好。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(instance ==<span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">synchronized</span>(Singleton.class) &#123;</span><br><span class="line">				<span class="keyword">if</span>(instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">					instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">100</span>;i++) &#123;</span><br><span class="line">			print();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;=<span class="number">1000</span>;i++) &#123;</span><br><span class="line">			Singleton.getInstance();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>于是我在代码里加上了两层循环，然后在尝试获取一些汇编代码。</p>
+<p>这次发现终于能得到Singleton相关的汇编代码了。</p>
+<p>于是我们分别编译了两次，第一个是没有使用volatile关键字修饰instance，第二个是使用volatile关键字，然后我们分别取出<code>Singleton::getInstance</code>这一段来进行比较。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 未使用volatile修饰</span></span><br><span class="line"> <span class="number">0x000000010d29e931</span>: movabs $<span class="number">0x7955f12a8</span>,%rsi  ;   &#123;oop(a <span class="string">'java/lang/Class'</span> = <span class="string">'main/Singleton'</span>)&#125;</span><br><span class="line"> <span class="number">0x000000010d29e93b</span>: mov    %rax,%r10</span><br><span class="line"> <span class="number">0x000000010d29e93e</span>: shr    $<span class="number">0x3</span>,%r10</span><br><span class="line"> <span class="number">0x000000010d29e942</span>: mov    %r10d,<span class="number">0x68</span>(%rsi)</span><br><span class="line"> <span class="number">0x000000010d29e946</span>: shr    $<span class="number">0x9</span>,%rsi</span><br><span class="line"> <span class="number">0x000000010d29e94a</span>: movabs $<span class="number">0xfe403000</span>,%rax</span><br><span class="line"> <span class="number">0x000000010d29e954</span>: movb   $<span class="number">0x0</span>,(%rsi,%rax,<span class="number">1</span>)  ;*putstatic instance</span><br><span class="line">                                               ; - main.Singleton::getInstance@<span class="number">24</span> (line <span class="number">10</span>)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用volatile修饰</span></span><br><span class="line"> <span class="number">0x000000011435394f</span>: movabs $<span class="number">0x7955f12a8</span>,%rsi  ;   &#123;oop(a <span class="string">'java/lang/Class'</span> = <span class="string">'main/Singleton'</span>)&#125;</span><br><span class="line">  <span class="number">0x0000000114353959</span>: mov    %rax,%r10</span><br><span class="line">  <span class="number">0x000000011435395c</span>: shr    $<span class="number">0x3</span>,%r10</span><br><span class="line">  <span class="number">0x0000000114353960</span>: mov    %r10d,<span class="number">0x68</span>(%rsi)</span><br><span class="line">  <span class="number">0x0000000114353964</span>: shr    $<span class="number">0x9</span>,%rsi</span><br><span class="line">  <span class="number">0x0000000114353968</span>: movabs $<span class="number">0x10db6e000</span>,%rax</span><br><span class="line">  <span class="number">0x0000000114353972</span>: movb   $<span class="number">0x0</span>,(%rsi,%rax,<span class="number">1</span>)</span><br><span class="line">  <span class="number">0x0000000114353976</span>: lock addl $<span class="number">0x0</span>,(%rsp)     ;*putstatic instance</span><br><span class="line">                                                ; - main.Singleton::getInstance@<span class="number">24</span> (line <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<p>虽然对于汇编指令了解不多，但还是能从两个对比中看出差异所在。<br>很明显，在<code>movb   $0x0,(%rsi,%rax,1)</code> 之后，加了volatile修饰的汇编代码后面多了一条汇编指令<code>lock addl $0x0,(%rsp)</code>，这个操作相当于一个内存屏障，指令重排时不能把后面的指令重排序到内存屏障之前的位置，当只有一个CPU访问内存时，并不需要内存屏障，当如果有两个或多个CPU访问同一块内存，且其中有一个在观测另一个，就需要内存屏障来保证一致性了。<code>lock addl $0x0,(%rsp)</code> 表示把rsp的寄存器的值加0，这显然是一个空操作，关键在于lock前缀。<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/L6wWZt.png" alt="image"><br>查询IA32手册，lock前缀会强制执行原子操作，它的作用是是的本CPU的Cache写入了内存，该写入动作会引起别的CPU无效化其Cache。所有通过这样一个空操作，可让前面volatile变量的便是对其他CPU可见。</p>
+<p>那为什么说它能禁止指令重排呢？从硬件架构上讲，指令重排序是指CPU采用了运行将多条指令不按程序规定的顺序分开发送给各相应的点了单元处理，但并不是指令任意重排，CPU需要能正确处理指令依赖情况以保障程序能得出正确的执行结果。<code>lock addl $0x0,(%rsp)</code> 指令把修改同步到内存时，意味着所有之前的操作都已经执行完成，这样便形成了” 指令重排序无法越过内存屏障”的效果。</p>
+<blockquote>
+<p>总结来说，内存屏障有两个作用：<br>先于这个内存屏障的指令必须先执行， 后于这个内存屏障的指令必须后执行。<br>如果你的字段是volatile，在读指令前插入读屏障，可以让高速缓存中的数据失效，重新从主内存加载数据。在写指令之后插入写屏障，能让写入缓存的最新数据写回到主内存。</p>
+</blockquote>
+<p>关于volatile关键字的介绍就到这里了，感谢，如果觉得还可以请帮忙点个赞，有问题欢迎留言讨论。</p>
+<p><a href="https://github.com/JasonGaoH/KnowledgeSummary/blob/master/Docs/MultiThread/%E6%B7%B1%E5%85%A5%E8%A7%A3%E6%9E%90volatile%E5%85%B3%E9%94%AE%E5%AD%97.md" target="_blank" rel="noopener">原文链接</a></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>[深入理解Java虚拟机]<br>[Java高并发编程详解]</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#volatile">
+    <span class="tag-code">volatile</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2020/05/21/synchronized关键字的原理/">
+        <span class="nav-arrow">← </span>
+        
+          synchronized关键字的原理
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2020/08/06/Feed流上的优化实践/">
+        
+          Feed流上的优化实践.md
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js" repo issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <!-- Utterances END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#volatile关键字的使用"><span class="toc-nav-text">volatile关键字的使用</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#CPU缓存模型"><span class="toc-nav-text">CPU缓存模型</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Java内存模型"><span class="toc-nav-text">Java内存模型</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#对于volatile变量的特殊规则"><span class="toc-nav-text">对于volatile变量的特殊规则</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#volatile关键字深入解析"><span class="toc-nav-text">volatile关键字深入解析</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#参考"><span class="toc-nav-text">参考</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'JasonGaoH.github.io/2020/05/21/深入解析volatile关键字/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', '/css/images/error_icon.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== '/css/images/error_icon.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a href="https://github.com/yanm1ng">yanm1ng</a>
+    
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      hljs.configure({useBR: true});
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

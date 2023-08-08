@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      JasonGao Thoughts
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    <script src="/js/qrious.js"></script>
+  
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+  
+    <script src="/js/local-search.js"></script>
+
+<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>JasonGao Thoughts</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/series/" class="item-link">Series</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+      
+        <li class="menu-item menu-item-search right-list">
+    <a role="button" class="popup-trigger">
+        <i class="fa fa-search fa-fw"></i>
+    </a>
+</li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/series/" class="menu-link">Series</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+    
+      <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+            <span class="search-icon">
+                <i class="fa fa-search"></i>
+            </span>
+            <div class="search-input-container">
+                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa fa-times-circle"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>Archives</h2>
+  <p class="post-date">Archives</p>
+</div>
+<main class="app-body" id="archives">
+  
+  
+  
+    <section class="time-section">
+  <h1 class="section-year">
+    2022
+  </h1>
+  <div class="section-list">
+    
+    
+      <div class="section-list-item">
+        <a href="/2022/05/06/Mac上你一定要装的效率神器/" class="archive-title">Mac上你一定要装的效率神器</a>
+        <p class="archive-date">05-06</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2022/04/20/第6篇文章，这周在读什么/" class="archive-title">第6篇文章，这周在读什么</a>
+        <p class="archive-date">04-20</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2022/04/15/如何更好得阅读/" class="archive-title">如何更好得阅读</a>
+        <p class="archive-date">04-15</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2022/04/09/分享一些有价值的博客/" class="archive-title">分享一些有价值的博客</a>
+        <p class="archive-date">04-09</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2022/03/27/如何不靠运气致富/" class="archive-title">如何不靠运气致富</a>
+        <p class="archive-date">03-27</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2022/03/25/认知觉醒，开启自我改变的原动力/" class="archive-title">认知觉醒,开启自我改变的原动力</a>
+        <p class="archive-date">03-25</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2022/03/19/RoamResearch-一款帮助我们更好思考的笔记工具/" class="archive-title">RoamResearch,一款帮助我们更好思考的笔记工具</a>
+        <p class="archive-date">03-19</p>
+      </div>
+    
+  </div>
+</section>
+  
+    <section class="time-section">
+  <h1 class="section-year">
+    2020
+  </h1>
+  <div class="section-list">
+    
+    
+      <div class="section-list-item">
+        <a href="/2020/08/29/我的2020年Android面试经历/" class="archive-title">你可能需要这份大厂面经</a>
+        <p class="archive-date">08-29</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/08/06/快到年底的年中总结/" class="archive-title">快到年底的年中总结</a>
+        <p class="archive-date">08-06</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/08/06/Feed流上的优化实践/" class="archive-title">Feed流上的优化实践.md</a>
+        <p class="archive-date">08-06</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/深入解析volatile关键字/" class="archive-title">深入解析volatile关键字</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/synchronized关键字的原理/" class="archive-title">synchronized关键字的原理</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/关于HashMap你需要知道的一些细节/" class="archive-title">关于HashMap你需要知道的一些细节</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/ConcurrentHashMap是如何保证线程安全的/" class="archive-title">ConcurrentHashMap是如何保证线程安全的</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/我画了近百张图来理解红黑树/" class="archive-title">我画了近百张图来理解红黑树</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果/" class="archive-title">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/解决CoordinatorLayout的动画抖动以及回弹问题/" class="archive-title">解决CoordinatorLayout的动画抖动以及回弹问题</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/从源码角度剖析Handler机制/" class="archive-title">从源码角度剖析Handler机制</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2020/05/21/android启动流程分析/" class="archive-title">android启动流程分析</a>
+        <p class="archive-date">05-21</p>
+      </div>
+    
+  </div>
+</section>
+  
+    <section class="time-section">
+  <h1 class="section-year">
+    2019
+  </h1>
+  <div class="section-list">
+    
+    
+      <div class="section-list-item">
+        <a href="/2019/03/23/深入分析AsyncTask/" class="archive-title">深入分析AsyncTask</a>
+        <p class="archive-date">03-23</p>
+      </div>
+    
+      <div class="section-list-item">
+        <a href="/2019/03/22/关于TabLayout的indicator宽度的一次探索/" class="archive-title">关于TabLayout的indicator宽度的一次探索</a>
+        <p class="archive-date">03-22</p>
+      </div>
+    
+  </div>
+</section>
+  
+</main>
+
+<script>
+  (function () {
+    var url = 'JasonGaoH.github.io/archives/index.html';
+    $('#article-banner').geopattern(url);
+    $('.header').removeClass('fixed-header');
+  })();
+</script>
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a href="https://github.com/yanm1ng">yanm1ng</a>
+    
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      hljs.configure({useBR: true});
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

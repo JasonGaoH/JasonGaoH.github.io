@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果 | JasonGao Thoughts
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    <script src="/js/qrious.js"></script>
+  
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+  
+    <script src="/js/local-search.js"></script>
+
+<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>JasonGao Thoughts</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/series/" class="item-link">Series</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+      
+        <li class="menu-item menu-item-search right-list">
+    <a role="button" class="popup-trigger">
+        <i class="fa fa-search fa-fw"></i>
+    </a>
+</li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/series/" class="menu-link">Series</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+    
+      <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+            <span class="search-icon">
+                <i class="fa fa-search"></i>
+            </span>
+            <div class="search-input-container">
+                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa fa-times-circle"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</h2>
+  <p class="post-date">2020-05-21</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><blockquote>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483770&amp;idx=1&amp;sn=38b95c3cff51e216248c0eb860155437&amp;chksm=fa237992cd54f084802be4b0be2b52e4f5052019d51562f65245ca8b0faf3e0d61d296fc0e7d&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a></p>
+</blockquote>
+<h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57" target="_blank" rel="noopener">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
+<a id="more"></a>
+<p>首先我们可以简单看下京东首页的效果gif，来看看我们到底是要实现什么样的效果：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/jingdong.gif" alt="image"></p>
+<p>京东首页的tab筛选区将feed分为两个部分，上面是各种不同item，tab的下半部分可以左右横滑，并且下拉可以加重更多，只要网络有数据的情况下理论上是可以无限下拉的。</p>
+<p>其实用CoordinatorLayout来实现tab吸顶，如果能将一些细节问题处理好的话，其实大致可以实现类似京东首页的这个效果，具体细节问题可以参考文章开头说的之前的文章，文章里讲了下使用CoordinatorLayout来实现类似效果遇到的动画抖动问题以及页面回弹问题以及对应的解决方法。</p>
+<p>那么为什么会不采用CoordinatorLayout来实现，转而采用嵌套RecyclerView的方式呢？</p>
+<p>首先我们来看下CoordinatorLayout实现的大致布局：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout.png" alt="image"></p>
+<p>一个问题是从AppBarLayout滑动效果是不能传递到下面的ViewPager里去的，我尝试了各种方式都没能解决掉这个问题，可以简单看下Demo效果图：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinatorlayout_fix.gif" alt="image"></p>
+<p>从gif图大致可以看到AppBarLayout滑上去之后惯性消失了，tab下面的区域是不能接着滚动的。</p>
+<blockquote>
+<p>这个惯性消失的问题，我在网上找到了一个一篇解决惯性消失的文章如下<a href="https://blog.kyleduo.com/2017/07/21/alipay-home-3-alipay-home/" target="_blank" rel="noopener">支付宝首页交互三部曲3实现支付宝首页交互</a>,实现方式大致是自己把CoordinatorLayout这套机制再实现了一遍，因为是自己实现的，里面的一些机制是比较方便改动的，它处理惯性这个问题的逻辑大致是将AppBarLayout中未消费的y轴偏移量拿出来再交由RecyclerView去滑动，代码如下：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mHeaderView.setOnHeaderFlingUnConsumedListener(<span class="keyword">new</span> APHeaderView.OnHeaderFlingUnConsumedListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">onFlingUnConsumed</span><span class="params">(APHeaderView header, <span class="keyword">int</span> targetOffset, <span class="keyword">int</span> unconsumed)</span> </span>&#123;</span><br><span class="line">        APHeaderView.Behavior behavior = mHeaderView.getBehavior();</span><br><span class="line">        <span class="keyword">int</span> dy = -unconsumed;</span><br><span class="line">        <span class="keyword">if</span> (behavior != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mRecyclerView.scrollBy(<span class="number">0</span>, dy);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dy;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里由于篇幅原因，就不展开详细介绍了，感兴趣地同学可以点开上面的链接去研究研究，文章中也贴出了GitHub地址。</p>
+</blockquote>
+<p>我们重新回到我们一开始的问题，为什么想替换掉CoordinatorLayout，另外一个问题是CoordinatorLayout这种实现相对比较简单，但是会导致页面的嵌套层级很深，我们从上面贴出来的布局来看，view嵌套的层级特别深，而且如果我们要实现类似京东或者淘宝首页这样的效果，在TabLayout上面的区域，也就是下图箭头标注的地方必须要采用RecyclerView的来实现，因为tab上半部分的内容和个数都是不确定的，使用RecyclerView才比较方便，但是这样页面的层级就更深了，加载速度也变得更慢了。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout_fix.png" alt="image"></p>
+<h3 id="如何实现"><a href="#如何实现" class="headerlink" title="如何实现"></a>如何实现</h3><p>要抛弃CoordinatorLayout，那么如何实现呢？</p>
+<p>我们用Android Studio中的Layout Inspector工具看了下京东首页的布局，发现的确是采用两层RecyclerView嵌套来实现的，展示的布局大致如下所示：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/jingdong_layout.png" alt="image"></p>
+<p>那么接下来是怎么去实现这个效果了。其实一开始我以为要采用嵌套滚动这套机制来实现，后来发现不采用嵌套滚动机制也是可以实现的。</p>
+<p>现在我们可以大致构造这样一个布局：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested_recycler_view.png" alt="image"></p>
+<p>我们把ViewPager以及TabLayout这一块作为外部RecyclerView的一个item，ViewPager可能会有个多个内部RecyclerView，只要我们能让外部RecyclerView和内部RecyclerView的滑动事件正确分发基本就可以解决这个问题了。</p>
+<p>如果只是构造出这个布局出来，我们发现内部的RecyclerView都不会显示出来，因为滑动完全由外部RecyclerView接管了。</p>
+<p>那么重点来了，这种情况如何处理？</p>
+<p>其实RecyclerView的LayoutManager中有这两个方法用于判断RecyclerView在水平方向上和竖直方向上是否可以滚动的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public boolean canScrollHorizontally() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public boolean canScrollVertically() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后LayoutManager有各种不同的实现LinearLayoutManager，StaggeredGridLayoutManager等</p>
+<p>这个LayoutManager中的canScrollVertically和canScrollHorizontally在RecyclerView的onInterceptTouchEvent中是会拿来作判断，判断当前RecyclerView是否需要处理滑动事件的。</p>
+<blockquote>
+<p>还有一点需要注意：我们处理内外两层RecyclerView的滑动冲突问题，主要是想解决下面两种场景：一、手指上滑时，当外部RecyclerView滑动底部的时候，内部的RecyclerView能继续去响应用户的滑动，因为内部的RecyclerView理论上是可以无限滚动的；二、手指下滑时，当内部的RecyclerView滑动到顶部的时候，外部的RecyclerView能够继续响应用户的下滑事件。</p>
+</blockquote>
+<p>其实上面已经说出了如何处理嵌套RecyclerView的最重要的点，其他的部分相当于都是一些细节的处理了。</p>
+<p>在外部RecyclerView(下面成ParentRecyclerView)中的重写LayoutManager的canScrollVertically方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">fun initLayoutManager() &#123;</span><br><span class="line">    val linearLayoutManager = object :LinearLayoutManager(context) &#123;</span><br><span class="line"></span><br><span class="line">        override fun canScrollVertically():Boolean &#123;</span><br><span class="line">            //找到当前的childRecyclerView</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            //只有当前childRecyclerView滑动到顶部才认为ParentRecyclerView是可以竖直方向是可以滚动的</span><br><span class="line">            return childRecyclerView == null || childRecyclerView.isScrollTop()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    linearLayoutManager.orientation = LinearLayoutManager.VERTICAL</span><br><span class="line">    layoutManager = linearLayoutManager</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在内部RecyclerView(以下称ChildRecyclerView)中定义了isScrollTop()，用于判断ChildRecyclerView是否滚动到顶部。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fun isScrollTop(): Boolean &#123;</span><br><span class="line">    //RecyclerView.canScrollVertically(-1)的值表示是否能向下滚动，false表示已经滚动到顶部</span><br><span class="line">    return !canScrollVertically(-1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>另外，在ParentRecyclerView的onTouchEvent方法中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">override fun onTouchEvent(e: MotionEvent): Boolean &#123;</span><br><span class="line">        if(lastY == 0f) &#123;</span><br><span class="line">            lastY = e.y</span><br><span class="line">        &#125;</span><br><span class="line">        if(isScrollEnd()) &#123;</span><br><span class="line">            //如果父RecyclerView已经滑动到底部，需要让子RecyclerView滑动剩余的距离</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            childRecyclerView?.run &#123;</span><br><span class="line">                val deltaY = (lastY - e.y).toInt()</span><br><span class="line">                if(deltaY != 0) &#123;</span><br><span class="line">                    scrollBy(0,deltaY)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        lastY = e.y</span><br><span class="line">        return try &#123;</span><br><span class="line">            super.onTouchEvent(e)</span><br><span class="line">        &#125; catch (e: Exception) &#123;</span><br><span class="line">            e.printStackTrace()</span><br><span class="line">            false</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>关于滑动事件主要代码就是上面这些，具体可以可以看看项目代码<a href="https://github.com/JasonGaoH/NestedRecyclerView" target="_blank" rel="noopener">NestedRecyclerView</a>。</p>
+<p>还有关于RecyclerView的fling部分，在RecyclerView的onScrollStateChanged回调中监听y轴的总的偏移量totalDy，然后在RecyclerView不滚动的时候交由内部或者外部RecyclerView去fling，这里就不赘述了，具体可以看项目的代码。</p>
+<p>最后贴上项目的运行gif图展示：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/NestedRecyclerView/master/gif/nested_recyclerview_1.gif" alt="image"></p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/NestedRecyclerView/master/gif/nested_recyclerview_2.gif" alt="image"></p>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>写作不易，欢迎大家点赞，如果有问题，欢迎提出一起讨论，您的点赞是我写作的最大动力，感谢！</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#RecyclerView">
+    <span class="tag-code">RecyclerView</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2020/05/21/解决CoordinatorLayout的动画抖动以及回弹问题/">
+        <span class="nav-arrow">← </span>
+        
+          解决CoordinatorLayout的动画抖动以及回弹问题
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2020/05/21/我画了近百张图来理解红黑树/">
+        
+          我画了近百张图来理解红黑树
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js" repo issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <!-- Utterances END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#为什么会有这篇文章"><span class="toc-nav-text">为什么会有这篇文章</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#如何实现"><span class="toc-nav-text">如何实现</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#最后"><span class="toc-nav-text">最后</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'JasonGaoH.github.io/2020/05/21/仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', '/css/images/error_icon.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== '/css/images/error_icon.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a href="https://github.com/yanm1ng">yanm1ng</a>
+    
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      hljs.configure({useBR: true});
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
