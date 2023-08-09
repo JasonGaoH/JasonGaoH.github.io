@@ -18,16 +18,12 @@
   <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   
-    <link rel="stylesheet" href="/css/plugins/gitment.css">
-  
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
   
     <script src="/js/qrious.js"></script>
   
-  
-    <script src="/js/gitment.js"></script>
   
   
   
@@ -203,9 +199,10 @@
     
     <!-- 二维码 END -->
     
-      <!-- Gitment START -->
-      <div id="comments"></div>
-      <!-- Gitment END -->
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js" repo="JasonGaoH/RepoForUtterances" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <!-- Utterances END -->
     
   </article>
   <!-- Article END -->
@@ -275,34 +272,6 @@
 
 
 
-
-  <script>
-    var gitmentConfig = "JasonGaoH";
-    if (gitmentConfig !== 'undefined') {
-      var gitment = new Gitment({
-        id: "categories",
-        owner: "JasonGaoH",
-        repo: "JasonGaoH.github.io",
-        oauth: {
-          client_id: "49c0e4302143ea9109a4",
-          client_secret: "576ee6a0de7495732e4e9a14f95ae3d1aaa832dd"
-        },
-        theme: {
-          render(state, instance) {
-            const container = document.createElement('div')
-            container.lang = "en-US"
-            container.className = 'gitment-container gitment-root-container'
-            container.appendChild(instance.renderHeader(state, instance))
-            container.appendChild(instance.renderEditor(state, instance))
-            container.appendChild(instance.renderComments(state, instance))
-            container.appendChild(instance.renderFooter(state, instance))
-            return container;
-          }
-        }
-      })
-      gitment.render(document.getElementById('comments'))
-    }
-  </script>
 
 
 
