@@ -317,16 +317,8 @@
   <!-- Article END -->
   <!-- Catalog START -->
   
-    <aside class="catalog-container">
-  <div class="toc-main">
-    <strong class="toc-title">Catalog</strong>
-    
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#如上代码，一般使用AsyncTask只要重写里面的三个方法，onPreExecute和onPostExecute不是抽象方法，不是必须实现，实现这两种方法一般能让代码的逻辑更加清晰。onPreExecute运行在主线程中，做一些准备工作。onPostExecute同样运行在主线程中，用于在耗时操作完成后，更新UI。另外，还有一个onProgressUpdate方法，用于在后台任务执行过程中来实时地更新UI。"><span class="toc-nav-text">如上代码，一般使用AsyncTask只要重写里面的三个方法，onPreExecute和onPostExecute不是抽象方法，不是必须实现，实现这两种方法一般能让代码的逻辑更加清晰。onPreExecute运行在主线程中，做一些准备工作。onPostExecute同样运行在主线程中，用于在耗时操作完成后，更新UI。另外，还有一个onProgressUpdate方法，用于在后台任务执行过程中来实时地更新UI。</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#doingBackGround则是抽象方法，必须实现，我们使用AsyncTask时希望将一些耗时操作放在子线程中，doingBackGround中逻辑就相当于我们在Thread-Handler中Thread中的run方法中实现的逻辑。"><span class="toc-nav-text">doingBackGround则是抽象方法，必须实现，我们使用AsyncTask时希望将一些耗时操作放在子线程中，doingBackGround中逻辑就相当于我们在Thread-Handler中Thread中的run方法中实现的逻辑。</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#execute方法用于启动执行任务"><span class="toc-nav-text">execute方法用于启动执行任务</span></a></li></ol><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#AsyncTask的execute方法"><span class="toc-nav-text">AsyncTask的execute方法</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#AsyncTask的构造方法"><span class="toc-nav-text">AsyncTask的构造方法</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#FutureTask中的run方法"><span class="toc-nav-text">FutureTask中的run方法</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#我们发现SerialExecutor即是串行执行器，它的作用是保证任务执行的顺序，也就是它可以保证提交的任务确实是按照先后顺序执行的。它的内部有一个队列用来保存所提交的任务，保证当前只运行一个，这样就可以保证任务是完全按照顺序执行的。如果发现异步任务还未执行，可能被我们发现SerialExecutor即是串行执行器顺序的使用线程执行。因为应用中可能还有其他地方使用AsyncTask，所以到我们的AsyncTask也许会等待到其他任务都完成时才得以执行而不是调用executor-之后马上执行。"><span class="toc-nav-text">我们发现SerialExecutor即是串行执行器，它的作用是保证任务执行的顺序，也就是它可以保证提交的任务确实是按照先后顺序执行的。它的内部有一个队列用来保存所提交的任务，保证当前只运行一个，这样就可以保证任务是完全按照顺序执行的。如果发现异步任务还未执行，可能被我们发现SerialExecutor即是串行执行器顺序的使用线程执行。因为应用中可能还有其他地方使用AsyncTask，所以到我们的AsyncTask也许会等待到其他任务都完成时才得以执行而不是调用executor()之后马上执行。</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#API中的解释：能够并行的执行任务。THREAD-POOL-EXECUTOR是一个数量为corePoolSize的线程池，具体线程池的数量是依据CPU的核心来设置的，如果超过这个数量的线程个数就需要等待"><span class="toc-nav-text">API中的解释：能够并行的执行任务。THREAD_POOL_EXECUTOR是一个数量为corePoolSize的线程池，具体线程池的数量是依据CPU的核心来设置的，如果超过这个数量的线程个数就需要等待</span></a></li></ol>
-    
-  </li></div>
-</aside>
-  
   <!-- Catalog END -->
+
 </main>
 
 <script>
@@ -393,8 +385,13 @@
     &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
     
     
+
+    <br>
+    本站累计访问量<span id="busuanzi_value_site_pv"></span>,
+    本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
 </footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>
   function async(u, c) {

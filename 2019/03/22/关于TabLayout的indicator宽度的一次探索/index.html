@@ -274,16 +274,8 @@
   <!-- Article END -->
   <!-- Catalog START -->
   
-    <aside class="catalog-container">
-  <div class="toc-main">
-    <strong class="toc-title">Catalog</strong>
-    
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#先来看看下面一张图，"><span class="toc-nav-text">先来看看下面一张图，</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><span class="toc-nav-text">第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><span class="toc-nav-text">第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"><span class="toc-nav-text">第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。</span></a></li></ol>
-    
-  </div>
-</aside>
-  
   <!-- Catalog END -->
+
 </main>
 
 <script>
@@ -350,8 +342,13 @@
     &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
     
     
+
+    <br>
+    本站累计访问量<span id="busuanzi_value_site_pv"></span>,
+    本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
 </footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>
   function async(u, c) {
