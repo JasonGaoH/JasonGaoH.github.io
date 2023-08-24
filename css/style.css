@@ -366,6 +366,13 @@ h2.article-head {
   height: 40px;
   margin-right: 10px;
 }
+.rss {
+  background: url("images/rss_logo.png");
+  background-size: contain;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
 .qrcode {
   background: url("images/qrcode.jpg");
   margin: 0 auto;
