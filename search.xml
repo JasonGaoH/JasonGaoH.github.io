@@ -66,6 +66,42 @@
       </tags>
   </entry>
   <entry>
+    <title>Mac上你一定要装的效率神器</title>
+    <url>/2022/05/06/Mac%E4%B8%8A%E4%BD%A0%E4%B8%80%E5%AE%9A%E8%A6%81%E8%A3%85%E7%9A%84%E6%95%88%E7%8E%87%E7%A5%9E%E5%99%A8/</url>
+    <content><![CDATA[<p>今天想介绍一下Mac上的效率神器 — Alfred。</p>
+<p>其实关于Alfred的介绍有很多，但我还是忍不住想介绍一下这个工具，个人感觉它真的是Mac上一个特别好用的提升效率的工具了。</p>
+ <a id="more"></a>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_1.jpg" alt></p>
+<p>Alfred 和Mac自带的Spotlight都属于同一类工具，但是比Spotlight 功能却要强大很多，下面会慢慢介绍它的强大之处。</p>
+<p>Alfred 默认是使用Alt+空格键触发的，这里你也可以按照你的习惯修改启动的默认快捷键。</p>
+<h3 id="基础功能中我觉得比较好用的"><a href="#基础功能中我觉得比较好用的" class="headerlink" title="基础功能中我觉得比较好用的"></a>基础功能中我觉得比较好用的</h3><h4 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h4><p>在唤起Alfred之后，输入’ 符号或者按下空格就可以进行文件搜索，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_2.jpg" alt></p>
+<p>文件搜索配合下面Alfred中封装的一些通用操作对于文件的操作会特别方便。</p>
+<p>在搜索到我们需要的文件时，这个时候只需要按下→键就可以列出一些通用的操作列表，如下所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_3.jpg" alt></p>
+<p>Alfred 中封装了很多对于文件的操作，可以看到图中有很多，常用的比如打开，在Finder中打开，在当前位置打开终端，拷贝文件路径等等，真的是非常方便。</p>
+<h4 id="网页搜索"><a href="#网页搜索" class="headerlink" title="网页搜索"></a>网页搜索</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_4.jpg" alt></p>
+<p>这个里面支持的搜索就很多了，我这边比较常用的就是Google和youtobe搜索了，通过在Alfred中输入google和youtobe就可以触发相应的搜索功能了，你只需要输入相应的关键字就可以了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_5.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_6.jpg" alt></p>
+<h4 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_7.jpeg" alt></p>
+<p>Alfred 能够记录剪贴板历史，有时候我们需要查看之前剪贴板中的内容，这个功能用的相对不多，但是关键时刻还是特别管用的。</p>
+<h4 id="Snippets-摘要功能"><a href="#Snippets-摘要功能" class="headerlink" title="Snippets(摘要功能)"></a>Snippets(摘要功能)</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_8.jpeg" alt></p>
+<p>Snippets 的功能类似TextExpander ，就是使用剪短字符来扩展大段的文字，对于一些比较模式化的文本，我们经常要输入，但是因为很长，输入很费时，如果你将这些文本存在某个地方还要花时间去搜索，这个时候，就可以通过配置Snippet来实现这个功能。其实mac系统自带的也有类似的功能，就是系统自带的Text Replacement，如下图所示，比如输入msd可以提示帮你补全”马上到！”的文本。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_13.jpeg" alt></p>
+<h4 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h4><p>通过键盘输入相关的命令控制Mac的睡眠，启动等等，另外还可以通过输入hide来隐藏某个软件，输入quit来关闭某个软件，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_14.jpg" alt><br>这个功能用的不多，更多的是要对电脑进行息屏等操作的时候比较方便，不需要记一些快捷键，也不需要使用鼠标去进行点击，相对鼠标，键盘肯定是效率要高不少的。</p>
+<h3 id="高级功能workflow"><a href="#高级功能workflow" class="headerlink" title="高级功能workflow"></a>高级功能workflow</h3><p>workflow是Alfred高级功能，是需要付费才能用的，我觉得这个是 Alfred 最牛逼的地方了，网上有很多好用的Workflow，因为有了自定义Workflow的功能，所以，只要你想，你可以将日常中几乎所有模板化的流程设计成你自己的workflow。</p>
+<p>我用的比较多的workflow有以下几个。</p>
+<p><a href="https://github.com/wensonsmith/YoudaoTranslator" target="_blank" rel="noopener">有道翻译</a>，输入yd即可进行单词的翻译，另外需要注意的是有道的翻译需要注册有道智云的账号，在workflow里设置你的应用id和密钥才可以使用</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_9.png" alt></p>
+<p><a href="https://github.com/cj1128/alfred-qrcode-workflow" target="_blank" rel="noopener">二维码生成</a>，输入qr 再输入文本回车即可以将目标文本生成二维码，我在平时开发中经常需要构造一个二维码进行扫码调试，这个workflow让生成二维码的效率大大提高。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_10.jpeg" alt></p>
+<p><a href="https://github.com/sballin/alfred-search-notes-app" target="_blank" rel="noopener">搜索备忘录里的一些文本</a>，输入nb则可以搜索进行文本内容的搜索，输入nt进行hashtag的搜索。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_11.png" alt></p>
+]]></content>
+  </entry>
+  <entry>
     <title>Feed流上的优化实践.md</title>
     <url>/2020/08/06/Feed%E6%B5%81%E4%B8%8A%E7%9A%84%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
@@ -105,42 +141,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Mac上你一定要装的效率神器</title>
-    <url>/2022/05/06/Mac%E4%B8%8A%E4%BD%A0%E4%B8%80%E5%AE%9A%E8%A6%81%E8%A3%85%E7%9A%84%E6%95%88%E7%8E%87%E7%A5%9E%E5%99%A8/</url>
-    <content><![CDATA[<p>今天想介绍一下Mac上的效率神器 — Alfred。</p>
-<p>其实关于Alfred的介绍有很多，但我还是忍不住想介绍一下这个工具，个人感觉它真的是Mac上一个特别好用的提升效率的工具了。</p>
- <a id="more"></a>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img1@main/2022/04/30/1651331189746-052eae8a-c210-4e94-9d89-a216216b5617.jpg" alt></p>
-<p>Alfred 和Mac自带的Spotlight都属于同一类工具，但是比Spotlight 功能却要强大很多，下面会慢慢介绍它的强大之处。</p>
-<p>Alfred 默认是使用Alt+空格键触发的，这里你也可以按照你的习惯修改启动的默认快捷键。</p>
-<h3 id="基础功能中我觉得比较好用的"><a href="#基础功能中我觉得比较好用的" class="headerlink" title="基础功能中我觉得比较好用的"></a>基础功能中我觉得比较好用的</h3><h4 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h4><p>在唤起Alfred之后，输入’ 符号或者按下空格就可以进行文件搜索，如下图所示：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img4@main/2022/04/30/1651331571077-f17dc86a-1a35-4cd8-9879-5d433c03f537.jpg" alt></p>
-<p>文件搜索配合下面Alfred中封装的一些通用操作对于文件的操作会特别方便。</p>
-<p>在搜索到我们需要的文件时，这个时候只需要按下→键就可以列出一些通用的操作列表，如下所示：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img8@main/2022/04/30/1651332143297-c2dd63d8-cbcd-4c63-bb68-451ef88cf3bd.jpg" alt></p>
-<p>Alfred 中封装了很多对于文件的操作，可以看到图中有很多，常用的比如打开，在Finder中打开，在当前位置打开终端，拷贝文件路径等等，真的是非常方便。</p>
-<h4 id="网页搜索"><a href="#网页搜索" class="headerlink" title="网页搜索"></a>网页搜索</h4><p><img src="https://gcore.jsdelivr.net/gh/filess/img14@main/2022/04/30/1651332670457-f2b559b9-8989-4554-97ac-b10f13c2c977.jpg" alt></p>
-<p>这个里面支持的搜索就很多了，我这边比较常用的就是Google和youtobe搜索了，通过在Alfred中输入google和youtobe就可以触发相应的搜索功能了，你只需要输入相应的关键字就可以了。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img15@main/2022/04/30/1651332950956-6dd4b6d6-2a86-47a3-8bce-b009b309adbf.jpg" alt></p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img6@main/2022/04/30/1651333123409-33e5f1aa-33e2-4116-bfde-ae55641f6314.jpg" alt></p>
-<h4 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h4><p><img src="https://gcore.jsdelivr.net/gh/filess/img9@main/2022/05/01/1651334675920-4d65b453-d333-476a-9812-a858bb5f1560.jpeg" alt></p>
-<p>Alfred 能够记录剪贴板历史，有时候我们需要查看之前剪贴板中的内容，这个功能用的相对不多，但是关键时刻还是特别管用的。</p>
-<h4 id="Snippets-摘要功能"><a href="#Snippets-摘要功能" class="headerlink" title="Snippets(摘要功能)"></a>Snippets(摘要功能)</h4><p><img src="https://gcore.jsdelivr.net/gh/filess/img5@main/2022/05/01/1651334717315-31ca7a88-461b-4126-8bc7-d893671340df.jpeg" alt></p>
-<p>Snippets 的功能类似TextExpander ，就是使用剪短字符来扩展大段的文字，对于一些比较模式化的文本，我们经常要输入，但是因为很长，输入很费时，如果你将这些文本存在某个地方还要花时间去搜索，这个时候，就可以通过配置Snippet来实现这个功能。其实mac系统自带的也有类似的功能，就是系统自带的Text Replacement，如下图所示，比如输入msd可以提示帮你补全”马上到！”的文本。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img16@main/2022/05/06/1651847949215-2eb321dd-0fb9-4470-a73e-e956de68ad96.jpeg" alt></p>
-<h4 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h4><p>通过键盘输入相关的命令控制Mac的睡眠，启动等等，另外还可以通过输入hide来隐藏某个软件，输入quit来关闭某个软件，如下图所示：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img4@main/2022/05/06/1651848402006-0f79b066-7ce9-4944-b4e4-af43bd106220.jpg" alt><br>这个功能用的不多，更多的是要对电脑进行息屏等操作的时候比较方便，不需要记一些快捷键，也不需要使用鼠标去进行点击，相对鼠标，键盘肯定是效率要高不少的。</p>
-<h3 id="高级功能workflow"><a href="#高级功能workflow" class="headerlink" title="高级功能workflow"></a>高级功能workflow</h3><p>workflow是Alfred高级功能，是需要付费才能用的，我觉得这个是 Alfred 最牛逼的地方了，网上有很多好用的Workflow，因为有了自定义Workflow的功能，所以，只要你想，你可以将日常中几乎所有模板化的流程设计成你自己的workflow。</p>
-<p>我用的比较多的workflow有以下几个。</p>
-<p><a href="https://github.com/wensonsmith/YoudaoTranslator" target="_blank" rel="noopener">有道翻译</a>，输入yd即可进行单词的翻译，另外需要注意的是有道的翻译需要注册有道智云的账号，在workflow里设置你的应用id和密钥才可以使用</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img3@main/2022/05/01/1651334807491-f0a3c359-0e66-4687-ad74-8e50f54c1dd1.png" alt></p>
-<p><a href="https://github.com/cj1128/alfred-qrcode-workflow" target="_blank" rel="noopener">二维码生成</a>，输入qr 再输入文本回车即可以将目标文本生成二维码，我在平时开发中经常需要构造一个二维码进行扫码调试，这个workflow让生成二维码的效率大大提高。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img5@main/2022/05/01/1651334843912-f5f1e86d-ec2c-4392-a3c0-d650d0674f57.jpeg" alt></p>
-<p><a href="https://github.com/sballin/alfred-search-notes-app" target="_blank" rel="noopener">搜索备忘录里的一些文本</a>，输入nb则可以搜索进行文本内容的搜索，输入nt进行hashtag的搜索。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img19@main/2022/05/01/1651334868842-7c019473-68e9-4199-aa4d-238dbc0ad0f7.png" alt></p>
-]]></content>
-  </entry>
-  <entry>
     <title>RoamResearch,一款帮助我们更好思考的笔记工具</title>
     <url>/2022/03/19/RoamResearch-%E4%B8%80%E6%AC%BE%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E6%9B%B4%E5%A5%BD%E6%80%9D%E8%80%83%E7%9A%84%E7%AC%94%E8%AE%B0%E5%B7%A5%E5%85%B7/</url>
     <content><![CDATA[<h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>上一次发公众号文章是 2020 年的 8 月 29 号，马上都快两年了，很久没更新了，真是太惭愧了。那些没取关的朋友们算是真爱了吧，或者是因为忘记在某个角落还关注着这个沉寂的没有提供什么价值的公众号，如果是因为后者，那可以考虑取关了 😂😂，咳~，开个玩笑。</p>
@@ -149,33 +149,32 @@
 <a id="more"></a>
 <h3 id="什么是Roam-Research"><a href="#什么是Roam-Research" class="headerlink" title="什么是Roam Research"></a>什么是Roam Research</h3><p>今天主要来介绍一下<code>Roam Reseach</code>这个工具吧。之前还在小红书的时候就使用过一个月，后面因为需要付费就没有继续用了，今年年初的时候看到关于<code>Roam Research</code>的推特，没忍住花钱买了一年的会员，目前用了一段时间整体感觉还可以，下面分享一下自己的使用经验。</p>
 <p>在分享我自己的使用经验之前，首先来介绍下<code>Roam Reseach</code>是什么？简单来说，它就是一个笔记工具，和传统的笔记工具如<code>Evernote</code>、<code>有道云笔记</code>相比，它有什么不一样呢？传统的这类笔记工具他往往是线性的，如下图所示：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img8@main/2022/03/12/1647093794617-c69e5698-6365-4d4c-8599-565b1a5d1719.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picyoudao_note.jpg" alt></p>
 <p><code>Roam Reseach</code>（下面都简称 Roam）的官方网站是<a href="https://roamresearch.com/" target="_blank" rel="noopener">Roam官网</a>，作者是<a href="https://twitter.com/Conaw" target="_blank" rel="noopener">Conaw</a>,目前有Web、Mac以及Windows版本，新用户可以试用一个月，后面就需要收费了，另外有免费的替代软件Obsidian和Logseq，这两个基本都是借鉴的 <code>Roam</code>的思想。</p>
 <p>而<code>Roam</code>则是网状的，结构上有点类似于我们的神经元。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img7@main/2022/03/12/1647094089534-f1c55c1e-67c4-487a-87bf-93bedf982905.jpg" alt><br><img src="https://gcore.jsdelivr.net/gh/filess/img15@main/2022/03/12/1647094416309-210c73c0-b48e-4059-91ca-af409e3b8d37.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picshenjingyuan.jpg" alt></p>
 <p>我们在使用传统笔记工具时，很多时候都是先建立一个分类，可能该分类下面还有一个小的分类，最后才是我们笔记的具体内容。而 Roam 则不是，比如笔记 A 讨论了 C 这个主题，笔记 B 也讨论了 C 这个主题，这样 A 和 B 就一起关联到 C 这个主题下面，注意这里的顺序，是先有 A 和 B，才有了 C 这个分类，这其实是一种自底向上的方法，程序员们对于这个方法应该不陌生，我们很多时候程序设计都会采用这种方法，由局部到整体逐步完善。</p>
-<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img8@main/2022/03/13/1647101022676-a6a69af8-f853-4bc2-8f38-3d84c5ff849d.jpeg" alt></p>
+<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_graph.jpg" alt><br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_network.jpeg" alt></p>
 <p>那么<code>Roam</code>是如何实现这种网状结构的呢？主要是靠它的双向链表的能力。<code>Roam</code>使用[[]]来实现双向链表，所有被[[]] 包起来的内容会自动生成一个 page，而在这个 page 里又可以使用[[]]继续构造新的 page，这样，这两个 page 之间就构成了一个双向链表，由很多个这种双向链表组合起来，整体就形成了一个网状的结构。</p>
 <p><code>Roam</code>每天会自动生成一个以当前日期为标题的 page。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img10@main/2022/03/12/1647094680974-836e1c2f-317a-4068-b7af-bb1940461e10.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_daily_page.jpg" alt></p>
 <p>比如我在今天自动生成的 page 的 Daily Log 下面关联了<code>Roam</code><br>而从<code>Roam Reseach</code>点进去则是下面这样的，</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img11@main/2022/03/12/1647094768340-cb6735c1-6ba3-4241-a523-6344252126ee.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_research_page.jpg" alt></p>
 <p>这里列出了所有链接到当前的内容，表示下面这些节点都是与 Roam Research 相关。</p>
 <p>而点击右侧的[Open Graph View] 则可以从图结构上更直观地看到当前节点关联的内容。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img19@main/2022/03/12/1647094872131-cda47723-22c9-4bcc-877d-3b6ce7f17b9a.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_single_graph.jpg" alt></p>
 <p>另外，Roam 还提供块的引用，使用(())可以实现，被(()) 包含的内容可以称之为块，这个块可以是其他 Page 里面某一句文本或一个片段，如下图所示：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img3@main/2022/03/12/1647094984168-b214b2cd-943b-4e36-9655-048b26732501.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_block_ref.jpg" alt></p>
 <p>图片中 1 所指示的部分就被两个地方引用到，2 处所显示的数字则是当前内容被引用的次数，通过点击 2 处可以实现折叠和展开这部分引用的内容。</p>
 <p>另外，Roam 还提供一些快捷的命令，通过输入/即可显示。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img0@main/2022/03/12/1647095178728-c8165e6d-ccf4-4384-86b6-387c2adb9919.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_command.jpg" alt></p>
 <p>对于图片，可以直接将剪贴板中的图片进行上传，对于Twitter和YouTube也是可以解析出来的。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img11@main/2022/03/13/1647101106760-1c95326f-9d6d-431e-9fc5-6fdd8b5411e2.jpg" alt></p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img12@main/2022/03/13/1647101120543-778aaa92-2c04-4157-aa2e-b5b39e579a81.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_twitter.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_youtobe.jpg" alt></p>
 <p>当我们了解了以上一些技巧之后就日常使用就没有什么问题了。</p>
 <h3 id="使用经验"><a href="#使用经验" class="headerlink" title="使用经验"></a>使用经验</h3><p>接下来，介绍一下平时我自己的一些使用技巧。</p>
 <p>在每天自动生成的 page 下面，我一般会创建 Daily Log，MIT3，Tasks，Daily Reading 以及 Thinking 这 6 个节点。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img4@main/2022/03/12/1647095319702-c23230e9-2cb7-4e5a-a690-876843011aef.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_tips.jpg" alt></p>
 <p><code>Daily Log</code> 主要是记录下每天的工作记录，主要是记录自己每天的时间花在哪里，从而提升工作效率，而不是每天浑浑噩噩不知道每天干了些啥。</p>
 <p>这个方法主要来自这篇文章，<a href="https://betterhumans.pub/replace-your-to-do-list-with-interstitial-journaling-to-increase-productivity-4e43109d15ef" target="_blank" rel="noopener">Replace Your To-Do List With Interstitial Journaling To Increase Productivity</a>，主要思想是：通过记录日志来替代使用 TODO List，当你从一个工作切换到另一个工作的时候做下记录，写几句话描述一下上一个任务做了啥，以及下一个任务准备做啥，尽量描述清楚，而不是用几个简单的词语来描述。</p>
 <p>原因是因为我们人的大脑是不能多线程工作的，我们需要在做当前工作的时候保持足够的专注度来提高我们整体的效率，所以我们需要在当前工作之前把上一个工作梳理下，并放空我们的大脑，让我们的大脑休息一下。</p>
@@ -186,7 +185,7 @@
 <p>上面就是一些 Roam 的一些实践的经验，介绍到这里，可能有人会问，我上面介绍的这些和是否使用 Roam 关系并不大啊，这些使用系统默认带的备忘录都是可以实现的啊？</p>
 <p>嗯，这个，也不是没有道理的，重要的其实是方法，工具更多的只是辅助。</p>
 <h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><p>最后，再来介绍一种使用 Roam 来记笔记的最佳实践。Roam 与其说是一个工具，倒不如说是一种思想。其实 Roam 的这种设计理念是来自德国的社会学家和系统理论家 —— 尼克拉斯 · 卢曼（Niklas Luhmann），方法名叫 Zettelkasten，卢曼使用这套方法，积累了 90000 个知识卡片，一生中写了 60 本书和其他大量出版物。</p>
-<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://gcore.jsdelivr.net/gh/filess/img4@main/2022/03/12/1647095440854-75a01879-4a79-4e29-ae1d-6e4a1c01a7e1.jpg" alt></p>
+<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picslip_box.jpg" alt></p>
 <p>Zettelkasten 是由许多单独的笔记组成，其中包括想法和其他简短的信息，这些信息一般是在平时学习或者思考时记下的。这些笔记可以分层编号，以便在适当的地方插入新的笔记，并包含元数据，使记录者能够将笔记相互关联。</p>
 <p>从这个基础上，就慢慢衍生出了类似 Roam 这类的软件。在<a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>这篇文章中就详细介绍了由 Zettelkasten 扩展出来的一种记笔记方法，写得很详细，大家有兴趣可以看看原文。</p>
 <p>我目前主要使用以下几种类型的笔记：<br><code>Fleeting Notes</code> 记录一些临时的想法，看书过程中的一些注解等。</p>
@@ -564,125 +563,6 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
-    <title>关于TabLayout的indicator宽度的一次探索</title>
-    <url>/2019/03/22/%E5%85%B3%E4%BA%8ETabLayout%E7%9A%84indicator%E5%AE%BD%E5%BA%A6%E7%9A%84%E4%B8%80%E6%AC%A1%E6%8E%A2%E7%B4%A2/</url>
-    <content><![CDATA[<p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
-<blockquote>
-<p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
-</blockquote>
- <a id="more"></a>
-<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
-<p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
-<p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
-<p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
-<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left = selectedTitle.getLeft();   right = selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
-<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3" target="_blank" rel="noopener">方法一</a></p>
-<p><strong>主要代码如下：</strong><br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
-<p>这种情况下，需要指定TabLayout的tabMode为fixed，如果设置为scrollable，那么这段代码是不生效的。</p>
-<p>来看看这段代码的运行效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_3.png" alt="这里写图片描述"><br>这种情况下基本可以满足需求，这里的indicator的宽度基本和Tab的文字是等宽的。这种解决方法勉强可以达到这种需求，但是这里有个问题是当Tab的文字不统一的时候，Indicator的宽度会由最大的那个Tab的宽度决定。</p>
-<p>可以看到下面这个截图的效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_4.png" alt="这里写图片描述"></p>
-<p>如上截图，我们发现，当第二个tab的文字变长的时候，第一个tab的Indicator的宽度马上就超过了tab文字的宽度，作为一个追求完美的程序员，这样还是显得很别扭，所以接下来我们再来看看第二种方法。</p>
-<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903" target="_blank" rel="noopener">方法二</a></p>
-<p>贴上链接地址，这个作者针对第一种方式做了一些改善，我觉得文章写得很不错，不仅针对第一种方式给出了具体的方法，而且分析了为什么采取这种方式。</p>
-<p>这里简单总结下，你也可以点击上面的链接看原作者的分析。我们注意到，TabLayout内部对Tab的宽度有个特殊的处理，在onMeasure方法中，如下面的截图，首先循环遍历，取出Tab的最大宽度，然后再循环将最大的宽度设置为每个Tab的宽度，这样tab的宽度总是以所有tab中最大宽度的那个值来决定，而我们每个Tab的Indicator的width是和每个Tab的宽度相关的.<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_5.png" alt="这里写图片描述"></p>
-<p>我们来看下关键代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
-<p>通过反射拿到每个TabView的宽度，拿到TabView中每个TextView宽度，将TextView的宽度设置给每个TabView，这样我们的Tab的宽度就被压缩了，同时，每个Tab的Indicator的宽度就能和Tab的文字部分保持同样的宽度了。</p>
-<p>这种方式的效果截图如下：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_6.png" alt="这里写图片描述"></p>
-<p>这样看，是不是就没有上面的问题了。每个Tab的Indicator的width基本可以合Tab的文字宽度保持一致了。但是这里还有一个问题，就是采用这种方法虽然可以解决每个Tab的Indicator宽度太长的问题，但是，上面两种方法都有一个特点，就是通过反射将每个tab的padding设置为0，这样会导致每个tab的可点击区域变得很小，我么打开开发者模式里面显示布局边距这个选项来看下我们刚才的解决方法运行的截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_7.png" alt="这里写图片描述"><br>通过上面的截图可以清楚地发现每个tab的可点击区域被压缩得很窄。虽然这个在某些方面看来是可以接受的，但是我们来看文章最开始这张图。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"></p>
-<p>这里我么如果采取上面两种方式来压缩Tab来改变Indicator的width的话，就会导致每个Tab的边距变得很小，这样，就会导致Tab的可点击区域变小，这对于app的首页来说，肯定是不能接受的。所以，针对这一点来说，上面两种方式都是不符合要求的，所以需要找另一种方法来解决这个问题。</p>
-<h3 id="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"><a href="#第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。" class="headerlink" title="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"></a>第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。</h3><p>简单来说，就是将原生TabLayout代码复制一份，作为自己的代码，这样可以很容易地改动里面的代码，在使用的时候直接引用我们自己的这个TabLayout就行。</p>
-<p>接下来我们需要改原生TabLayout的一些逻辑，在保留原生TabLayout一些自定义属性的基础上，添加可以自定义Indicator的width的属性，<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_9.png" alt="这里写图片描述"></p>
-<p><strong>在代码中主要改两个地方，第一个地方如下</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_10.png" alt="这里写图片描述"></p>
-<p>在updateIndicatorPosition方法中，这里在处理Indicator的宽度的时候不是以Tab的左边坐标来算，将Indicator的left和right进行如下设置。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
-<p>并且，对于Indicator滑动中的状态也做相应的处理，即当mSelectionOffset大于0时对Indicator的left和right做同样的处理。</p>
-<p><strong>第二个改动的地方:</strong><br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png" alt="这里写图片描述"></p>
-<p>这里改动的是animateIndicatorToPosition方法，根据名字就可以基本知道这个是对Tab切换时Indicator的动画处理。</p>
-<p>如上截图，可以知道这个targetView就是TabLayout的每个Tab，对于targetLeft和targetRight我们做上面同样的处理。</p>
-<p>接下来我们可以验证下我们这样的改动方法是否有效，简单看下效果图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png" alt="这里写图片描述"></p>
-<p>可以看到，我们可以让TabLayout的Tab的可点击区域保持不变，并且可以修改Tab下面的Indicator的宽度，这里我们提供了TabLayout的Indicator的width的自定义。</p>
-<p>不多说，最后看下统一的效果截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png" alt="这里写图片描述"></p>
-<p><a href="https://github.com/JasonGaoH/XTabLayout/" target="_blank" rel="noopener">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
-<p>最后，感谢大家阅读这篇文章，如果觉得写得还不错的话，点个赞呗，实在不行，留个言也可以接受。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>TabLayout</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分享一些有价值的博客</title>
-    <url>/2022/04/09/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>这周的文章延迟了。</p>
-<p>最近比较忙，清明节都在家里加班。</p>
-<a id="more"></a>
-<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
-<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
-<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
-<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
-<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
-<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
-<p>这个是我feedly的截图：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img14@main/2022/04/07/1649262796149-3bb6ae81-f1e0-49aa-9cb3-34c53c62639a.jpeg" alt></p>
-<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
-<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
-<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
-<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
-<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
-<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
-<p>还有一些英文的博客：</p>
-<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
-<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
-<ul>
-<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
-</li>
-<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
-</li>
-<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
-</li>
-</ul>
-<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
-<p>下面放一些目前的阅读笔记吧。</p>
-<p>挣钱不是一件事情，而是一种技巧。</p>
-<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
-<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
-<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
-<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
-<p>销售技巧是一种形式的独特知识。</p>
-<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
-<p>Sales skills </p>
-<p>Musical talents, with the ability to pick up any instrument </p>
-<p>An obsessive personality: you dive into things and remember them quickly </p>
-<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
-<p>Playing a lot of games, you understand game theory pretty well </p>
-<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
-<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
-<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
-<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
-<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
-<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
-<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
-<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
-<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
-<p>跟随你的好奇心去做事，而不是追寻热点。</p>
-<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
-<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
-<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
-<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
-<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
-<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
-<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
-<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
-<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
-<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
-]]></content>
-  </entry>
-  <entry>
     <title>如何不靠运气致富</title>
     <url>/2022/03/27/%E5%A6%82%E4%BD%95%E4%B8%8D%E9%9D%A0%E8%BF%90%E6%B0%94%E8%87%B4%E5%AF%8C/</url>
     <content><![CDATA[<p>今年的第三篇文章，庆幸自己还在坚持，同时也希望后面自己能够继续坚持下去。</p>
@@ -878,51 +758,56 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
-    <title>如何更好得阅读</title>
-    <url>/2022/04/15/%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E5%BE%97%E9%98%85%E8%AF%BB/</url>
-    <content><![CDATA[<p>今天在看geekplux的这篇 <a href="https://geekplux.com/newsletters/14" target="_blank" rel="noopener">我获取信息的方法 -#14</a> Newsletter的时候，在感慨作者获取信息源这么丰富的同时，发现原来自己最近的几篇文章其实算不上是博客，更应该算是一种Newsletter的形式。博客通常是有主题的，而Newsletter更多的时候算是一种信息输入后的整理输出，通常有多个主题。</p>
-<p>相对Newsletter来说，博客需要更多的时间去整理，去思考，而对于我每天10105的上班节奏来说，没有太多时间去整理输出类似博客这种相对有深度的文章。</p>
-<p>接下来，每周更多的是分享的一些Reading List，内容涉及书籍，博客，Newsletter，Twitter或YouTube等形式。</p>
-<p>这周讲讲如何更好的阅读。</p>
-<a id="more"></a>
-<p>Farnam Street上的两篇文章：</p>
-<ul>
-<li><a href="https://fs.blog/reading/" target="_blank" rel="noopener">Reading Better</a></li>
-<li><a href="https://fs.blog/remember-books/" target="_blank" rel="noopener">How to remember what you read</a></li>
-</ul>
-<p>如何更好得阅读，有以下一些技巧：</p>
-<ul>
-<li>我们要学会筛选好书和坏书，我们的时间是宝贵的，坏书不值得我们浪费时间，而好书值得我们反复阅读。</li>
-<li>阅读有4个境界，为了娱乐阅读，为了了解阅读，为了理解阅读，为了掌握阅读。这个其实没有好坏之分，没有说为了娱乐阅读就一定比为了掌握阅读要低级，当你能从阅读中找到乐趣，这其实是个好事情。Naval就说过，阅读那些你喜欢的书直到你喜欢阅读为止。</li>
-<li>不要关注阅读速度，阅读的关键不在速度，而在你是否从中吸收了知识。</li>
-<li>如何选择好书？阅读经典的书，新书里面虽然有好书，但是数量不多，有很多质量不高的书，而经典的书经过时间的考验，值得花时间阅读。</li>
-<li>记笔记能提高你的阅读效率。文章中介绍了一种记笔记的方式如下：<ul>
-<li>在每个章节结尾写下这一章的总结或者一些特别的观点，要用自己的话写出来。</li>
-<li>在读完一周后，再回来回顾一下之前的笔记。盖上书本，尝试用你自己的话写下来这本书的主要观点，如果你发现有点困难，再重新去看你的笔记。这其实来自于<a href="https://baike.baidu.com/item/%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95/50895393#:~:text=%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95%E7%9A%84,%E6%B3%A8%E9%87%8D%E4%BA%86%E8%A7%A3%E6%9F%90%E4%BB%B6%E4%BA%8B%E7%89%A9%E3%80%82" target="_blank" rel="noopener">费曼学习法</a>。</li>
-<li>最后，将这些摘要手写抄下来或者输入到笔记工具(如EverNote)中去。</li>
-</ul>
-</li>
-</ul>
-<p>如何记住我们阅读的东西？这篇文章和上面那篇文章有些观点类似，这里就介绍一些不一样的观点。</p>
-<ul>
-<li>不要关注阅读的数量，要关注质量。</li>
-<li>不要去关注那些华而不实的App或者工具，关注书本的内容即可。</li>
-<li><p>不应该阅读让你觉得很枯燥的书，也不一定非得把某本书读完。</p>
-</li>
-<li><p>什么是主动阅读？你要在阅读某本书之前以及在整个阅读过程中你需要弄清楚你想在书中学到什么或者收获什么，将书中的内容和自己现有的知识进行关联，并尝试去应用这些知识。</p>
-</li>
-</ul>
-<p>之前看过Jiayuan的推文总结<a href="https://twitter.com/Tisoga/status/1260430958345543687?t=L4nvHixGM2gUEj4JWHuxJw&amp;s=19" target="_blank" rel="noopener">3wh2t阅读法</a>，我觉得总结的很好，这里介绍下。</p>
-<p>2wh2t的意思是Why，Who，What，How，Think以及Todo。</p>
-<p>Why表示为什么阅读，也就是要带着目的去阅读，当你带着目的去阅读的时候才会促进你思考，漫无目的的阅读其实就是在浪费时间。</p>
-<p>Who表示是谁，这本书是谁写的，以及书中介绍了哪些人物。这个点我理解不是必需的，但是如果你知道这些，比如作者写这本书的上下文，能够帮助更好得理解书本中的内容。</p>
-<p>What表示书写的是什么，你要搞清楚书中写的是什么，比如前面说到的通过费曼学习法来帮助自己记住书中的观点。</p>
-<p>How则表示怎么做，作者是怎么教你做的。</p>
-<p>最后2个t，一个表示Think(思考)，一个表示Todo(行动)。读完这本书给你带来的思考是什么？每个人的阅历都是不同的，你肯定有你自己不一样的思考，而这个思考才是真正属于你自己的东西。另一个表示行动，行动才是最重要的，没有付诸行动的想法不过是你脑中的一个概念而已。</p>
-<p>另外，上面的一些想法和之前读过的《麦肯锡精英高效阅读法》很多观点不谋而合，推荐大家去阅读这边书。</p>
-<p>最后放一下按照2wh2t 方法总结的《麦肯锡精英高效阅读法》的思维导图，思维导图是Jiayuan制作的，我是觉得总结的很好，就放在这里了。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img7@main/2022/04/11/1649692309620-8a806243-1f76-4fae-9384-60bb9d6703df.png" alt></p>
+    <title>关于TabLayout的indicator宽度的一次探索</title>
+    <url>/2019/03/22/%E5%85%B3%E4%BA%8ETabLayout%E7%9A%84indicator%E5%AE%BD%E5%BA%A6%E7%9A%84%E4%B8%80%E6%AC%A1%E6%8E%A2%E7%B4%A2/</url>
+    <content><![CDATA[<p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
+<blockquote>
+<p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
+</blockquote>
+ <a id="more"></a>
+<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
+<p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
+<p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
+<p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
+<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left = selectedTitle.getLeft();   right = selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
+<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3" target="_blank" rel="noopener">方法一</a></p>
+<p><strong>主要代码如下：</strong><br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这种情况下，需要指定TabLayout的tabMode为fixed，如果设置为scrollable，那么这段代码是不生效的。</p>
+<p>来看看这段代码的运行效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_3.png" alt="这里写图片描述"><br>这种情况下基本可以满足需求，这里的indicator的宽度基本和Tab的文字是等宽的。这种解决方法勉强可以达到这种需求，但是这里有个问题是当Tab的文字不统一的时候，Indicator的宽度会由最大的那个Tab的宽度决定。</p>
+<p>可以看到下面这个截图的效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_4.png" alt="这里写图片描述"></p>
+<p>如上截图，我们发现，当第二个tab的文字变长的时候，第一个tab的Indicator的宽度马上就超过了tab文字的宽度，作为一个追求完美的程序员，这样还是显得很别扭，所以接下来我们再来看看第二种方法。</p>
+<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903" target="_blank" rel="noopener">方法二</a></p>
+<p>贴上链接地址，这个作者针对第一种方式做了一些改善，我觉得文章写得很不错，不仅针对第一种方式给出了具体的方法，而且分析了为什么采取这种方式。</p>
+<p>这里简单总结下，你也可以点击上面的链接看原作者的分析。我们注意到，TabLayout内部对Tab的宽度有个特殊的处理，在onMeasure方法中，如下面的截图，首先循环遍历，取出Tab的最大宽度，然后再循环将最大的宽度设置为每个Tab的宽度，这样tab的宽度总是以所有tab中最大宽度的那个值来决定，而我们每个Tab的Indicator的width是和每个Tab的宽度相关的.<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_5.png" alt="这里写图片描述"></p>
+<p>我们来看下关键代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>通过反射拿到每个TabView的宽度，拿到TabView中每个TextView宽度，将TextView的宽度设置给每个TabView，这样我们的Tab的宽度就被压缩了，同时，每个Tab的Indicator的宽度就能和Tab的文字部分保持同样的宽度了。</p>
+<p>这种方式的效果截图如下：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_6.png" alt="这里写图片描述"></p>
+<p>这样看，是不是就没有上面的问题了。每个Tab的Indicator的width基本可以合Tab的文字宽度保持一致了。但是这里还有一个问题，就是采用这种方法虽然可以解决每个Tab的Indicator宽度太长的问题，但是，上面两种方法都有一个特点，就是通过反射将每个tab的padding设置为0，这样会导致每个tab的可点击区域变得很小，我么打开开发者模式里面显示布局边距这个选项来看下我们刚才的解决方法运行的截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_7.png" alt="这里写图片描述"><br>通过上面的截图可以清楚地发现每个tab的可点击区域被压缩得很窄。虽然这个在某些方面看来是可以接受的，但是我们来看文章最开始这张图。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"></p>
+<p>这里我么如果采取上面两种方式来压缩Tab来改变Indicator的width的话，就会导致每个Tab的边距变得很小，这样，就会导致Tab的可点击区域变小，这对于app的首页来说，肯定是不能接受的。所以，针对这一点来说，上面两种方式都是不符合要求的，所以需要找另一种方法来解决这个问题。</p>
+<h3 id="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"><a href="#第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。" class="headerlink" title="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"></a>第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。</h3><p>简单来说，就是将原生TabLayout代码复制一份，作为自己的代码，这样可以很容易地改动里面的代码，在使用的时候直接引用我们自己的这个TabLayout就行。</p>
+<p>接下来我们需要改原生TabLayout的一些逻辑，在保留原生TabLayout一些自定义属性的基础上，添加可以自定义Indicator的width的属性，<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_9.png" alt="这里写图片描述"></p>
+<p><strong>在代码中主要改两个地方，第一个地方如下</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_10.png" alt="这里写图片描述"></p>
+<p>在updateIndicatorPosition方法中，这里在处理Indicator的宽度的时候不是以Tab的左边坐标来算，将Indicator的left和right进行如下设置。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
+<p>并且，对于Indicator滑动中的状态也做相应的处理，即当mSelectionOffset大于0时对Indicator的left和right做同样的处理。</p>
+<p><strong>第二个改动的地方:</strong><br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png" alt="这里写图片描述"></p>
+<p>这里改动的是animateIndicatorToPosition方法，根据名字就可以基本知道这个是对Tab切换时Indicator的动画处理。</p>
+<p>如上截图，可以知道这个targetView就是TabLayout的每个Tab，对于targetLeft和targetRight我们做上面同样的处理。</p>
+<p>接下来我们可以验证下我们这样的改动方法是否有效，简单看下效果图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png" alt="这里写图片描述"></p>
+<p>可以看到，我们可以让TabLayout的Tab的可点击区域保持不变，并且可以修改Tab下面的Indicator的宽度，这里我们提供了TabLayout的Indicator的width的自定义。</p>
+<p>不多说，最后看下统一的效果截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png" alt="这里写图片描述"></p>
+<p><a href="https://github.com/JasonGaoH/XTabLayout/" target="_blank" rel="noopener">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
+<p>最后，感谢大家阅读这篇文章，如果觉得写得还不错的话，点个赞呗，实在不行，留个言也可以接受。</p>
 ]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>TabLayout</tag>
+      </tags>
   </entry>
   <entry>
     <title>快到年底的年中总结</title>
@@ -1194,6 +1079,120 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
+    <title>分享一些有价值的博客</title>
+    <url>/2022/04/09/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>这周的文章延迟了。</p>
+<p>最近比较忙，清明节都在家里加班。</p>
+<a id="more"></a>
+<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
+<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
+<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
+<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
+<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
+<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
+<p>这个是我feedly的截图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG102.jpeg" alt></p>
+<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
+<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
+<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
+<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
+<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
+<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
+<p>还有一些英文的博客：</p>
+<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
+<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
+<ul>
+<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
+</li>
+<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
+</li>
+<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
+</li>
+</ul>
+<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
+<p>下面放一些目前的阅读笔记吧。</p>
+<p>挣钱不是一件事情，而是一种技巧。</p>
+<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
+<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
+<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
+<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
+<p>销售技巧是一种形式的独特知识。</p>
+<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
+<p>Sales skills </p>
+<p>Musical talents, with the ability to pick up any instrument </p>
+<p>An obsessive personality: you dive into things and remember them quickly </p>
+<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
+<p>Playing a lot of games, you understand game theory pretty well </p>
+<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
+<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
+<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
+<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
+<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
+<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
+<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
+<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
+<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
+<p>跟随你的好奇心去做事，而不是追寻热点。</p>
+<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
+<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
+<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
+<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
+<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
+<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
+<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
+<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
+<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
+<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>如何更好得阅读</title>
+    <url>/2022/04/15/%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E5%BE%97%E9%98%85%E8%AF%BB/</url>
+    <content><![CDATA[<p>今天在看geekplux的这篇 <a href="https://geekplux.com/newsletters/14" target="_blank" rel="noopener">我获取信息的方法 -#14</a> Newsletter的时候，在感慨作者获取信息源这么丰富的同时，发现原来自己最近的几篇文章其实算不上是博客，更应该算是一种Newsletter的形式。博客通常是有主题的，而Newsletter更多的时候算是一种信息输入后的整理输出，通常有多个主题。</p>
+<p>相对Newsletter来说，博客需要更多的时间去整理，去思考，而对于我每天10105的上班节奏来说，没有太多时间去整理输出类似博客这种相对有深度的文章。</p>
+<p>接下来，每周更多的是分享的一些Reading List，内容涉及书籍，博客，Newsletter，Twitter或YouTube等形式。</p>
+<p>这周讲讲如何更好的阅读。</p>
+<a id="more"></a>
+<p>Farnam Street上的两篇文章：</p>
+<ul>
+<li><a href="https://fs.blog/reading/" target="_blank" rel="noopener">Reading Better</a></li>
+<li><a href="https://fs.blog/remember-books/" target="_blank" rel="noopener">How to remember what you read</a></li>
+</ul>
+<p>如何更好得阅读，有以下一些技巧：</p>
+<ul>
+<li>我们要学会筛选好书和坏书，我们的时间是宝贵的，坏书不值得我们浪费时间，而好书值得我们反复阅读。</li>
+<li>阅读有4个境界，为了娱乐阅读，为了了解阅读，为了理解阅读，为了掌握阅读。这个其实没有好坏之分，没有说为了娱乐阅读就一定比为了掌握阅读要低级，当你能从阅读中找到乐趣，这其实是个好事情。Naval就说过，阅读那些你喜欢的书直到你喜欢阅读为止。</li>
+<li>不要关注阅读速度，阅读的关键不在速度，而在你是否从中吸收了知识。</li>
+<li>如何选择好书？阅读经典的书，新书里面虽然有好书，但是数量不多，有很多质量不高的书，而经典的书经过时间的考验，值得花时间阅读。</li>
+<li>记笔记能提高你的阅读效率。文章中介绍了一种记笔记的方式如下：<ul>
+<li>在每个章节结尾写下这一章的总结或者一些特别的观点，要用自己的话写出来。</li>
+<li>在读完一周后，再回来回顾一下之前的笔记。盖上书本，尝试用你自己的话写下来这本书的主要观点，如果你发现有点困难，再重新去看你的笔记。这其实来自于<a href="https://baike.baidu.com/item/%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95/50895393#:~:text=%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95%E7%9A%84,%E6%B3%A8%E9%87%8D%E4%BA%86%E8%A7%A3%E6%9F%90%E4%BB%B6%E4%BA%8B%E7%89%A9%E3%80%82" target="_blank" rel="noopener">费曼学习法</a>。</li>
+<li>最后，将这些摘要手写抄下来或者输入到笔记工具(如EverNote)中去。</li>
+</ul>
+</li>
+</ul>
+<p>如何记住我们阅读的东西？这篇文章和上面那篇文章有些观点类似，这里就介绍一些不一样的观点。</p>
+<ul>
+<li>不要关注阅读的数量，要关注质量。</li>
+<li>不要去关注那些华而不实的App或者工具，关注书本的内容即可。</li>
+<li><p>不应该阅读让你觉得很枯燥的书，也不一定非得把某本书读完。</p>
+</li>
+<li><p>什么是主动阅读？你要在阅读某本书之前以及在整个阅读过程中你需要弄清楚你想在书中学到什么或者收获什么，将书中的内容和自己现有的知识进行关联，并尝试去应用这些知识。</p>
+</li>
+</ul>
+<p>之前看过Jiayuan的推文总结<a href="https://twitter.com/Tisoga/status/1260430958345543687?t=L4nvHixGM2gUEj4JWHuxJw&amp;s=19" target="_blank" rel="noopener">3wh2t阅读法</a>，我觉得总结的很好，这里介绍下。</p>
+<p>2wh2t的意思是Why，Who，What，How，Think以及Todo。</p>
+<p>Why表示为什么阅读，也就是要带着目的去阅读，当你带着目的去阅读的时候才会促进你思考，漫无目的的阅读其实就是在浪费时间。</p>
+<p>Who表示是谁，这本书是谁写的，以及书中介绍了哪些人物。这个点我理解不是必需的，但是如果你知道这些，比如作者写这本书的上下文，能够帮助更好得理解书本中的内容。</p>
+<p>What表示书写的是什么，你要搞清楚书中写的是什么，比如前面说到的通过费曼学习法来帮助自己记住书中的观点。</p>
+<p>How则表示怎么做，作者是怎么教你做的。</p>
+<p>最后2个t，一个表示Think(思考)，一个表示Todo(行动)。读完这本书给你带来的思考是什么？每个人的阅历都是不同的，你肯定有你自己不一样的思考，而这个思考才是真正属于你自己的东西。另一个表示行动，行动才是最重要的，没有付诸行动的想法不过是你脑中的一个概念而已。</p>
+<p>另外，上面的一些想法和之前读过的《麦肯锡精英高效阅读法》很多观点不谋而合，推荐大家去阅读这边书。</p>
+<p>最后放一下按照2wh2t 方法总结的《麦肯锡精英高效阅读法》的思维导图，思维导图是Jiayuan制作的，我是觉得总结的很好，就放在这里了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic20230904192030.png" alt></p>
+]]></content>
+  </entry>
+  <entry>
     <title>你可能需要这份大厂面经</title>
     <url>/2020/08/29/%E6%88%91%E7%9A%842020%E5%B9%B4Android%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/</url>
     <content><![CDATA[<p>今年小红书这边发完年终奖之后，心里隐隐觉得要出去看看机会，因为在小红书这边已经呆了快三年了，对于一些技术，业务总觉得有点麻木了，内心里总觉得自己啥都会了，但是很多只是知道个皮毛。</p>
@@ -1418,6 +1417,37 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
+    <title>第6篇文章，这周在读什么</title>
+    <url>/2022/04/20/%E7%AC%AC6%E7%AF%87%E6%96%87%E7%AB%A0%EF%BC%8C%E8%BF%99%E5%91%A8%E5%9C%A8%E8%AF%BB%E4%BB%80%E4%B9%88/</url>
+    <content><![CDATA[<p>最近接收的负面消息有点多，有时候会有一股深深的无力感，这个时候除了在社交媒体上吐吐槽也改变不了什么，更多的是徒增自己的负面情绪而已。</p>
+<p>后来想清楚了，有些事情改变不了就不要太过关注。正如那篇宁静祷文里写的那样，改变我能改变的，接受我不能改变的。</p>
+<a id="more"></a>
+<p>英文原文是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">God,</span><br><span class="line"></span><br><span class="line">Grant me</span><br><span class="line"></span><br><span class="line">the serenity to accept the thing I cannot change,</span><br><span class="line"></span><br><span class="line">the courage to change the thing I can change,</span><br><span class="line"></span><br><span class="line">and wisdom to separate the difference.</span><br></pre></td></tr></table></figure>
+<p>翻译有很多种版本，发现下面这个翻译最好。</p>
+<p>愿上帝赐与我宁静，好让我能接受，我无法改变的事情；</p>
+<p>愿上帝赐与我勇气，好让我能改变，我能去改变的事情；</p>
+<p>愿上帝赐与我睿智，好让我能区别，以上这两者的不同。</p>
+<p>今天在整理笔记的时候，发现了FaceBook公司的一个标语，Done is better than perfect. </p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picdone_better.jpg" alt></p>
+<p>笔记出处来自《人生护城河》这本书，作者是用这句话来激励自己坚持写作，我看到这里突然觉得这句话很好，有时候我有很多想法，但总是因为害怕自己做得不好而迟迟没有动手，但是殊不知，去完成才是最关键的。</p>
+<p>最近看的一本书，《Show Your Work》，看的是英文版，主要是想锻炼一下自己的英文阅读能力，这本书也有中文翻译，名字叫《点子就要秀出来》。</p>
+<p>这本书让我印象比较深刻的有以下几点：</p>
+<p>1、多发朋友圈或者推特展示自己在做的一些事情，用有用和有趣的内容和用户进行联结，这是一种基于内容的Self-Promotion；</p>
+<p>2、分享你拥有的，这些东西有可能对于某些人来说很有用，不需要担忧你分享的东西是否完美。就像上面说的那样，完成比完美更重要。</p>
+<p>3、可以分享哪些东西？当在项目开始的时候，分享那些能打动你的点；当项目在进行中的时候，分享你的方法以及项目的进度；当项目完成的时候，分享你的最终产品以及你从中学到的东西。</p>
+<p>4、分享并不会减少你的价值，反而能增加你的价值。</p>
+<p>另外，因为最近在看不少英文的书或者文档，比如上面的《Show Your Work》，之前关于Naval的那本《The Almanack of Naval Ravikant》，还有最近在看的《How to take smart notes》，之前分享的这个网站 <a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>只是这本书的一些总结，这些基本都是英文的，因为本人词汇量有限，我主要使用以下几种工具来帮助进行相对流畅的英文阅读。</p>
+<p>在手机上：使用欧路词典里的跨软件取词，发现还是挺好用的。将电子书epub或pdf导入到微信读书里，通过拖动图标就可以进行单词查询翻译，并且支持自动吸边。另外，我发现手机上美区的Kindle App查单词体验也挺好的，主要问题在美区Amazon 上暂时不支持国内的信用卡，而使用礼品卡买书容易被封号，我已经被封了两个账号了🤣，搜了一圈攻略说是要使用美国的地址并使用VISA这类支持外币信用卡才可以购买，后面准备试试。<img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG112.jpeg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG110.jpeg" alt></p>
+<p>在电脑上，一般看的都是PDF，我一般使用Alfred里的有道词典workflow进行翻译，我觉得Alfred目前用起来比较多的workflow就是这个有道字典的了，唤起Alfred，输入”yd”就可以查询单词了，效率比较高，另外有的时候我会将阅读过程中的单词记下来进行复习。这个时候Alfred这个有道词典workflow就不太方便了，这个时候我一般会用浏览器插件”沙拉查词”或”划词翻译”，使用 Roam中的插件 <a href="https://github.com/aidam38/roamsr" target="_blank" rel="noopener">roamsr</a> 来帮助记单词，roamsr 实现了 Anki中的 Spaced Repetition(间隔重复)的能力，制作卡片起来很容易，使用 <a href="https://twitter.com/hashtag/sr?src=hashtag_click" target="_blank" rel="noopener">#sr</a> 标记，然后再配合浏览器中的”沙拉查词“插件，将单词的相关解释截个图丢到 Roam 中就可以制作完善的单词卡片，复习起来也很方便。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroamsr_1.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroamsr_2.jpg" alt></p>
+<p>最近在看《The Almanack of Naval Ravikant》发现 Naval 也是建议要尽量去阅读经典的书，不要去读畅销书，这个和我上一篇如何更好的阅读里的观点一样，尽量去阅读那些经历过时间考验的书籍。于是我最近去看亚当·斯密的《国富论》，目前还没有完全看完，因为内容比较多，看了一小部分，感觉还是值得一读的，很多关于经济的观点一点都不过时，后面有时间再来分享。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picNaval_reading.jpeg" alt></p>
+]]></content>
+  </entry>
+  <entry>
     <title>深入解析volatile关键字</title>
     <url>/2020/05/21/%E6%B7%B1%E5%85%A5%E8%A7%A3%E6%9E%90volatile%E5%85%B3%E9%94%AE%E5%AD%97/</url>
     <content><![CDATA[<blockquote>
@@ -1518,36 +1548,6 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
-    <title>第6篇文章，这周在读什么</title>
-    <url>/2022/04/20/%E7%AC%AC6%E7%AF%87%E6%96%87%E7%AB%A0%EF%BC%8C%E8%BF%99%E5%91%A8%E5%9C%A8%E8%AF%BB%E4%BB%80%E4%B9%88/</url>
-    <content><![CDATA[<p>最近接收的负面消息有点多，有时候会有一股深深的无力感，这个时候除了在社交媒体上吐吐槽也改变不了什么，更多的是徒增自己的负面情绪而已。</p>
-<p>后来想清楚了，有些事情改变不了就不要太过关注。正如那篇宁静祷文里写的那样，改变我能改变的，接受我不能改变的。</p>
-<a id="more"></a>
-<p>英文原文是这样的：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">God,</span><br><span class="line"></span><br><span class="line">Grant me</span><br><span class="line"></span><br><span class="line">the serenity to accept the thing I cannot change,</span><br><span class="line"></span><br><span class="line">the courage to change the thing I can change,</span><br><span class="line"></span><br><span class="line">and wisdom to separate the difference.</span><br></pre></td></tr></table></figure>
-<p>翻译有很多种版本，发现下面这个翻译最好。</p>
-<p>愿上帝赐与我宁静，好让我能接受，我无法改变的事情；</p>
-<p>愿上帝赐与我勇气，好让我能改变，我能去改变的事情；</p>
-<p>愿上帝赐与我睿智，好让我能区别，以上这两者的不同。</p>
-<p>今天在整理笔记的时候，发现了FaceBook公司的一个标语，Done is better than perfect. </p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img16@main/2022/04/18/1650294033934-ef85a74d-dd77-4003-8c73-fe56ef120e4a.jpg" alt></p>
-<p>笔记出处来自《人生护城河》这本书，作者是用这句话来激励自己坚持写作，我看到这里突然觉得这句话很好，有时候我有很多想法，但总是因为害怕自己做得不好而迟迟没有动手，但是殊不知，去完成才是最关键的。</p>
-<p>最近看的一本书，《Show Your Work》，看的是英文版，主要是想锻炼一下自己的英文阅读能力，这本书也有中文翻译，名字叫《点子就要秀出来》。</p>
-<p>这本书让我印象比较深刻的有以下几点：</p>
-<p>1、多发朋友圈或者推特展示自己在做的一些事情，用有用和有趣的内容和用户进行联结，这是一种基于内容的Self-Promotion；</p>
-<p>2、分享你拥有的，这些东西有可能对于某些人来说很有用，不需要担忧你分享的东西是否完美。就像上面说的那样，完成比完美更重要。</p>
-<p>3、可以分享哪些东西？当在项目开始的时候，分享那些能打动你的点；当项目在进行中的时候，分享你的方法以及项目的进度；当项目完成的时候，分享你的最终产品以及你从中学到的东西。</p>
-<p>4、分享并不会减少你的价值，反而能增加你的价值。</p>
-<p>另外，因为最近在看不少英文的书或者文档，比如上面的《Show Your Work》，之前关于Naval的那本《The Almanack of Naval Ravikant》，还有最近在看的《How to take smart notes》，之前分享的这个网站 <a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>只是这本书的一些总结，这些基本都是英文的，因为本人词汇量有限，我主要使用以下几种工具来帮助进行相对流畅的英文阅读。</p>
-<p>在手机上：使用欧路词典里的跨软件取词，发现还是挺好用的。将电子书epub或pdf导入到微信读书里，通过拖动图标就可以进行单词查询翻译，并且支持自动吸边。另外，我发现手机上美区的Kindle App查单词体验也挺好的，主要问题在美区Amazon 上暂时不支持国内的信用卡，而使用礼品卡买书容易被封号，我已经被封了两个账号了🤣，搜了一圈攻略说是要使用美国的地址并使用VISA这类支持外币信用卡才可以购买，后面准备试试。<img src="https://gcore.jsdelivr.net/gh/filess/img12@main/2022/04/18/1650296541643-a990d5cf-bed1-42e4-bfef-981b56cb7105.jpeg" alt></p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img4@main/2022/04/18/1650296500261-ac2fcd5b-8bff-4eea-ba31-a028a3c48136.jpeg" alt></p>
-<p>在电脑上，一般看的都是PDF，我一般使用Alfred里的有道词典workflow进行翻译，我觉得Alfred目前用起来比较多的workflow就是这个有道字典的了，唤起Alfred，输入”yd”就可以查询单词了，效率比较高，另外有的时候我会将阅读过程中的单词记下来进行复习。这个时候Alfred这个有道词典workflow就不太方便了，这个时候我一般会用浏览器插件”沙拉查词”或”划词翻译”，使用 Roam中的插件 <a href="https://github.com/aidam38/roamsr" target="_blank" rel="noopener">roamsr</a> 来帮助记单词，roamsr 实现了 Anki中的 Spaced Repetition(间隔重复)的能力，制作卡片起来很容易，使用 <a href="https://twitter.com/hashtag/sr?src=hashtag_click" target="_blank" rel="noopener">#sr</a> 标记，然后再配合浏览器中的”沙拉查词“插件，将单词的相关解释截个图丢到 Roam 中就可以制作完善的单词卡片，复习起来也很方便。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img2@main/2022/04/30/1651328206087-5cc52fe0-d07b-4987-86f4-e0622779ec31.png" alt></p>
-<p>最近在看《The Almanack of Naval Ravikant》发现 Naval 也是建议要尽量去阅读经典的书，不要去读畅销书，这个和我上一篇如何更好的阅读里的观点一样，尽量去阅读那些经历过时间考验的书籍。于是我最近去看亚当·斯密的《国富论》，目前还没有完全看完，因为内容比较多，看了一小部分，感觉还是值得一读的，很多关于经济的观点一点都不过时，后面有时间再来分享。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img16@main/2022/04/19/1650297973623-adf38179-83d4-4ad2-954f-f27b39c5cba7.jpeg" alt></p>
-]]></content>
-  </entry>
-  <entry>
     <title>解决CoordinatorLayout的动画抖动以及回弹问题</title>
     <url>/2020/05/21/%E8%A7%A3%E5%86%B3CoordinatorLayout%E7%9A%84%E5%8A%A8%E7%94%BB%E6%8A%96%E5%8A%A8%E4%BB%A5%E5%8F%8A%E5%9B%9E%E5%BC%B9%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<p>在使用CoordinatorLayout来实现Android中的一种吸顶的时候，遇到了两个CoordinatorLayout的滑动问题，这里做下记录。</p>
@@ -1630,11 +1630,11 @@ an action to be performed on a different thread than your own.
     <content><![CDATA[<p>上一篇<a href="https://jasongaoh.github.io/2022/03/19/RoamResearch-%E4%B8%80%E6%AC%BE%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E6%9B%B4%E5%A5%BD%E6%80%9D%E8%80%83%E7%9A%84%E7%AC%94%E8%AE%B0%E5%B7%A5%E5%85%B7/" target="_blank" rel="noopener">RoamResearch,一款帮助我们更好思考的笔记工具</a>文章里提到要每周写一篇文章，类似最近比较流行的<code>Newsletter</code> 模式，公开地提出来也算是让大家监督我，从而让我可以坚持下去。<br> <a id="more"></a></p>
 <p>从写文章这件事往前看，主要是这阵子我做的比较大的一个改变是：有时间就看书，把平时休闲娱乐的时候都用来阅读，因为阅读量的提高，所以也想着写点什么，主要是自己在看完书后的一些总结与思考，而因为有输出的诉求，从而又让自己得加大输入，这样形成一个比较良性的循环。</p>
 <p>这段时间看了不少书，其实还是有不少收获的，今天主要讲讲这段时间让我感觉触动最大的书《认知觉醒》吧，这边书最早是在小创作的视频号里看到的，当时就好奇去微信读书里看了下，书中很多观点让我有种醍醐灌顶的感觉，后面我应该还会看第二遍的。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img1@main/2022/03/20/1647786135307-aac65e65-1b58-43ad-a520-4165283b8117.jpeg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi1.jpeg" alt></p>
 <h2 id="什么是认知觉醒"><a href="#什么是认知觉醒" class="headerlink" title="什么是认知觉醒"></a>什么是认知觉醒</h2><p>人的大脑等级上分有 3 个部分：本能脑、情绪脑和理智脑。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img19@main/2022/03/20/1647787148002-39abf290-f20e-49dd-8992-9c416f0aec92.jpeg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi2.jpeg" alt></p>
 <p>本能脑源自爬行动物，可以类比成蜥蜴脑，主要是让爬行动物对环境快速做出本能反应，遇到危险就逃跑，遇到猎物就捕食，情绪脑源自哺乳动物，可以类比成猴子脑，情绪可以让哺乳动物趋利避害，更好地在恶劣的环境生存，而理智脑则源自灵长类动物，主管认知。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img7@main/2022/03/20/1647787205185-be5649c3-a5f7-4c56-9498-a177bae905c6.jpeg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi3.jpeg" alt></p>
 <p>本能脑和情绪脑相对理智脑发展时间很长，在大多数情况下占主导地位，我们在生活中做的大部分决策往往源于本能和情绪，而非理智。</p>
 <p>本能脑和情绪脑在亿万年来以来，是被生存压力塑造而成的，所以它们天性就是目光短浅，即时满足，喜欢呆在舒适区，而理智脑的思考是需要耗费大量能量的，所以人天性就有懒性，不喜欢思考。</p>
 <p>这些所谓的天性在远古的时候是我们得以生存的巨大优势，而到了现在社会则成了我们成长过程中的巨大阻碍，所谓的认知觉醒就是让理智脑变强从而克服我们天性的过程。</p>
@@ -1645,7 +1645,7 @@ an action to be performed on a different thread than your own.
 <p>一个方法是养成习惯，从《微习惯》一书中获得的启示。作者斯蒂芬·盖斯为了养成好习惯，要求自己每天只做一个俯卧撑、每天只读一页书、每天只写 50 个字，这种无负担的习惯养成法最终促使他拥有了良好的身材，养成了阅读习惯，还写出了自己的书。</p>
 <p>另外一个点事我们给自己设定目标的时候不宜太大，要学会将目标进行分解，分为一个一个的小目标，这样自己在完成每个目标的时候会有一个正向的反馈，同时也更能让自己有动力坚持下去。</p>
 <p>爱因斯坦说过，复利是世界第八大奇迹，不到必要的时候，别去打断它。那些短期内看不到效果的”无用之事”其实就遵循复利规律，你要相信它。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img10@main/2022/03/20/1647787954675-a61a19c1-b6a8-4815-bb8c-d3f2f0510d2d.png" alt><br>复利的曲线图很好的描述了增长情况，在前期，增长都是比较缓慢的，到了某个值之后才会有很大增长。大部分人因为认知上看不到这个点，所以在那个值来临之前就放弃了。而这也正是那些能坚持下去的人的机会。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picfuli.webp" alt><br>复利的曲线图很好的描述了增长情况，在前期，增长都是比较缓慢的，到了某个值之后才会有很大增长。大部分人因为认知上看不到这个点，所以在那个值来临之前就放弃了。而这也正是那些能坚持下去的人的机会。</p>
 <h3 id="阅读是为了改变"><a href="#阅读是为了改变" class="headerlink" title="阅读是为了改变"></a>阅读是为了改变</h3><blockquote>
 <p>很多人以为一本书只要读完，读书的过程就结束了。事实上，阅读只是整个过程的开始，阅读之后的思考、思考之后的实践比阅读本身更加重要（这里主要指非虚构类书籍）。很多人的阅读仅停留在表面，读的时候觉得这里好有道理、那里好有道理，读完之后就不闻不问了，然后迅速转移到下一本书中，这种满足于录入的阅读造成的一个直接后果便是，一段时间之后再去翻这本书就好像之前没有看过一样，所有的痕迹都烟消云散了。真正读好一本书，往往需要花费数倍于阅读的时间去思考和实践，并输出自己的东西——可能是一篇文章，也可能是养成一个习惯——这个过程比阅读本身要费力得多。</p>
 </blockquote>

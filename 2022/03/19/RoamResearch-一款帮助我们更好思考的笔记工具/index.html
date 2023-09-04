@@ -206,33 +206,32 @@
 <a id="more"></a>
 <h3 id="什么是Roam-Research"><a href="#什么是Roam-Research" class="headerlink" title="什么是Roam Research"></a>什么是Roam Research</h3><p>今天主要来介绍一下<code>Roam Reseach</code>这个工具吧。之前还在小红书的时候就使用过一个月，后面因为需要付费就没有继续用了，今年年初的时候看到关于<code>Roam Research</code>的推特，没忍住花钱买了一年的会员，目前用了一段时间整体感觉还可以，下面分享一下自己的使用经验。</p>
 <p>在分享我自己的使用经验之前，首先来介绍下<code>Roam Reseach</code>是什么？简单来说，它就是一个笔记工具，和传统的笔记工具如<code>Evernote</code>、<code>有道云笔记</code>相比，它有什么不一样呢？传统的这类笔记工具他往往是线性的，如下图所示：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img8@main/2022/03/12/1647093794617-c69e5698-6365-4d4c-8599-565b1a5d1719.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picyoudao_note.jpg" alt></p>
 <p><code>Roam Reseach</code>（下面都简称 Roam）的官方网站是<a href="https://roamresearch.com/" target="_blank" rel="noopener">Roam官网</a>，作者是<a href="https://twitter.com/Conaw" target="_blank" rel="noopener">Conaw</a>,目前有Web、Mac以及Windows版本，新用户可以试用一个月，后面就需要收费了，另外有免费的替代软件Obsidian和Logseq，这两个基本都是借鉴的 <code>Roam</code>的思想。</p>
 <p>而<code>Roam</code>则是网状的，结构上有点类似于我们的神经元。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img7@main/2022/03/12/1647094089534-f1c55c1e-67c4-487a-87bf-93bedf982905.jpg" alt><br><img src="https://gcore.jsdelivr.net/gh/filess/img15@main/2022/03/12/1647094416309-210c73c0-b48e-4059-91ca-af409e3b8d37.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picshenjingyuan.jpg" alt></p>
 <p>我们在使用传统笔记工具时，很多时候都是先建立一个分类，可能该分类下面还有一个小的分类，最后才是我们笔记的具体内容。而 Roam 则不是，比如笔记 A 讨论了 C 这个主题，笔记 B 也讨论了 C 这个主题，这样 A 和 B 就一起关联到 C 这个主题下面，注意这里的顺序，是先有 A 和 B，才有了 C 这个分类，这其实是一种自底向上的方法，程序员们对于这个方法应该不陌生，我们很多时候程序设计都会采用这种方法，由局部到整体逐步完善。</p>
-<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img8@main/2022/03/13/1647101022676-a6a69af8-f853-4bc2-8f38-3d84c5ff849d.jpeg" alt></p>
+<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_graph.jpg" alt><br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_network.jpeg" alt></p>
 <p>那么<code>Roam</code>是如何实现这种网状结构的呢？主要是靠它的双向链表的能力。<code>Roam</code>使用[[]]来实现双向链表，所有被[[]] 包起来的内容会自动生成一个 page，而在这个 page 里又可以使用[[]]继续构造新的 page，这样，这两个 page 之间就构成了一个双向链表，由很多个这种双向链表组合起来，整体就形成了一个网状的结构。</p>
 <p><code>Roam</code>每天会自动生成一个以当前日期为标题的 page。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img10@main/2022/03/12/1647094680974-836e1c2f-317a-4068-b7af-bb1940461e10.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_daily_page.jpg" alt></p>
 <p>比如我在今天自动生成的 page 的 Daily Log 下面关联了<code>Roam</code><br>而从<code>Roam Reseach</code>点进去则是下面这样的，</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img11@main/2022/03/12/1647094768340-cb6735c1-6ba3-4241-a523-6344252126ee.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_research_page.jpg" alt></p>
 <p>这里列出了所有链接到当前的内容，表示下面这些节点都是与 Roam Research 相关。</p>
 <p>而点击右侧的[Open Graph View] 则可以从图结构上更直观地看到当前节点关联的内容。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img19@main/2022/03/12/1647094872131-cda47723-22c9-4bcc-877d-3b6ce7f17b9a.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_single_graph.jpg" alt></p>
 <p>另外，Roam 还提供块的引用，使用(())可以实现，被(()) 包含的内容可以称之为块，这个块可以是其他 Page 里面某一句文本或一个片段，如下图所示：</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img3@main/2022/03/12/1647094984168-b214b2cd-943b-4e36-9655-048b26732501.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_block_ref.jpg" alt></p>
 <p>图片中 1 所指示的部分就被两个地方引用到，2 处所显示的数字则是当前内容被引用的次数，通过点击 2 处可以实现折叠和展开这部分引用的内容。</p>
 <p>另外，Roam 还提供一些快捷的命令，通过输入/即可显示。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img0@main/2022/03/12/1647095178728-c8165e6d-ccf4-4384-86b6-387c2adb9919.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_command.jpg" alt></p>
 <p>对于图片，可以直接将剪贴板中的图片进行上传，对于Twitter和YouTube也是可以解析出来的。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img11@main/2022/03/13/1647101106760-1c95326f-9d6d-431e-9fc5-6fdd8b5411e2.jpg" alt></p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img12@main/2022/03/13/1647101120543-778aaa92-2c04-4157-aa2e-b5b39e579a81.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_twitter.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_youtobe.jpg" alt></p>
 <p>当我们了解了以上一些技巧之后就日常使用就没有什么问题了。</p>
 <h3 id="使用经验"><a href="#使用经验" class="headerlink" title="使用经验"></a>使用经验</h3><p>接下来，介绍一下平时我自己的一些使用技巧。</p>
 <p>在每天自动生成的 page 下面，我一般会创建 Daily Log，MIT3，Tasks，Daily Reading 以及 Thinking 这 6 个节点。</p>
-<p><img src="https://gcore.jsdelivr.net/gh/filess/img4@main/2022/03/12/1647095319702-c23230e9-2cb7-4e5a-a690-876843011aef.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_tips.jpg" alt></p>
 <p><code>Daily Log</code> 主要是记录下每天的工作记录，主要是记录自己每天的时间花在哪里，从而提升工作效率，而不是每天浑浑噩噩不知道每天干了些啥。</p>
 <p>这个方法主要来自这篇文章，<a href="https://betterhumans.pub/replace-your-to-do-list-with-interstitial-journaling-to-increase-productivity-4e43109d15ef" target="_blank" rel="noopener">Replace Your To-Do List With Interstitial Journaling To Increase Productivity</a>，主要思想是：通过记录日志来替代使用 TODO List，当你从一个工作切换到另一个工作的时候做下记录，写几句话描述一下上一个任务做了啥，以及下一个任务准备做啥，尽量描述清楚，而不是用几个简单的词语来描述。</p>
 <p>原因是因为我们人的大脑是不能多线程工作的，我们需要在做当前工作的时候保持足够的专注度来提高我们整体的效率，所以我们需要在当前工作之前把上一个工作梳理下，并放空我们的大脑，让我们的大脑休息一下。</p>
@@ -243,7 +242,7 @@
 <p>上面就是一些 Roam 的一些实践的经验，介绍到这里，可能有人会问，我上面介绍的这些和是否使用 Roam 关系并不大啊，这些使用系统默认带的备忘录都是可以实现的啊？</p>
 <p>嗯，这个，也不是没有道理的，重要的其实是方法，工具更多的只是辅助。</p>
 <h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><p>最后，再来介绍一种使用 Roam 来记笔记的最佳实践。Roam 与其说是一个工具，倒不如说是一种思想。其实 Roam 的这种设计理念是来自德国的社会学家和系统理论家 —— 尼克拉斯 · 卢曼（Niklas Luhmann），方法名叫 Zettelkasten，卢曼使用这套方法，积累了 90000 个知识卡片，一生中写了 60 本书和其他大量出版物。</p>
-<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://gcore.jsdelivr.net/gh/filess/img4@main/2022/03/12/1647095440854-75a01879-4a79-4e29-ae1d-6e4a1c01a7e1.jpg" alt></p>
+<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picslip_box.jpg" alt></p>
 <p>Zettelkasten 是由许多单独的笔记组成，其中包括想法和其他简短的信息，这些信息一般是在平时学习或者思考时记下的。这些笔记可以分层编号，以便在适当的地方插入新的笔记，并包含元数据，使记录者能够将笔记相互关联。</p>
 <p>从这个基础上，就慢慢衍生出了类似 Roam 这类的软件。在<a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>这篇文章中就详细介绍了由 Zettelkasten 扩展出来的一种记笔记方法，写得很详细，大家有兴趣可以看看原文。</p>
 <p>我目前主要使用以下几种类型的笔记：<br><code>Fleeting Notes</code> 记录一些临时的想法，看书过程中的一些注解等。</p>
