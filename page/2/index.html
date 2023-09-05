@@ -13,6 +13,7 @@
       JasonGao Thoughts
     
   </title>
+ 
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
   <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
@@ -21,33 +22,8 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
-
   
   
-  
-    <!-- MathJax support START -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-        }
-      });
-    </script>
-
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax(), i;
-        for (i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-        }
-      });
-    </script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <!-- MathJax support END -->
-  
-
 
   
   
@@ -192,7 +168,7 @@
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/深入解析volatile关键字/">深入解析volatile关键字</a>
+        <a href="/2020/05/21/how-volatile-works/">深入解析volatile关键字</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -210,12 +186,12 @@
 <p><code>volatile关键字</code>和<code>synchronized关键字</code>一样，在Java多线程开发中，是一道必须要跨越的槛。之前有篇文章已经分析过<code>synchronized关键字</code>的原理，<a href="https://blog.csdn.net/H_Gao/article/details/98593198" target="_blank" rel="noopener">synchronized关键字的原理</a>，这一次，我们来一步一步分析下<code>volatile关键字</code>的工作原理。</p>
         
       </div>
-      <a class="more" href="/2020/05/21/深入解析volatile关键字/">Read more</a>
+      <a class="more" href="/2020/05/21/how-volatile-works/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/synchronized关键字的原理/">synchronized关键字的原理</a>
+        <a href="/2020/05/21/The-principle-of-the -synchronized-keyword/">synchronized关键字的原理</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -234,12 +210,12 @@
 <p>Synchronized keyword enable a simple strategy for preventing thread interference and memory consistency errors: if an object is visible to more than one thread, all reads or writes to that object’s variables ard done through synchronized methods.</p>
         
       </div>
-      <a class="more" href="/2020/05/21/synchronized关键字的原理/">Read more</a>
+      <a class="more" href="/2020/05/21/The-principle-of-the -synchronized-keyword/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/关于HashMap你需要知道的一些细节/">关于HashMap你需要知道的一些细节</a>
+        <a href="/2020/05/21/some-knowledge-about-hashmap/">关于HashMap你需要知道的一些细节</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -260,12 +236,12 @@
 </blockquote>
         
       </div>
-      <a class="more" href="/2020/05/21/关于HashMap你需要知道的一些细节/">Read more</a>
+      <a class="more" href="/2020/05/21/some-knowledge-about-hashmap/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/ConcurrentHashMap是如何保证线程安全的/">ConcurrentHashMap是如何保证线程安全的</a>
+        <a href="/2020/05/21/how-does-ConcurrentHashMap-work/">ConcurrentHashMap是如何保证线程安全的</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -283,12 +259,12 @@
 <p>之前分析过HashMap的一些实现细节，<a href="https://blog.csdn.net/H_Gao/article/details/90746413" target="_blank" rel="noopener">关于HashMap你需要知道的一些细节</a>, 今天我们从源码角度来看看ConcurrentHashMap是如何实现线程安全的，其实网上这类文章分析特别多，秉着”纸上得来终觉浅，绝知此事要躬行“的原则，我们尝试自己去分析下，希望这样对于ConcurrentHashMap有一个更深刻的理解。</p>
         
       </div>
-      <a class="more" href="/2020/05/21/ConcurrentHashMap是如何保证线程安全的/">Read more</a>
+      <a class="more" href="/2020/05/21/how-does-ConcurrentHashMap-work/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/我画了近百张图来理解红黑树/">我画了近百张图来理解红黑树</a>
+        <a href="/2020/05/21/understand-treemap-by-using-imags/">我画了近百张图来理解红黑树</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -307,12 +283,12 @@
 <p>这篇文章算是我写博客写公众号以来画图最多的一篇文章了，没有之一，我希望尽可能多地用图片来形象地描述红黑树的各种操作的前后变换原理，帮助大家来理解红黑树的工作原理，下面，多图预警开始了。<br>
         
       </p></div>
-      <a class="more" href="/2020/05/21/我画了近百张图来理解红黑树/">Read more</a>
+      <a class="more" href="/2020/05/21/understand-treemap-by-using-imags/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果/">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a>
+        <a href="/2020/05/21/The-tab's-sticky-effect./">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -330,12 +306,12 @@
 <h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57" target="_blank" rel="noopener">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
         
       </div>
-      <a class="more" href="/2020/05/21/仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果/">Read more</a>
+      <a class="more" href="/2020/05/21/The-tab's-sticky-effect./">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/解决CoordinatorLayout的动画抖动以及回弹问题/">解决CoordinatorLayout的动画抖动以及回弹问题</a>
+        <a href="/2020/05/21/adressing-CoordinatorLayout's-animation-jitter-and-rebound-issues/">解决CoordinatorLayout的动画抖动以及回弹问题</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -351,12 +327,12 @@
 <p>这里使用CoordinatorLayout实现的是一个tab吸顶的效果，类似淘宝，京东首页的一个效果。<br>头部区域展示各种类型banner卡片，中间是类似TabLayout的可点击tab，下面是feed卡片，可以一直下拉加载，并且feed卡片区域使用ViewPager可以支持左右横滑切换tab，另外，就是tab滚动到顶部之后会有个吸顶的效果。</p>
         
       </div>
-      <a class="more" href="/2020/05/21/解决CoordinatorLayout的动画抖动以及回弹问题/">Read more</a>
+      <a class="more" href="/2020/05/21/adressing-CoordinatorLayout's-animation-jitter-and-rebound-issues/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/从源码角度剖析Handler机制/">从源码角度剖析Handler机制</a>
+        <a href="/2020/05/21/how-handler-works/">从源码角度剖析Handler机制</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -372,12 +348,12 @@
 <p>对于Handler的用法，相信大家都比较熟悉了，那么Handler机制的原理是什么呢？我们今天从源码角度来分析下Handler机制的原理。<br>
         
       </p></div>
-      <a class="more" href="/2020/05/21/从源码角度剖析Handler机制/">Read more</a>
+      <a class="more" href="/2020/05/21/how-handler-works/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/android启动流程分析/">android启动流程分析</a>
+        <a href="/2020/05/21/The-analysis-of-the-Android-startup-process/">android启动流程分析</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
@@ -393,12 +369,12 @@
 <h4 id="当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system-core-init-init-cpp）代码如下："><a href="#当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system-core-init-init-cpp）代码如下：" class="headerlink" title="当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system\core\init\init.cpp）代码如下："></a>当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system\core\init\init.cpp）代码如下：</h4></blockquote>
         
       </div>
-      <a class="more" href="/2020/05/21/android启动流程分析/">Read more</a>
+      <a class="more" href="/2020/05/21/The-analysis-of-the-Android-startup-process/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2019/03/23/深入分析AsyncTask/">深入分析AsyncTask</a>
+        <a href="/2019/03/23/analys-of-AsyncTask/">深入分析AsyncTask</a>
       </h2>
       <p class="article-date">March 23, 2019</p>
       
@@ -422,7 +398,7 @@
 <p>AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。<br>
         
       </p></div>
-      <a class="more" href="/2019/03/23/深入分析AsyncTask/">Read more</a>
+      <a class="more" href="/2019/03/23/analys-of-AsyncTask/">Read more</a>
     </article>
   
 

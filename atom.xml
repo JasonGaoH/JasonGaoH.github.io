@@ -6,7 +6,7 @@
   <link href="atom.xml" rel="self"/>
   
   <link href="JasonGaoH.github.io/"/>
-  <updated>2023-09-04T09:27:14.625Z</updated>
+  <updated>2023-09-05T12:02:35.491Z</updated>
   <id>JasonGaoH.github.io/</id>
   
   <author>
@@ -18,10 +18,10 @@
   
   <entry>
     <title>Mac上你一定要装的效率神器</title>
-    <link href="JasonGaoH.github.io/2022/05/06/Mac%E4%B8%8A%E4%BD%A0%E4%B8%80%E5%AE%9A%E8%A6%81%E8%A3%85%E7%9A%84%E6%95%88%E7%8E%87%E7%A5%9E%E5%99%A8/"/>
-    <id>JasonGaoH.github.io/2022/05/06/Mac%E4%B8%8A%E4%BD%A0%E4%B8%80%E5%AE%9A%E8%A6%81%E8%A3%85%E7%9A%84%E6%95%88%E7%8E%87%E7%A5%9E%E5%99%A8/</id>
+    <link href="JasonGaoH.github.io/2022/05/06/awsome-tools-in-mac/"/>
+    <id>JasonGaoH.github.io/2022/05/06/awsome-tools-in-mac/</id>
     <published>2022-05-06T14:51:58.000Z</published>
-    <updated>2023-09-04T09:27:14.625Z</updated>
+    <updated>2023-09-05T12:02:35.491Z</updated>
     
     <content type="html"><![CDATA[<p>今天想介绍一下Mac上的效率神器 — Alfred。</p><p>其实关于Alfred的介绍有很多，但我还是忍不住想介绍一下这个工具，个人感觉它真的是Mac上一个特别好用的提升效率的工具了。</p> <a id="more"></a><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_1.jpg" alt></p><p>Alfred 和Mac自带的Spotlight都属于同一类工具，但是比Spotlight 功能却要强大很多，下面会慢慢介绍它的强大之处。</p><p>Alfred 默认是使用Alt+空格键触发的，这里你也可以按照你的习惯修改启动的默认快捷键。</p><h3 id="基础功能中我觉得比较好用的"><a href="#基础功能中我觉得比较好用的" class="headerlink" title="基础功能中我觉得比较好用的"></a>基础功能中我觉得比较好用的</h3><h4 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h4><p>在唤起Alfred之后，输入’ 符号或者按下空格就可以进行文件搜索，如下图所示：</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_2.jpg" alt></p><p>文件搜索配合下面Alfred中封装的一些通用操作对于文件的操作会特别方便。</p><p>在搜索到我们需要的文件时，这个时候只需要按下→键就可以列出一些通用的操作列表，如下所示：</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_3.jpg" alt></p><p>Alfred 中封装了很多对于文件的操作，可以看到图中有很多，常用的比如打开，在Finder中打开，在当前位置打开终端，拷贝文件路径等等，真的是非常方便。</p><h4 id="网页搜索"><a href="#网页搜索" class="headerlink" title="网页搜索"></a>网页搜索</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_4.jpg" alt></p><p>这个里面支持的搜索就很多了，我这边比较常用的就是Google和youtobe搜索了，通过在Alfred中输入google和youtobe就可以触发相应的搜索功能了，你只需要输入相应的关键字就可以了。</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_5.jpg" alt></p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_6.jpg" alt></p><h4 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_7.jpeg" alt></p><p>Alfred 能够记录剪贴板历史，有时候我们需要查看之前剪贴板中的内容，这个功能用的相对不多，但是关键时刻还是特别管用的。</p><h4 id="Snippets-摘要功能"><a href="#Snippets-摘要功能" class="headerlink" title="Snippets(摘要功能)"></a>Snippets(摘要功能)</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_8.jpeg" alt></p><p>Snippets 的功能类似TextExpander ，就是使用剪短字符来扩展大段的文字，对于一些比较模式化的文本，我们经常要输入，但是因为很长，输入很费时，如果你将这些文本存在某个地方还要花时间去搜索，这个时候，就可以通过配置Snippet来实现这个功能。其实mac系统自带的也有类似的功能，就是系统自带的Text Replacement，如下图所示，比如输入msd可以提示帮你补全”马上到！”的文本。</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_13.jpeg" alt></p><h4 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h4><p>通过键盘输入相关的命令控制Mac的睡眠，启动等等，另外还可以通过输入hide来隐藏某个软件，输入quit来关闭某个软件，如下图所示：</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_14.jpg" alt><br>这个功能用的不多，更多的是要对电脑进行息屏等操作的时候比较方便，不需要记一些快捷键，也不需要使用鼠标去进行点击，相对鼠标，键盘肯定是效率要高不少的。</p><h3 id="高级功能workflow"><a href="#高级功能workflow" class="headerlink" title="高级功能workflow"></a>高级功能workflow</h3><p>workflow是Alfred高级功能，是需要付费才能用的，我觉得这个是 Alfred 最牛逼的地方了，网上有很多好用的Workflow，因为有了自定义Workflow的功能，所以，只要你想，你可以将日常中几乎所有模板化的流程设计成你自己的workflow。</p><p>我用的比较多的workflow有以下几个。</p><p><a href="https://github.com/wensonsmith/YoudaoTranslator" target="_blank" rel="noopener">有道翻译</a>，输入yd即可进行单词的翻译，另外需要注意的是有道的翻译需要注册有道智云的账号，在workflow里设置你的应用id和密钥才可以使用</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_9.png" alt></p><p><a href="https://github.com/cj1128/alfred-qrcode-workflow" target="_blank" rel="noopener">二维码生成</a>，输入qr 再输入文本回车即可以将目标文本生成二维码，我在平时开发中经常需要构造一个二维码进行扫码调试，这个workflow让生成二维码的效率大大提高。</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_10.jpeg" alt></p><p><a href="https://github.com/sballin/alfred-search-notes-app" target="_blank" rel="noopener">搜索备忘录里的一些文本</a>，输入nb则可以搜索进行文本内容的搜索，输入nt进行hashtag的搜索。</p><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_11.png" alt></p>]]></content>
     
@@ -36,8 +36,8 @@
   
   <entry>
     <title>第6篇文章，这周在读什么</title>
-    <link href="JasonGaoH.github.io/2022/04/20/%E7%AC%AC6%E7%AF%87%E6%96%87%E7%AB%A0%EF%BC%8C%E8%BF%99%E5%91%A8%E5%9C%A8%E8%AF%BB%E4%BB%80%E4%B9%88/"/>
-    <id>JasonGaoH.github.io/2022/04/20/%E7%AC%AC6%E7%AF%87%E6%96%87%E7%AB%A0%EF%BC%8C%E8%BF%99%E5%91%A8%E5%9C%A8%E8%AF%BB%E4%BB%80%E4%B9%88/</id>
+    <link href="JasonGaoH.github.io/2022/04/20/what-do-I-read-this-week/"/>
+    <id>JasonGaoH.github.io/2022/04/20/what-do-I-read-this-week/</id>
     <published>2022-04-20T15:11:35.000Z</published>
     <updated>2023-09-04T09:36:42.519Z</updated>
     
@@ -54,8 +54,8 @@
   
   <entry>
     <title>如何更好得阅读</title>
-    <link href="JasonGaoH.github.io/2022/04/15/%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E5%BE%97%E9%98%85%E8%AF%BB/"/>
-    <id>JasonGaoH.github.io/2022/04/15/%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E5%BE%97%E9%98%85%E8%AF%BB/</id>
+    <link href="JasonGaoH.github.io/2022/04/15/how-to-read-better/"/>
+    <id>JasonGaoH.github.io/2022/04/15/how-to-read-better/</id>
     <published>2022-04-15T13:54:08.000Z</published>
     <updated>2023-09-04T11:20:57.485Z</updated>
     
@@ -74,8 +74,8 @@
   
   <entry>
     <title>分享一些有价值的博客</title>
-    <link href="JasonGaoH.github.io/2022/04/09/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E5%8D%9A%E5%AE%A2/"/>
-    <id>JasonGaoH.github.io/2022/04/09/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E5%8D%9A%E5%AE%A2/</id>
+    <link href="JasonGaoH.github.io/2022/04/09/Share-some-valuable-blogs./"/>
+    <id>JasonGaoH.github.io/2022/04/09/Share-some-valuable-blogs./</id>
     <published>2022-04-09T09:06:23.000Z</published>
     <updated>2023-09-04T09:45:26.552Z</updated>
     
@@ -92,8 +92,8 @@
   
   <entry>
     <title>如何不靠运气致富</title>
-    <link href="JasonGaoH.github.io/2022/03/27/%E5%A6%82%E4%BD%95%E4%B8%8D%E9%9D%A0%E8%BF%90%E6%B0%94%E8%87%B4%E5%AF%8C/"/>
-    <id>JasonGaoH.github.io/2022/03/27/%E5%A6%82%E4%BD%95%E4%B8%8D%E9%9D%A0%E8%BF%90%E6%B0%94%E8%87%B4%E5%AF%8C/</id>
+    <link href="JasonGaoH.github.io/2022/03/27/how-to-get-rich-without-getting-lucky/"/>
+    <id>JasonGaoH.github.io/2022/03/27/how-to-get-rich-without-getting-lucky/</id>
     <published>2022-03-27T15:01:03.000Z</published>
     <updated>2023-08-08T11:19:27.080Z</updated>
     
@@ -112,8 +112,8 @@
   
   <entry>
     <title>认知觉醒,开启自我改变的原动力</title>
-    <link href="JasonGaoH.github.io/2022/03/25/%E8%AE%A4%E7%9F%A5%E8%A7%89%E9%86%92%EF%BC%8C%E5%BC%80%E5%90%AF%E8%87%AA%E6%88%91%E6%94%B9%E5%8F%98%E7%9A%84%E5%8E%9F%E5%8A%A8%E5%8A%9B/"/>
-    <id>JasonGaoH.github.io/2022/03/25/%E8%AE%A4%E7%9F%A5%E8%A7%89%E9%86%92%EF%BC%8C%E5%BC%80%E5%90%AF%E8%87%AA%E6%88%91%E6%94%B9%E5%8F%98%E7%9A%84%E5%8E%9F%E5%8A%A8%E5%8A%9B/</id>
+    <link href="JasonGaoH.github.io/2022/03/25/how-to-improve-yourself/"/>
+    <id>JasonGaoH.github.io/2022/03/25/how-to-improve-yourself/</id>
     <published>2022-03-25T14:19:08.000Z</published>
     <updated>2023-09-04T09:52:24.986Z</updated>
     
@@ -129,8 +129,8 @@
   
   <entry>
     <title>RoamResearch,一款帮助我们更好思考的笔记工具</title>
-    <link href="JasonGaoH.github.io/2022/03/19/RoamResearch-%E4%B8%80%E6%AC%BE%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E6%9B%B4%E5%A5%BD%E6%80%9D%E8%80%83%E7%9A%84%E7%AC%94%E8%AE%B0%E5%B7%A5%E5%85%B7/"/>
-    <id>JasonGaoH.github.io/2022/03/19/RoamResearch-%E4%B8%80%E6%AC%BE%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E6%9B%B4%E5%A5%BD%E6%80%9D%E8%80%83%E7%9A%84%E7%AC%94%E8%AE%B0%E5%B7%A5%E5%85%B7/</id>
+    <link href="JasonGaoH.github.io/2022/03/19/RoamResearch-a-tool-which-can-help-us-think-better/"/>
+    <id>JasonGaoH.github.io/2022/03/19/RoamResearch-a-tool-which-can-help-us-think-better/</id>
     <published>2022-03-19T09:22:10.000Z</published>
     <updated>2023-09-04T11:15:10.447Z</updated>
     
@@ -148,8 +148,8 @@
   
   <entry>
     <title>你可能需要这份大厂面经</title>
-    <link href="JasonGaoH.github.io/2020/08/29/%E6%88%91%E7%9A%842020%E5%B9%B4Android%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/"/>
-    <id>JasonGaoH.github.io/2020/08/29/%E6%88%91%E7%9A%842020%E5%B9%B4Android%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/</id>
+    <link href="JasonGaoH.github.io/2020/08/29/My-interview-in-2020/"/>
+    <id>JasonGaoH.github.io/2020/08/29/My-interview-in-2020/</id>
     <published>2020-08-29T09:03:11.000Z</published>
     <updated>2023-08-08T11:19:27.081Z</updated>
     
@@ -166,8 +166,8 @@
   
   <entry>
     <title>快到年底的年中总结</title>
-    <link href="JasonGaoH.github.io/2020/08/06/%E5%BF%AB%E5%88%B0%E5%B9%B4%E5%BA%95%E7%9A%84%E5%B9%B4%E4%B8%AD%E6%80%BB%E7%BB%93/"/>
-    <id>JasonGaoH.github.io/2020/08/06/%E5%BF%AB%E5%88%B0%E5%B9%B4%E5%BA%95%E7%9A%84%E5%B9%B4%E4%B8%AD%E6%80%BB%E7%BB%93/</id>
+    <link href="JasonGaoH.github.io/2020/08/06/Mid-year-review/"/>
+    <id>JasonGaoH.github.io/2020/08/06/Mid-year-review/</id>
     <published>2020-08-06T08:21:56.000Z</published>
     <updated>2023-08-08T11:19:27.081Z</updated>
     
@@ -184,8 +184,8 @@
   
   <entry>
     <title>Feed流上的优化实践.md</title>
-    <link href="JasonGaoH.github.io/2020/08/06/Feed%E6%B5%81%E4%B8%8A%E7%9A%84%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/"/>
-    <id>JasonGaoH.github.io/2020/08/06/Feed%E6%B5%81%E4%B8%8A%E7%9A%84%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5/</id>
+    <link href="JasonGaoH.github.io/2020/08/06/Optimization-Practices-on-Feeds/"/>
+    <id>JasonGaoH.github.io/2020/08/06/Optimization-Practices-on-Feeds/</id>
     <published>2020-08-06T05:16:21.000Z</published>
     <updated>2023-08-08T11:19:27.079Z</updated>
     
@@ -203,8 +203,8 @@
   
   <entry>
     <title>深入解析volatile关键字</title>
-    <link href="JasonGaoH.github.io/2020/05/21/%E6%B7%B1%E5%85%A5%E8%A7%A3%E6%9E%90volatile%E5%85%B3%E9%94%AE%E5%AD%97/"/>
-    <id>JasonGaoH.github.io/2020/05/21/%E6%B7%B1%E5%85%A5%E8%A7%A3%E6%9E%90volatile%E5%85%B3%E9%94%AE%E5%AD%97/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/how-volatile-works/"/>
+    <id>JasonGaoH.github.io/2020/05/21/how-volatile-works/</id>
     <published>2020-05-21T01:17:31.000Z</published>
     <updated>2023-08-08T11:19:27.081Z</updated>
     
@@ -227,8 +227,8 @@
   
   <entry>
     <title>synchronized关键字的原理</title>
-    <link href="JasonGaoH.github.io/2020/05/21/synchronized%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E5%8E%9F%E7%90%86/"/>
-    <id>JasonGaoH.github.io/2020/05/21/synchronized%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E5%8E%9F%E7%90%86/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/The-principle-of-the%20-synchronized-keyword/"/>
+    <id>JasonGaoH.github.io/2020/05/21/The-principle-of-the%20-synchronized-keyword/</id>
     <published>2020-05-21T01:15:50.000Z</published>
     <updated>2023-08-08T11:19:27.079Z</updated>
     
@@ -252,8 +252,8 @@
   
   <entry>
     <title>关于HashMap你需要知道的一些细节</title>
-    <link href="JasonGaoH.github.io/2020/05/21/%E5%85%B3%E4%BA%8EHashMap%E4%BD%A0%E9%9C%80%E8%A6%81%E7%9F%A5%E9%81%93%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82/"/>
-    <id>JasonGaoH.github.io/2020/05/21/%E5%85%B3%E4%BA%8EHashMap%E4%BD%A0%E9%9C%80%E8%A6%81%E7%9F%A5%E9%81%93%E7%9A%84%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/some-knowledge-about-hashmap/"/>
+    <id>JasonGaoH.github.io/2020/05/21/some-knowledge-about-hashmap/</id>
     <published>2020-05-21T01:14:14.000Z</published>
     <updated>2023-08-08T11:19:27.080Z</updated>
     
@@ -279,8 +279,8 @@
   
   <entry>
     <title>ConcurrentHashMap是如何保证线程安全的</title>
-    <link href="JasonGaoH.github.io/2020/05/21/ConcurrentHashMap%E6%98%AF%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84/"/>
-    <id>JasonGaoH.github.io/2020/05/21/ConcurrentHashMap%E6%98%AF%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/how-does-ConcurrentHashMap-work/"/>
+    <id>JasonGaoH.github.io/2020/05/21/how-does-ConcurrentHashMap-work/</id>
     <published>2020-05-21T01:11:55.000Z</published>
     <updated>2023-08-08T11:19:27.079Z</updated>
     
@@ -303,8 +303,8 @@
   
   <entry>
     <title>我画了近百张图来理解红黑树</title>
-    <link href="JasonGaoH.github.io/2020/05/21/%E6%88%91%E7%94%BB%E4%BA%86%E8%BF%91%E7%99%BE%E5%BC%A0%E5%9B%BE%E6%9D%A5%E7%90%86%E8%A7%A3%E7%BA%A2%E9%BB%91%E6%A0%91/"/>
-    <id>JasonGaoH.github.io/2020/05/21/%E6%88%91%E7%94%BB%E4%BA%86%E8%BF%91%E7%99%BE%E5%BC%A0%E5%9B%BE%E6%9D%A5%E7%90%86%E8%A7%A3%E7%BA%A2%E9%BB%91%E6%A0%91/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/understand-treemap-by-using-imags/"/>
+    <id>JasonGaoH.github.io/2020/05/21/understand-treemap-by-using-imags/</id>
     <published>2020-05-21T01:09:56.000Z</published>
     <updated>2023-08-08T11:19:27.081Z</updated>
     
@@ -328,8 +328,8 @@
   
   <entry>
     <title>仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</title>
-    <link href="JasonGaoH.github.io/2020/05/21/%E4%BB%BF%E4%BA%AC%E4%B8%9C%E3%80%81%E6%B7%98%E5%AE%9D%E9%A6%96%E9%A1%B5%EF%BC%8C%E9%80%9A%E8%BF%87%E4%B8%A4%E5%B1%82%E5%B5%8C%E5%A5%97%E7%9A%84RecyclerView%E5%AE%9E%E7%8E%B0tab%E7%9A%84%E5%90%B8%E9%A1%B6%E6%95%88%E6%9E%9C/"/>
-    <id>JasonGaoH.github.io/2020/05/21/%E4%BB%BF%E4%BA%AC%E4%B8%9C%E3%80%81%E6%B7%98%E5%AE%9D%E9%A6%96%E9%A1%B5%EF%BC%8C%E9%80%9A%E8%BF%87%E4%B8%A4%E5%B1%82%E5%B5%8C%E5%A5%97%E7%9A%84RecyclerView%E5%AE%9E%E7%8E%B0tab%E7%9A%84%E5%90%B8%E9%A1%B6%E6%95%88%E6%9E%9C/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/The-tab&#39;s-sticky-effect./"/>
+    <id>JasonGaoH.github.io/2020/05/21/The-tab&#39;s-sticky-effect./</id>
     <published>2020-05-21T01:08:26.000Z</published>
     <updated>2023-08-08T11:19:27.080Z</updated>
     
@@ -350,8 +350,8 @@
   
   <entry>
     <title>解决CoordinatorLayout的动画抖动以及回弹问题</title>
-    <link href="JasonGaoH.github.io/2020/05/21/%E8%A7%A3%E5%86%B3CoordinatorLayout%E7%9A%84%E5%8A%A8%E7%94%BB%E6%8A%96%E5%8A%A8%E4%BB%A5%E5%8F%8A%E5%9B%9E%E5%BC%B9%E9%97%AE%E9%A2%98/"/>
-    <id>JasonGaoH.github.io/2020/05/21/%E8%A7%A3%E5%86%B3CoordinatorLayout%E7%9A%84%E5%8A%A8%E7%94%BB%E6%8A%96%E5%8A%A8%E4%BB%A5%E5%8F%8A%E5%9B%9E%E5%BC%B9%E9%97%AE%E9%A2%98/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/adressing-CoordinatorLayout&#39;s-animation-jitter-and-rebound-issues/"/>
+    <id>JasonGaoH.github.io/2020/05/21/adressing-CoordinatorLayout&#39;s-animation-jitter-and-rebound-issues/</id>
     <published>2020-05-21T01:07:01.000Z</published>
     <updated>2023-08-08T11:19:27.082Z</updated>
     
@@ -370,8 +370,8 @@
   
   <entry>
     <title>从源码角度剖析Handler机制</title>
-    <link href="JasonGaoH.github.io/2020/05/21/%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%92%E5%BA%A6%E5%89%96%E6%9E%90Handler%E6%9C%BA%E5%88%B6/"/>
-    <id>JasonGaoH.github.io/2020/05/21/%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%92%E5%BA%A6%E5%89%96%E6%9E%90Handler%E6%9C%BA%E5%88%B6/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/how-handler-works/"/>
+    <id>JasonGaoH.github.io/2020/05/21/how-handler-works/</id>
     <published>2020-05-21T01:05:10.000Z</published>
     <updated>2023-08-08T11:19:27.080Z</updated>
     
@@ -392,8 +392,8 @@
   
   <entry>
     <title>android启动流程分析</title>
-    <link href="JasonGaoH.github.io/2020/05/21/android%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/"/>
-    <id>JasonGaoH.github.io/2020/05/21/android%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/</id>
+    <link href="JasonGaoH.github.io/2020/05/21/The-analysis-of-the-Android-startup-process/"/>
+    <id>JasonGaoH.github.io/2020/05/21/The-analysis-of-the-Android-startup-process/</id>
     <published>2020-05-21T01:02:10.000Z</published>
     <updated>2023-08-08T11:19:27.079Z</updated>
     
@@ -414,8 +414,8 @@
   
   <entry>
     <title>深入分析AsyncTask</title>
-    <link href="JasonGaoH.github.io/2019/03/23/%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90AsyncTask/"/>
-    <id>JasonGaoH.github.io/2019/03/23/%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90AsyncTask/</id>
+    <link href="JasonGaoH.github.io/2019/03/23/analys-of-AsyncTask/"/>
+    <id>JasonGaoH.github.io/2019/03/23/analys-of-AsyncTask/</id>
     <published>2019-03-22T17:12:16.000Z</published>
     <updated>2023-08-08T11:19:27.081Z</updated>
     

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      synchronized关键字的原理 | JasonGao Thoughts
+    
+  </title>
+ 
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+  
+
+  
+  
+    <script src="js/local-search.js" async></script>
+  
+<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>JasonGao Thoughts</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/links/" class="item-link">Links</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+      
+      <li class="menu-item menu-item-rss right-list">
+    <a href="/atom.xml">
+      <i class="fa fa-rss fa-fw"></i>
+    </a>
+  </li>
+      
+        <li class="menu-item menu-item-search right-list">
+    <a role="button" class="popup-trigger">
+        <i class="fa fa-search fa-fw"></i>
+    </a>
+</li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/links/" class="menu-link">Links</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+    
+      <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+            <span class="search-icon">
+                <i class="fa fa-search"></i>
+            </span>
+            <div class="search-input-container">
+                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa fa-times-circle"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>synchronized关键字的原理</h2>
+  <p class="post-date">2020-05-21</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><blockquote>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483807&amp;idx=1&amp;sn=3bdf01201a329fe98a98c045f5387e1b&amp;chksm=fa237977cd54f061e46fee3727e51208c01931ef704a83526d0fe5e5a15eab386376927888ae&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">synchronized关键字的原理</a></p>
+</blockquote>
+<h3 id="什么是synchronized"><a href="#什么是synchronized" class="headerlink" title="什么是synchronized"></a>什么是synchronized</h3><p>JDK官网对synchronized关键字有个比较权威的解释。</p>
+<p>Synchronized keyword enable a simple strategy for preventing thread interference and memory consistency errors: if an object is visible to more than one thread, all reads or writes to that object’s variables ard done through synchronized methods.</p>
+ <a id="more"></a>
+<p>上述解释的意思是：synchronized关键字可以实现一个简单的策略来防止线程干扰和内存一致性错误，如果一个对象对多个线程是可见的，那么对该对象的所有读或者写都将通过同步的方式来进行，具体表现如下：</p>
+<ul>
+<li>synchronized关键字提供了一种锁的机制，能够确保共享变量的互斥访问，从而防止数据不一致的问题出现。</li>
+<li>synchronized关键字包括monitor enter和monitor exit两个JVM指令，它能够保证在任何时候任何线程执行到monitor enter成功之前都必须从主内存中获取数据，而不是缓存中，在monitor exit运行成功之后，共享变量被更新后的值必须刷入主内存。</li>
+<li>synchronized的执行严格遵守java happens-before 规则，一个monitor exit指令之前必定要有一个monitor enter。</li>
+</ul>
+<h3 id="synchronized关键字的用法"><a href="#synchronized关键字的用法" class="headerlink" title="synchronized关键字的用法"></a>synchronized关键字的用法</h3><p>synchronized可以用于对代码块或方法进行修饰，而不能够用于对class以及变量进行修饰。</p>
+<ul>
+<li>同步方法</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public synchronized void sync() &#123;</span><br><span class="line">    //...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>同步方法块</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">private final Object lock = new Object();</span><br><span class="line">public void sync() &#123;</span><br><span class="line">    synchronized(lock) &#123;</span><br><span class="line">        //...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于同步代码块和同步方法的区别之前写过一个关于这个对比，具体可以看这篇文章。<br><a href="https://blog.csdn.net/h_gao/article/details/52266950" target="_blank" rel="noopener">java中的synchronized（同步代码块和同步方法的区别）</a></p>
+<h3 id="深入分析Synchronized关键字"><a href="#深入分析Synchronized关键字" class="headerlink" title="深入分析Synchronized关键字"></a>深入分析Synchronized关键字</h3><h4 id="线程堆栈分析"><a href="#线程堆栈分析" class="headerlink" title="线程堆栈分析"></a>线程堆栈分析</h4><p>synchronized关键字提供了一种互斥机制，也就是说在同一时刻，只能有一个线程访问同步资源。</p>
+<p>看下面这段程序：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">import java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line">public class TestSync &#123;</span><br><span class="line">	</span><br><span class="line">	private final static Object lock = new Object();</span><br><span class="line">	</span><br><span class="line">	public void accessResource() &#123;</span><br><span class="line">		synchronized(lock) &#123;</span><br><span class="line">			try &#123;</span><br><span class="line">				TimeUnit.MINUTES.sleep(10);</span><br><span class="line">			&#125; catch (InterruptedException e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		final TestSync sync = new TestSync();</span><br><span class="line">		for(int i =0;i&lt;5;i++) &#123;</span><br><span class="line">			new Thread()&#123;</span><br><span class="line">				@Override</span><br><span class="line">				public void run() &#123;</span><br><span class="line">					sync.accessResource();</span><br><span class="line">				&#125;	</span><br><span class="line">			&#125;.start();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的代码定义一个方法accessResource，并且使用synchronized来对代码进行同步，同时定义了5个线程调用accessResource方法，由于synchronized的互斥性，只能有一个线程获得lock的monitor锁，其他线程只能进入阻塞状态，等待获取lock的monitor锁。</p>
+<p>针对这个monitor锁我们如何从线程堆栈信息来看呢？</p>
+<p>其实，jstack命令在Java中可以用来打印进程的线程堆栈信息。</p>
+<p>我们来运行这个Java程序，在终端通过top命令查看运行起来的Java程序的进程id，然后执行jstack ‘pid’。</p>
+<p>我们来看下打印出来的信息：<br><img src="../img/jstack_print_info.png" alt></p>
+<p>通过截图可以看到Thread-0持有monitor<0x00000007955f2130>的锁并且处于休眠状态中，而其他几个线程则是处于BLOCKED状态中，它们是在等待着获取monitor<0x00000007955f2130>的锁。</0x00000007955f2130></0x00000007955f2130></p>
+<h4 id="JVM指令分析"><a href="#JVM指令分析" class="headerlink" title="JVM指令分析"></a>JVM指令分析</h4><p>从JVM指令角度再来分析synchronized关键字。</p>
+<p>我们可以使用javap这个命令来对上面这个TestSync类生成的class字节码进行反编译，得到下面的JVM指令。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">Compiled from &quot;TestSync.java&quot;</span><br><span class="line">public class main.TestSync &#123;</span><br><span class="line">  static &#123;&#125;;</span><br><span class="line">    Code:</span><br><span class="line">       0: new           #3                  // class java/lang/Object</span><br><span class="line">       3: dup</span><br><span class="line">       4: invokespecial #10                 // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       7: putstatic     #13                 // Field lock:Ljava/lang/Object;</span><br><span class="line">      10: return</span><br><span class="line"></span><br><span class="line">  public main.TestSync();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #10                 // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public void accessResource();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #13                 // Field lock:Ljava/lang/Object;</span><br><span class="line">       3: dup</span><br><span class="line">       4: astore_1</span><br><span class="line">       5: monitorenter</span><br><span class="line">       6: getstatic     #20                 // Field java/util/concurrent/TimeUnit.MINUTES:Ljava/util/concurrent/TimeUnit;</span><br><span class="line">       9: ldc2_w        #26                 // long 10l</span><br><span class="line">      12: invokevirtual #28                 // Method java/util/concurrent/TimeUnit.sleep:(J)V</span><br><span class="line">      15: goto          23</span><br><span class="line">      18: astore_2</span><br><span class="line">      19: aload_2</span><br><span class="line">      20: invokevirtual #32                 // Method java/lang/InterruptedException.printStackTrace:()V</span><br><span class="line">      23: aload_1</span><br><span class="line">      24: monitorexit</span><br><span class="line">      25: goto          31</span><br><span class="line">      28: aload_1</span><br><span class="line">      29: monitorexit</span><br><span class="line">      30: athrow</span><br><span class="line">      31: return</span><br><span class="line">    Exception table:</span><br><span class="line">       from    to  target type</span><br><span class="line">           6    15    18   Class java/lang/InterruptedException</span><br><span class="line">           6    25    28   any</span><br><span class="line">          28    30    28   any</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: new           #1                  // class main/TestSync</span><br><span class="line">       3: dup</span><br><span class="line">       4: invokespecial #44                 // Method &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       7: astore_1</span><br><span class="line">       8: iconst_0</span><br><span class="line">       9: istore_2</span><br><span class="line">      10: goto          27</span><br><span class="line">      13: new           #45                 // class main/TestSync$1</span><br><span class="line">      16: dup</span><br><span class="line">      17: aload_1</span><br><span class="line">      18: invokespecial #47                 // Method main/TestSync$1.&quot;&lt;init&gt;&quot;:(Lmain/TestSync;)V</span><br><span class="line">      21: invokevirtual #50                 // Method main/TestSync$1.start:()V</span><br><span class="line">      24: iinc          2, 1</span><br><span class="line">      27: iload_2</span><br><span class="line">      28: iconst_5</span><br><span class="line">      29: if_icmplt     13</span><br><span class="line">      32: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上面的指令中可以看到，在accessResource()方法中，先后出现了一个monitor enter和两个monitor exit。</p>
+<p>我们主要选取accessResource()这部分代码块来重点分析。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public void accessResource();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #13                 //①获取lock</span><br><span class="line">       3: dup</span><br><span class="line">       4: astore_1</span><br><span class="line">       5: monitorenter                      //②执行monitorenter JVM指令</span><br><span class="line">       6: getstatic     #20                 // Field java/util/concurrent/TimeUnit.MINUTES:Ljava/util/concurrent/TimeUnit;</span><br><span class="line">       9: ldc2_w        #26                 // long 10l</span><br><span class="line">      12: invokevirtual #28                 // Method java/util/concurrent/TimeUnit.sleep:(J)V</span><br><span class="line">      15: goto          23                  //③跳转到23行</span><br><span class="line">      18: astore_2</span><br><span class="line">      19: aload_2</span><br><span class="line">      20: invokevirtual #32                 // Method java/lang/InterruptedException.printStackTrace:()V</span><br><span class="line">      23: aload_1                           //④</span><br><span class="line">      24: monitorexit                       //⑤ 执行monitor exit JVM指令</span><br><span class="line">      25: goto          31</span><br><span class="line">      28: aload_1</span><br><span class="line">      29: monitorexit</span><br><span class="line">      30: athrow</span><br><span class="line">      31: return</span><br></pre></td></tr></table></figure></p>
+<p>首先①获取到lock引用，然后执行②monitorenter JVM指令，休眠结束后goto至③monitorexit的位置<br>（astore_n表示存储引用到本地变量表；aload_n表示从本地变量表加载应用；getstatic表示从class中获取静态属性）</p>
+<p>monitorenter</p>
+<blockquote>
+<p>每一个对象都与一个monitor相关联，一个monitor的lock的锁只能被一个线程在同一时间获得，在一个线程尝试获得与对象关联的monitor的所有权时会发生如下的几件事情。</p>
+</blockquote>
+<ul>
+<li>如果monitor的计数器为0，则意味着该monitor的lock还没有被获得，，某个线程获得之后将立即对该计数器加一，从此该线程就是这个monitor的所有者了。</li>
+<li>如果一个已经拥有该线程所有权的线程重入，则会导致monitor的计数器再次累加。</li>
+<li>如果monitor已经被其他线程所拥有，则其他线程尝试获取该monitor所有权时，会被陷入阻塞状态直到monitor变为0，才能再次尝试获取对monitor的所有权。</li>
+</ul>
+<p>monitorexit</p>
+<p>释放对monitor的所有权，想要释放某个对象关联的monitor所有权的前提是，你曾经拥有了所有权。释放monitor所有权的过程比较简单，就是将monitor的计数器减一，如果计数器的结果为0，则意味着该线程不在拥有对该monitor的所有权，通俗地讲就是解锁。</p>
+<h4 id="synchronized的锁优化"><a href="#synchronized的锁优化" class="headerlink" title="synchronized的锁优化"></a>synchronized的锁优化</h4><p>在虚拟机规范对monitorenter和monitorexit的行为描述中，有两点是需要特别注意的，首先，synchronized同步块对于同一条线程是可重入的，不会出现自己锁死自己的问题。其次，同步块在已进入的线程执行完以前，会阻塞后面其他线程的进入。</p>
+<p>Java的线程是映射到操作系统线程上的，要阻塞或唤醒一个线程，都需要操作系统来帮忙完成，这就需要从用户态切到核心态，因此状态转换需要耗费很多的处理器时间，对于简单的同步块（如被synchronized修饰的getter或setter方法），状态转换消耗的时间有可能比用户代码执行的时间还要长。所以synchronized是Java语言中的一个重量级的操作。</p>
+<p>其实大多数时候，共享数据的锁定状态一般只会持续很短的一段时间，为了这段时间去挂起和恢复线程其实并不值得。</p>
+<p>如果物理机上有多个处理器，可以让多个线程同时执行的话。我们就可以让后面来的线程“稍微等一下”，但是并不放弃处理器的执行时间，看看持有锁的线程会不会很快释放锁。这个“稍微等一下”的过程就是自旋。</p>
+<p>自旋锁在JDK 1.4中已经引入，在JDK 1.6中默认开启。只是将当前线程不停地执行循环体，不进行线程状态的改变，所以响应速度更快，因为上面刚说到，线程的状态切换会耗费很多CPU时间。但当线程数不停增加时，性能下降明显，因为每个线程都需要执行，占用CPU时间。如果线程竞争不激烈，并且保持锁的时间段，适合使用自旋锁。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#synchronized">
+    <span class="tag-code">synchronized</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2020/05/21/some-knowledge-about-hashmap/">
+        <span class="nav-arrow">← </span>
+        
+          关于HashMap你需要知道的一些细节
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2020/05/21/how-volatile-works/">
+        
+          深入解析volatile关键字
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode"></div>
+      <p class="notice">公众号同步更新，欢迎关注😄</p>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js" repo="JasonGaoH/RepoForUtterances" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <!-- Utterances END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+
+</main>
+
+<script>
+  (function () {
+    var url = 'JasonGaoH.github.io/2020/05/21/The-principle-of-the -synchronized-keyword/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', '/css/images/error_icon.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== '/css/images/error_icon.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    
+    
+
+    <br>
+    本站累计访问量<span id="busuanzi_value_site_pv"></span>,
+    本站累计访客数<span id="busuanzi_value_site_uv"></span>
+  </p>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      hljs.configure({useBR: true});
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

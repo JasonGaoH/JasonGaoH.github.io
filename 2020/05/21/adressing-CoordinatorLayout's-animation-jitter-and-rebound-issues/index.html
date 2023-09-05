@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      解决CoordinatorLayout的动画抖动以及回弹问题 | JasonGao Thoughts
+    
+  </title>
+ 
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+  
+
+  
+  
+    <script src="js/local-search.js" async></script>
+  
+<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>JasonGao Thoughts</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/links/" class="item-link">Links</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+      
+      <li class="menu-item menu-item-rss right-list">
+    <a href="/atom.xml">
+      <i class="fa fa-rss fa-fw"></i>
+    </a>
+  </li>
+      
+        <li class="menu-item menu-item-search right-list">
+    <a role="button" class="popup-trigger">
+        <i class="fa fa-search fa-fw"></i>
+    </a>
+</li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/links/" class="menu-link">Links</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+    
+      <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+            <span class="search-icon">
+                <i class="fa fa-search"></i>
+            </span>
+            <div class="search-input-container">
+                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa fa-times-circle"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>解决CoordinatorLayout的动画抖动以及回弹问题</h2>
+  <p class="post-date">2020-05-21</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><p>在使用CoordinatorLayout来实现Android中的一种吸顶的时候，遇到了两个CoordinatorLayout的滑动问题，这里做下记录。</p>
+<p>这里使用CoordinatorLayout实现的是一个tab吸顶的效果，类似淘宝，京东首页的一个效果。<br>头部区域展示各种类型banner卡片，中间是类似TabLayout的可点击tab，下面是feed卡片，可以一直下拉加载，并且feed卡片区域使用ViewPager可以支持左右横滑切换tab，另外，就是tab滚动到顶部之后会有个吸顶的效果。</p>
+ <a id="more"></a>
+<p>我们在项目中也要实现的效果，一开始我的想法是使用嵌套RecycleView的形式来实现，因为我去调研了下京东和淘宝的首页布局都是这么实现的，京东和淘宝首页实现方式和下面的图类似，外部的整个RecycleView嵌套ViewPager，ViewPager中再有多个RecycleView，这个实现起来稍微有点麻烦，难点是要处理好外部的RecycleView和ViewPager中内部RecycleView的滑动事件传递，这里我们只是简单介绍下，后面我会专门来介绍类似这样的嵌套RecycleView如何实现。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested_recycler_view.png" alt="image"></p>
+<p>接下来是如何采用其他方便的方式来实现类似需求？我想到了CoordinatorLayout，CoordinatorLayout在处理吸顶是有一套已经成熟的方案的。</p>
+<p>网上关于CoordinatorLayout的使用有很多不错的文章，这里就不介绍如何使用，关于CoordinatorLayout和Behavior我推荐看看这篇文章<a href="https://blog.csdn.net/briblue/article/details/73076458" target="_blank" rel="noopener">针对 CoordinatorLayout 及 Behavior 的一次细节较真</a></p>
+<p>而我们这篇文章主要是讲使用CoordinatorLayout中遇到的问题，问题如何解决以及CoordinatorLayout为什么会有这样的问题。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout.png" alt="image"></p>
+<p>实现这个大概是像上面这样类似的布局结构，来看下布局文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</span><br><span class="line">    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;</span><br><span class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</span><br><span class="line">    android:layout_width=&quot;match_parent&quot;</span><br><span class="line">    android:layout_height=&quot;match_parent&quot;</span><br><span class="line">    tools:context=&quot;.MainActivity&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;android.support.design.widget.AppBarLayout</span><br><span class="line">        app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">        android:layout_width=&quot;match_parent&quot;</span><br><span class="line">        android:layout_height=&quot;wrap_content&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;android.support.design.widget.CollapsingToolbarLayout</span><br><span class="line">            app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">            app:scrimVisibleHeightTrigger=&quot;45dp&quot;</span><br><span class="line">            android:layout_width=&quot;match_parent&quot;</span><br><span class="line">            android:layout_height=&quot;wrap_content&quot;&gt;</span><br><span class="line"></span><br><span class="line">            &lt;ImageView</span><br><span class="line">                android:background=&quot;@drawable/header&quot;</span><br><span class="line">                app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">                android:layout_width=&quot;match_parent&quot;</span><br><span class="line">                android:layout_height=&quot;450dp&quot; /&gt;</span><br><span class="line"></span><br><span class="line">        &lt;/android.support.design.widget.CollapsingToolbarLayout&gt;</span><br><span class="line"></span><br><span class="line">        &lt;android.support.design.widget.TabLayout</span><br><span class="line">            android:id=&quot;@+id/tabs&quot;</span><br><span class="line">            app:layout_collapseMode=&quot;pin&quot;</span><br><span class="line">            app:tabMode=&quot;scrollable&quot;</span><br><span class="line">            android:layout_width=&quot;match_parent&quot;</span><br><span class="line">            android:layout_height=&quot;wrap_content&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/android.support.design.widget.AppBarLayout&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &lt;android.support.v4.view.ViewPager</span><br><span class="line">        android:id=&quot;@+id/view_pager&quot;</span><br><span class="line">        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</span><br><span class="line">        android:layout_width=&quot;match_parent&quot;</span><br><span class="line">        android:layout_height=&quot;match_parent&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;/android.support.design.widget.CoordinatorLayout&gt;</span><br></pre></td></tr></table></figure>
+<p>这样的布局，接着填充数据基本上就能实现tab吸顶效果，feed卡片区采用RecycleView实现，可以一直下拉，并且能够支持左右横滑，基本实现了类似京东，淘宝首页的一个效果。</p>
+<p>但是在使用这种方式来实现发现两个很明显的问题。</p>
+<h4 id="第一，抖动问题"><a href="#第一，抖动问题" class="headerlink" title="第一，抖动问题"></a>第一，抖动问题</h4><p>该问题场景描述：我们触摸AppBarLayout使AppBarLayout整体向上滑动，，即手指上滑，当AppBarLayout fling的同时，我们触摸下部ViewPager中的RecycleView区域，使RecycleView区域整体向下滑动，即手指下滑，这个时候会发现一个明显页面动画现象，这个问题几乎是必现。</p>
+<p>来看下gif效果：<img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_resize_1.gif" alt="image"></p>
+<p>接下来我们来看问题的原因，其实这个要搞清楚原因需要对CoordinatorLayout的工作机制有个比较清晰的理解，然而CoordinatorLayout这里牵扯到嵌套滚动以及Behavior这些，</p>
+<p>我们这里尝试简单地介绍下CoordinatorLayout的工作机制。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinatorLayout_analysis.png" alt="image"></p>
+<ul>
+<li>CoordinatorLayout实现NestedScrollingParent2接口，用于处理与滑动子View的联动交互，实际上交由Behavior进行处理。</li>
+<li>AppBarLayout中默认使用了AppBarLayout.Behavior，主要功能是接收CoordinatorLayout传输过来的滑动事件，并且相对应的进行处理，如RecycleView往上滑动到头时候，继续滑动移动AppBarLayout到头。</li>
+<li>RecycleView实现了NestedScrollingChild2接口，用于传输给CoordinatorLayout，并且消费CoordinatorLayout不消费的触摸事件，其中还是使用了AppBarLayout.ScrollingViewBehavior，功能是进行监听AppBarLayout的位移变化，从而进行相对应的变化，最明显的例子就是AppBarLayout上移过程中，RecycleView一起上移。</li>
+</ul>
+<h4 id="CoordinatorLayout中Behavior"><a href="#CoordinatorLayout中Behavior" class="headerlink" title="CoordinatorLayout中Behavior"></a>CoordinatorLayout中Behavior</h4><p>其实CoordinatorLayout就是通过Behavior这个机制来协调各个子View的滚动。比如我们来看CoordinatorLayout的onStartNestedScroll方法，这个其实是NestedScrollingParent2中的方法。</p>
+<p>当CoordinatorLayout子view的调用NestedScrollingChild2的方法startNestedScroll时,会调用到该方法<br>该方法决定了当前控件是否能接收到其内部View（并非是直接子View）滑动时的参数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">//CoordinatorLayout中的onStartNestedScroll方法：</span><br><span class="line"> @Override</span><br><span class="line">    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) &#123;</span><br><span class="line">        return onStartNestedScroll(child, target, nestedScrollAxes, ViewCompat.TYPE_TOUCH);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onStartNestedScroll(View child, View target, int axes, int type) &#123;</span><br><span class="line">        boolean handled = false;</span><br><span class="line"></span><br><span class="line">        final int childCount = getChildCount();</span><br><span class="line">        for (int i = 0; i &lt; childCount; i++) &#123;</span><br><span class="line">            final View view = getChildAt(i);</span><br><span class="line">            if (view.getVisibility() == View.GONE) &#123;</span><br><span class="line">                // If it&apos;s GONE, don&apos;t dispatch</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            final LayoutParams lp = (LayoutParams) view.getLayoutParams();</span><br><span class="line">            final Behavior viewBehavior = lp.getBehavior();</span><br><span class="line">            if (viewBehavior != null) &#123;</span><br><span class="line">                final boolean accepted = viewBehavior.onStartNestedScroll(this, view, child,</span><br><span class="line">                        target, axes, type);</span><br><span class="line">                handled |= accepted;</span><br><span class="line">                lp.setNestedScrollAccepted(type, accepted);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lp.setNestedScrollAccepted(type, false);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return handled;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>CoordinatorLayout中的onStartNestedScroll方法基本都会调用到每个子View的Behavior中相应的方法中去。</p>
+<p>关于Nested嵌套滚动机制可以看看下面这篇博客。</p>
+<p><a href="https://blog.csdn.net/aishang5wpj/article/details/78873343" target="_blank" rel="noopener">事件分发和NestedScrolling</a></p>
+<p>嵌套滚动机制NestedScrollingParent2和NestedScrollingChild2的各个回调方法调用流程如下图所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested.jpeg" alt="image"></p>
+<p>上图列出来手指从按下到抬起时的整个流程，当然这些都是在子View的onTouchEvent()中完成的，所以父View一定不能拦截子View的事件，否则这套机制就失效了。</p>
+<p>除此之外，箭头的左边分别都是NestedScrollingChild2中的各种方法，右边则是NestedScrollingParent2对应的方法。使用时，一般是子View通过dispatchXXX()来通知父View，然后父View通过onXXX()来进行回应。</p>
+<p>方法调用的先后时机也有区别，对应到上图中，图越往下，调用的时机越晚。</p>
+<h4 id="AppBarLayout中的Behavior"><a href="#AppBarLayout中的Behavior" class="headerlink" title="AppBarLayout中的Behavior"></a>AppBarLayout中的Behavior</h4><p>接着我们来看看AppBarLayout中的Behavior，ApprBarLayout的默认Behavior就是AppBarLayout.Behavior这个类，而AppBarLayout.Behavior继承自HeaderBehavior，HeaderBehavior又继承自ViewOffsetBehavior，这里先总结一下两个类的作用。</p>
+<ul>
+<li>ViewOffsetBehavior：该Behavior主要运用于View的移动，从名字就可以看出来，该类中提供了上下移动，左右移动的方法。</li>
+<li>HeaderBehavior：该类主要用于View处理触摸事件以及触摸后的fling事件。</li>
+</ul>
+<p>由于上面两个类功能的实现，使得AppBarLayout.Behavior具有了同时移动本身以及处理触摸事件的功能。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">public boolean onTouchEvent(CoordinatorLayout parent, V child, MotionEvent ev) &#123;</span><br><span class="line">       ...</span><br><span class="line">        switch (ev.getActionMasked()) &#123;</span><br><span class="line">            ...</span><br><span class="line">            case MotionEvent.ACTION_MOVE: &#123;</span><br><span class="line">                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);</span><br><span class="line">                if (activePointerIndex == -1) &#123;</span><br><span class="line">                    return false;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                final int y = (int) ev.getY(activePointerIndex);</span><br><span class="line">                int dy = mLastMotionY - y;</span><br><span class="line"></span><br><span class="line">                if (!mIsBeingDragged &amp;&amp; Math.abs(dy) &gt; mTouchSlop) &#123;</span><br><span class="line">                    mIsBeingDragged = true;</span><br><span class="line">                    if (dy &gt; 0) &#123;</span><br><span class="line">                        dy -= mTouchSlop;</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        dy += mTouchSlop;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                if (mIsBeingDragged) &#123;</span><br><span class="line">                    mLastMotionY = y;</span><br><span class="line">                    // We&apos;re being dragged so scroll the ABL</span><br><span class="line">                    scroll(parent, child, dy, getMaxDragOffset(child), 0);</span><br><span class="line">                &#125;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            case MotionEvent.ACTION_UP:</span><br><span class="line">                if (mVelocityTracker != null) &#123;</span><br><span class="line">                    mVelocityTracker.addMovement(ev);</span><br><span class="line">                    mVelocityTracker.computeCurrentVelocity(1000);</span><br><span class="line">                    float yvel = mVelocityTracker.getYVelocity(mActivePointerId);</span><br><span class="line">                    fling(parent, child, -getScrollRangeForDragFling(child), 0, yvel);</span><br><span class="line">                &#125;</span><br><span class="line">         ...</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>我们来看onTouchEvent的方法，主要逻辑还是在ACTION_MOVE中，可以看到在滑动过程中调用了scroll(…)方法，scroll(…)方法在HeaderBehavior中进行实现，最终调用到了额setHeaderTopBottomOffset(…)方法，该方法在AppBarLayout.Behavior中进行了重写，所以，我们直接看AppBarLayout.Behavior中的源码即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">   //newOffeset传入了dy，也就是我们手指移动距离上一次移动的距离，</span><br><span class="line">   //minOffset等于AppBarLayout的负的height，maxOffset等于0。</span><br><span class="line">        int setHeaderTopBottomOffset(CoordinatorLayout coordinatorLayout,</span><br><span class="line">                AppBarLayout appBarLayout, int newOffset, int minOffset, int maxOffset) &#123;</span><br><span class="line">            final int curOffset = getTopBottomOffsetForScrollingSibling();//获取当前的滑动Offset</span><br><span class="line">            int consumed = 0;</span><br><span class="line">			//AppBarLayout滑动的距离如果超出了minOffset或者maxOffset，则直接返回0</span><br><span class="line">            if (minOffset != 0 &amp;&amp; curOffset &gt;= minOffset &amp;&amp; curOffset &lt;= maxOffset) &#123;</span><br><span class="line">               //矫正newOffset，使其minOffset&lt;=newOffset&lt;=maxOffset</span><br><span class="line">                newOffset = MathUtils.clamp(newOffset, minOffset, maxOffset);</span><br><span class="line">				//由于默认没设置Interpolator，所以interpolatedOffset=newOffset;</span><br><span class="line">                if (curOffset != newOffset) &#123;</span><br><span class="line">                    final int interpolatedOffset = appBarLayout.hasChildWithInterpolator()</span><br><span class="line">                            ? interpolateOffset(appBarLayout, newOffset)</span><br><span class="line">                            : newOffset;</span><br><span class="line">					//调用ViewOffsetBehvaior的方法setTopAndBottomOffset(...)，最终通过</span><br><span class="line">					//ViewCompat.offsetTopAndBottom()移动AppBarLayout</span><br><span class="line">                    final boolean offsetChanged = setTopAndBottomOffset(interpolatedOffset);</span><br><span class="line"></span><br><span class="line">                    //记录下消费了多少的dy。</span><br><span class="line">                    consumed = curOffset - newOffset;</span><br><span class="line">                   //没设置Interpolator的情况， mOffsetDelta永远=0</span><br><span class="line">                    mOffsetDelta = newOffset - interpolatedOffset;</span><br><span class="line">					....</span><br><span class="line">                     //分发回调OnOffsetChangedListener.onOffsetChanged(...)</span><br><span class="line">                    appBarLayout.dispatchOffsetUpdates(getTopAndBottomOffset());</span><br><span class="line"></span><br><span class="line">                  </span><br><span class="line">                    updateAppBarLayoutDrawableState(coordinatorLayout, appBarLayout, newOffset,</span><br><span class="line">                            newOffset &lt; curOffset ? -1 : 1, false);</span><br><span class="line">                &#125;</span><br><span class="line">           ...</span><br><span class="line">            return consumed;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>AppBarLayout中移动主要就是这部分逻辑了，通过setTopAndBottomOffset()来达到了移动我们的AppBarLayout，那么这里AppBarLayout就可以跟着手上下移动了。</p>
+<h4 id="RecycleView中的Behavior"><a href="#RecycleView中的Behavior" class="headerlink" title="RecycleView中的Behavior"></a>RecycleView中的Behavior</h4><p>那么接下来我们看看RecycleView在CoordinatorLayout中如何是移动的？</p>
+<p>上面讲了AppBarLayout是如何通过Behavior来移动的，我们在上面布局文件中指定了ViewPager的Behavior。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</span><br></pre></td></tr></table></figure>
+<p>这个”appbar_scrolling_view_behavior”其实就是ScrollingViewBehavior，ScrollingViewBehavior也继承自ViewOffsetBehavior，我们在上下移动AppBarLayout的时候，下面的RecycleView也是需要跟着移动的，它上下移动就是靠这个来ScrollingViewBehavior来实现的。</p>
+<p>在阅读ScrollingViewBehavior源码中发现其实现了如下方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) &#123;</span><br><span class="line">    // We depend on any AppBarLayouts</span><br><span class="line">    return dependency instanceof AppBarLayout;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public boolean onDependentViewChanged(CoordinatorLayout parent, View child,</span><br><span class="line">        View dependency) &#123;</span><br><span class="line">    offsetChildAsNeeded(parent, child, dependency);</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样我们这个RecycleView依赖于AppBarLayout，在AppBarLayout移动的过程中，RecycleView会随着AppBarLayout的移动回调onDependentViewChanged(…)方法，进而调用offsetChildAsNeeded(parent, child, dependency)。</p>
+<p>用这么多篇幅主要讲了CoordinatorLayout如何协调AppBarLayout和RecycleView来上下滚动的，接着回到刚开始我们要讨论那个动画抖动问题。</p>
+<p>其实造成这个的原因主要是AppBarLayout的fling操作和RecycleView联动造成的问题。</p>
+<p>在AppBarLayout的Behavior中的onTouchEvent()事件中处理了fling事件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public boolean onTouchEvent(CoordinatorLayout parent, V child, MotionEvent ev) &#123;</span><br><span class="line">    ...</span><br><span class="line">    case MotionEvent.ACTION_UP:</span><br><span class="line">        if (mVelocityTracker != null) &#123;</span><br><span class="line">            mVelocityTracker.addMovement(ev);</span><br><span class="line">            mVelocityTracker.computeCurrentVelocity(1000);</span><br><span class="line">            float yvel = mVelocityTracker.getYVelocity(mActivePointerId);</span><br><span class="line">            fling(parent, child, -getScrollRangeForDragFling(child), 0, yvel);</span><br><span class="line">        &#125;</span><br><span class="line">    ...</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在fling的方法中使用OverScroller来模拟进行fling操作，最终会调到setHeaderTopBottomOffset(…)来使AppBarLayout进行fling的滑动操作。</p>
+<p>在绝大部分滑动逻辑中，这样处理是正确的，但是如果在AppBarLayout在fling的时候主动滑动RecyclerView，那么就会造成动画抖动的问题了。</p>
+<p>在当前情况下，RecyclerView滑动到头了，那么就会把未消费的事件通过NestedScrollingChild2交付由CoordinatorLayout(实现了NestedScrollingParent2)处理，parent又最终交付由AppBarLayout.Behavior进行处理的，其中调用的方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void onNestedScroll(CoordinatorLayout coordinatorLayout, AppBarLayout child,</span><br><span class="line">        View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed,</span><br><span class="line">        int type) &#123;</span><br><span class="line">    if (dyUnconsumed &lt; 0) &#123;</span><br><span class="line">        // If the scrolling view is scrolling down but not consuming, it&apos;s probably be at</span><br><span class="line">        // the top of it&apos;s content</span><br><span class="line">        scroll(coordinatorLayout, child, dyUnconsumed,</span><br><span class="line">                -child.getDownNestedScrollRange(), 0);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里的scroll方法最终会调用setHeaderTopBottomOffset(…)，由于两次分别触摸在AppBarLayout和RecyclerView的方向不一致，导致了最终的抖动的效果。</p>
+<p>解决方式也很简单,只要在CoordinatorLayout的onInterceptedTouchEvent()中停止AppBarLayout的fling操作就可以了，直接操作的对象就是AppBarLayout中的Behavior，该Behavior继承自HeaderBehavior，而fling操作由OverScroller产生，所以自定义一个FixedBehavior：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">public class FixedBehavior extends AppBarLayout.Behavior &#123;</span><br><span class="line">    private OverScroller mOverScroller;</span><br><span class="line"></span><br><span class="line">    public FixedBehavior() &#123;</span><br><span class="line">        super();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public FixedBehavior(Context context, AttributeSet attrs) &#123;</span><br><span class="line">        super(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onAttachedToLayoutParams(@NonNull CoordinatorLayout.LayoutParams params) &#123;</span><br><span class="line">        super.onAttachedToLayoutParams(params);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onDetachedFromLayoutParams() &#123;</span><br><span class="line">        super.onDetachedFromLayoutParams();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onTouchEvent(CoordinatorLayout parent, AppBarLayout child, MotionEvent ev) &#123;</span><br><span class="line">        if (ev.getAction() == MotionEvent.ACTION_UP) &#123;</span><br><span class="line">            reflectOverScroller();</span><br><span class="line">        &#125;</span><br><span class="line">        return super.onTouchEvent(parent, child, ev);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     *</span><br><span class="line">     */</span><br><span class="line">    public void stopFling() &#123;</span><br><span class="line">        if (mOverScroller != null) &#123;</span><br><span class="line">            mOverScroller.abortAnimation();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 解决AppbarLayout在fling的时候，再主动滑动RecyclerView导致的动画错误的问题</span><br><span class="line">     */</span><br><span class="line">    private void reflectOverScroller() &#123;</span><br><span class="line">        if (mOverScroller == null) &#123;</span><br><span class="line">            Field field = null;</span><br><span class="line">            try &#123;</span><br><span class="line">                field = getClass().getSuperclass()</span><br><span class="line">                        .getSuperclass().getDeclaredField(&quot;mScroller&quot;);</span><br><span class="line">                field.setAccessible(true);</span><br><span class="line">                Object object = field.get(this);</span><br><span class="line">                mOverScroller = (OverScroller) object;</span><br><span class="line">            &#125; catch (NoSuchFieldException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; catch (IllegalAccessException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后在重写CoordinatorLayout，暴露一个接口：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">public class CustomCoordinatorLayout extends CoordinatorLayout &#123;</span><br><span class="line">    private OnInterceptTouchListener mListener;</span><br><span class="line"></span><br><span class="line">    public void setOnInterceptTouchListener(OnInterceptTouchListener listener) &#123;</span><br><span class="line">        mListener = listener;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context) &#123;</span><br><span class="line">        super(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context, AttributeSet attrs) &#123;</span><br><span class="line">        super(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context, AttributeSet attrs, int defStyleAttr) &#123;</span><br><span class="line">        super(context, attrs, defStyleAttr);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onInterceptTouchEvent(MotionEvent ev) &#123;</span><br><span class="line">        if (mListener != null) &#123;</span><br><span class="line">            mListener.onIntercept();</span><br><span class="line">        &#125;</span><br><span class="line">        return super.onInterceptTouchEvent(ev);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public interface OnInterceptTouchListener &#123;</span><br><span class="line">        void onIntercept();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接着在接口中处理滑动问题即可：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">coordinatorLayout.setOnInterceptTouchListener &#123;</span><br><span class="line">    //RecyclerView滑动的时候禁止AppBarLayout的滑动</span><br><span class="line">    if (customBehavior != null) &#123;</span><br><span class="line">        customBehavior!!.stopFling()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="第二，回弹问题"><a href="#第二，回弹问题" class="headerlink" title="第二，回弹问题"></a>第二，回弹问题</h4><p>问题场景描述，我们反复上下滑动AppBarLayout的时候，可以看到AppBarLayout在滑出屏幕外之后又反弹回去了，而且当你滑动的加速度很大的时候，这个反弹的幅度也会跟着变大。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_resize_2.gif" alt="image"></p>
+<p>这个问题造成的原因是因为在手指向上滑动后造成RecyclerView的fling操作执行，具体的代码在RecyclerView内部类ViewFlinger中。</p>
+<p>我使用Android Studio中的Profiler抓取了一下当出现反弹问题的时候出现的方法调用堆栈如下所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_bugs_method_call.jpg" alt="image"></p>
+<p>发现RecyclerView中ViewFlinger调用后，接着触发了HeaderBehavior中的FlingRunnable。而ViewFling中会调用dispatchNestedScroll(…)方法，RecyclerView作为CoordinatorLayout的子View，它通过嵌套滚动的机制又会调用到CoordinatorLayout中的onNestedScroll，这里主要就是通过AppBarLayout的Behavior中的方法setHeaderTopBottomOffset来实现AppBarLayout的滚动，后面会发现多次setHeaderTopBottomOffset的调用，其实目前看到这里，并不太确定造成这个问题的具体原因是啥，感觉上是因为RecyclerView的滑动和CoordinatorLayout的滑动冲突导致了反弹效果的出现。</p>
+<p>于是尝试了下面的解决方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">coordinatorLayout.setOnInterceptTouchListener &#123;</span><br><span class="line">    mRecyclerView.stopScroll()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>试了这个方法发现果然有效。</p>
+<p>另外，我在写demo的时候发现，这个问题在support-27是存在的，在support-28 Google已经修复过了。</p>
+<p>我尝试过看看support-28里面的都有哪些改动，想看看Google是如何修复的。看了下Google的release note并没有提及，如果从Google的commit history来看实在页看不出来啥，暂时也没有个具体的原因。</p>
+<p>后面可以将support-27和support-28的source下载下来，然后使用Beyond Compare来看看具体的diff改动是在哪。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#UI">
+    <span class="tag-code">UI</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2020/05/21/how-handler-works/">
+        <span class="nav-arrow">← </span>
+        
+          从源码角度剖析Handler机制
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2020/05/21/The-tab's-sticky-effect./">
+        
+          仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode"></div>
+      <p class="notice">公众号同步更新，欢迎关注😄</p>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Utterances START -->
+      <div id="utterances"></div>
+      <script src="https://utteranc.es/client.js" repo="JasonGaoH/RepoForUtterances" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <!-- Utterances END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+
+</main>
+
+<script>
+  (function () {
+    var url = 'JasonGaoH.github.io/2020/05/21/adressing-CoordinatorLayout&#39;s-animation-jitter-and-rebound-issues/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', '/css/images/error_icon.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== '/css/images/error_icon.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    
+    
+
+    <br>
+    本站累计访问量<span id="busuanzi_value_site_pv"></span>,
+    本站累计访客数<span id="busuanzi_value_site_uv"></span>
+  </p>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      hljs.configure({useBR: true});
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
