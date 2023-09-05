@@ -199,61 +199,6 @@
 ]]></content>
   </entry>
   <entry>
-    <title>android启动流程分析</title>
-    <url>/2020/05/21/android%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<blockquote>
-<h4 id="当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system-core-init-init-cpp）代码如下："><a href="#当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system-core-init-init-cpp）代码如下：" class="headerlink" title="当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system\core\init\init.cpp）代码如下："></a>当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system\core\init\init.cpp）代码如下：</h4></blockquote>
- <a id="more"></a>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(int argc, char** argv) &#123;</span><br><span class="line"></span><br><span class="line">    .....</span><br><span class="line">    //创建文件夹，挂载</span><br><span class="line">    // Get the basic filesystem setup we need put together in the initramdisk</span><br><span class="line">    // on / and then we&apos;ll let the rc file figure out the rest.</span><br><span class="line">    if (is_first_stage) &#123;</span><br><span class="line">         mount(&quot;tmpfs&quot;, &quot;/dev&quot;, &quot;tmpfs&quot;, MS_NOSUID, &quot;mode=0755&quot;);</span><br><span class="line">         mkdir(&quot;/dev/pts&quot;, 0755);</span><br><span class="line">         mkdir(&quot;/dev/socket&quot;, 0755);</span><br><span class="line">         mount(&quot;devpts&quot;, &quot;/dev/pts&quot;, &quot;devpts&quot;, 0, NULL);</span><br><span class="line">         #define MAKE_STR(x) __STRING(x)</span><br><span class="line">         mount(&quot;proc&quot;, &quot;/proc&quot;, &quot;proc&quot;, 0, &quot;hidepid=2,gid=&quot; MAKE_STR(AID_READPROC));</span><br><span class="line">         mount(&quot;sysfs&quot;, &quot;/sys&quot;, &quot;sysfs&quot;, 0, NULL);</span><br><span class="line">    &#125;</span><br><span class="line">    .....</span><br><span class="line"></span><br><span class="line">    //打印日志，设置log的级别</span><br><span class="line">    klog_init();</span><br><span class="line">    klog_set_level(KLOG_NOTICE_LEVEL);</span><br><span class="line">    .....</span><br><span class="line">    </span><br><span class="line">    Parser&amp; parser = Parser::GetInstance();</span><br><span class="line">    parser.AddSectionParser(&quot;service&quot;,std::make_unique&lt;ServiceParser&gt;());</span><br><span class="line">    parser.AddSectionParser(&quot;on&quot;, std::make_unique&lt;ActionParser&gt;());</span><br><span class="line">    parser.AddSectionParser(&quot;import&quot;, std::make_unique&lt;ImportParser&gt;());</span><br><span class="line">    // 加载init.rc配置文件</span><br><span class="line">    parser.ParseConfig(&quot;/init.rc&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<h4 id="加载init-rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码："><a href="#加载init-rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码：" class="headerlink" title="加载init.rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码："></a>加载init.rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码：</h4><p>从android L开始，在 /system/core/rootdir 目录中有 4 个 zygote 相关的启动脚本如下图：</p>
-</blockquote>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/init_rc_7.0.png" alt="image"></p>
-<p>在init.rc文件中，有如下代码：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import /init.environ.rc</span><br><span class="line">import /init.usb.rc</span><br><span class="line">import /init.$&#123;ro.hardware&#125;.rc</span><br><span class="line">import /init.usb.configfs.rc</span><br><span class="line">import /init.$&#123;ro.zygote&#125;.rc</span><br></pre></td></tr></table></figure></p>
-<p>注意到上面的代码import /init.${ro.zygote}.rc，这里会读取ro.zygote这个属性，导入相应的init.rc文件。<br>ro.zygote的属性可为：zygote32、zygote64、zygote32_64、zygote64_32。</p>
-<p>对于这个属性的解释如下。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">init.zygote32.rc：zygote 进程对应的执行程序是 app_process (纯 32bit 模式)</span><br><span class="line">init.zygote64.rc：zygote 进程对应的执行程序是 app_process64 (纯 64bit 模式)</span><br><span class="line">init.zygote32_64.rc：启动两个 zygote 进程 (名为 zygote 和 zygote_secondary)，对应的执行程序分别是 app_process32 (主模式)、app_process64。</span><br><span class="line">init.zygote64_32.rc：启动两个 zygote 进程 (名为 zygote 和 zygote_secondary)，对应的执行程序分别是 app_process64 (主模式)、app_process32</span><br></pre></td></tr></table></figure></p>
-<p>主流的机型属性都为zygote64_32，我们来看看init.zygote64_32.rc文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service zygote /system/bin/app_process64 -Xzygote /system/bin --zygote --start-system-server --socket-name=zygote</span><br><span class="line">   class main</span><br><span class="line">   socket zygote stream 660 root system</span><br><span class="line">   onrestart write /sys/android_power/request_state wake</span><br><span class="line">   onrestart write /sys/power/state on</span><br><span class="line">   onrestart restart audioserver</span><br><span class="line">   onrestart restart cameraserver</span><br><span class="line">   onrestart restart media</span><br><span class="line">   onrestart restart netd</span><br><span class="line">    writepid /dev/cpuset/foreground/tasks</span><br><span class="line"></span><br><span class="line">service zygote_secondary /system/bin/app_process32 -Xzygote /system/bin --zygote --socket-name=zygote_secondary</span><br><span class="line">    class main</span><br><span class="line">    socket zygote_secondary stream 660 root system</span><br><span class="line">    onrestart restart zygote</span><br><span class="line">    writepid /dev/cpuset/foreground/tasks</span><br></pre></td></tr></table></figure></p>
-<p>在 linux 系统中，service 通常是一种被称为守护进程 (daemon) 的程序。它通常在系统启动时启动，并一直运行于后台，直到系统关闭时终止。</p>
-<p>这里会以service方式来启动zygote进程，app_process的代码位于/frameworks/base/cmds/app_process/路径下，该路径下有一个文件app_main.cpp,入口是main函数。</p>
-<blockquote>
-<h4 id="接下来看app-main-cpp函数，这里实现从c-代码调到java代码："><a href="#接下来看app-main-cpp函数，这里实现从c-代码调到java代码：" class="headerlink" title="接下来看app_main.cpp函数，这里实现从c++代码调到java代码："></a>接下来看app_main.cpp函数，这里实现从c++代码调到java代码：</h4></blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(int argc, char* const argv[])</span><br><span class="line">&#123;</span><br><span class="line">    .....</span><br><span class="line">    //android运行时环境</span><br><span class="line">    AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));</span><br><span class="line">    // Process command line arguments</span><br><span class="line">    // ignore argv[0]</span><br><span class="line">    argc--;</span><br><span class="line">    argv++;</span><br><span class="line"></span><br><span class="line">    .....</span><br><span class="line">    if (zygote) &#123;</span><br><span class="line">        //启动java代码</span><br><span class="line">        runtime.start(&quot;com.android.internal.os.ZygoteInit&quot;, args, zygote);</span><br><span class="line">    &#125; else if (className) &#123;</span><br><span class="line">        runtime.start(&quot;com.android.internal.os.RuntimeInit&quot;, args, zygote);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        fprintf(stderr, &quot;Error: no class name or --zygote supplied.\n&quot;);</span><br><span class="line">        app_usage();</span><br><span class="line">        LOG_ALWAYS_FATAL(&quot;app_process: no class name or --zygote supplied.&quot;);</span><br><span class="line">        return 10;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<h4 id="ZygoteInit-java-代码："><a href="#ZygoteInit-java-代码：" class="headerlink" title="ZygoteInit.java 代码："></a>ZygoteInit.java 代码：</h4><p>/frameworks/base/core/java/com/android/internal/os/ZygoteInit.java<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> public static void main(String argv[]) &#123;</span><br><span class="line">     .....</span><br><span class="line">     try &#123;</span><br><span class="line">         .....</span><br><span class="line">         boolean startSystemServer = false;</span><br><span class="line">         String socketName = &quot;zygote&quot;;</span><br><span class="line">         String abiList = null;</span><br><span class="line">         for (int i = 1; i &lt; argv.length; i++) &#123;</span><br><span class="line">             if (&quot;start-system-server&quot;.equals(argv[i])) &#123;</span><br><span class="line">                 startSystemServer = true;</span><br><span class="line">             &#125; else if (argv[i].startsWith(ABI_LIST_ARG)) &#123;</span><br><span class="line">                 abiList = argv[i].substring(ABI_LIST_ARG.length());</span><br><span class="line">             &#125; else if (argv[i].startsWith(SOCKET_NAME_ARG)) &#123;</span><br><span class="line">                 socketName = argv[i].substring(SOCKET_NAME_ARG.length());</span><br><span class="line">             &#125; else &#123;</span><br><span class="line">                 throw new RuntimeException(&quot;Unknown command line argument: &quot; + argv[i]);</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         .....</span><br><span class="line">         //预加载android依赖的文件</span><br><span class="line">         preload();</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line">         if (startSystemServer) &#123;</span><br><span class="line">             //启动系统服务</span><br><span class="line">             startSystemServer(abiList, socketName);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">.....</span><br><span class="line">     &#125; catch (MethodAndArgsCaller caller) &#123;</span><br><span class="line">         caller.run();</span><br><span class="line">     &#125; catch (Throwable ex) &#123;</span><br><span class="line">         Log.e(TAG, &quot;Zygote died with exception&quot;, ex);</span><br><span class="line">         closeServerSocket();</span><br><span class="line">         throw ex;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<p>看这个类的main方法，最上面根据传入的参数判断是否将startSystemServer这个标记设为true，接着预加载android依赖的文件，最后根据上面设置的标记来判断是否能启动系统服务。</p>
-<p>接着看ZygoteInit.java中main方法在最后调用startSystemServer方法具体内容<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  private static boolean startSystemServer(String abiList, String socketName)</span><br><span class="line">          throws MethodAndArgsCaller, RuntimeException &#123;</span><br><span class="line">.....</span><br><span class="line">      /* Hardcoded command line to start the system server */</span><br><span class="line">      String args[] = &#123;</span><br><span class="line">          &quot;--setuid=1000&quot;,</span><br><span class="line">          &quot;--setgid=1000&quot;,</span><br><span class="line">          &quot;--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007,3009,3010&quot;,</span><br><span class="line">          &quot;--capabilities=&quot; + capabilities + &quot;,&quot; + capabilities,</span><br><span class="line">          &quot;--nice-name=system_server&quot;,</span><br><span class="line">          &quot;--runtime-args&quot;,</span><br><span class="line">          &quot;com.android.server.SystemServer&quot;,</span><br><span class="line">      &#125;;</span><br><span class="line">.....</span><br><span class="line">      try &#123;</span><br><span class="line">          parsedArgs = new ZygoteConnection.Arguments(args);</span><br><span class="line">          ZygoteConnection.applyDebuggerSystemProperty(parsedArgs);</span><br><span class="line">          ZygoteConnection.applyInvokeWithSystemProperty(parsedArgs);</span><br><span class="line"></span><br><span class="line">          //Zygote进程开始fork子进程，启动SystemServer</span><br><span class="line">          /* Request to fork the system server process */</span><br><span class="line">          pid = Zygote.forkSystemServer(</span><br><span class="line">                  parsedArgs.uid, parsedArgs.gid,</span><br><span class="line">                  parsedArgs.gids,</span><br><span class="line">                  parsedArgs.debugFlags,</span><br><span class="line">                  null,</span><br><span class="line">                  parsedArgs.permittedCapabilities,</span><br><span class="line">                  parsedArgs.effectiveCapabilities);</span><br><span class="line">      &#125; catch (IllegalArgumentException ex) &#123;</span><br><span class="line">          throw new RuntimeException(ex);</span><br><span class="line">      &#125;</span><br><span class="line">.....</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<h4 id="SystemServer-java-代码"><a href="#SystemServer-java-代码" class="headerlink" title="SystemServer.java 代码"></a>SystemServer.java 代码</h4><p>/frameworks/base/services/java/com/android/server/SystemServer.java<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  /**</span><br><span class="line">* The main entry point from zygote.</span><br><span class="line">*/</span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    new SystemServer().run();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">private void run() &#123;</span><br><span class="line">    ......</span><br><span class="line">    // Start services.</span><br><span class="line">    try &#123;</span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, &quot;StartServices&quot;);</span><br><span class="line">        startBootstrapServices();</span><br><span class="line">        //启动核心Service</span><br><span class="line">        startCoreServices();</span><br><span class="line">        //启动其他Service</span><br><span class="line">        startOtherServices();</span><br><span class="line">    &#125; catch (Throwable ex) &#123;</span><br><span class="line">        Slog.e(&quot;System&quot;, &quot;******************************************&quot;);</span><br><span class="line">        Slog.e(&quot;System&quot;, &quot;************ Failure starting system services&quot;, ex);</span><br><span class="line">        throw ex;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Loop forever.</span><br><span class="line">    Looper.loop();</span><br><span class="line">    throw new RuntimeException(&quot;Main thread loop unexpectedly exited&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
-<h4 id="启动SystemServer-java的startOtherServices方法"><a href="#启动SystemServer-java的startOtherServices方法" class="headerlink" title="启动SystemServer.java的startOtherServices方法"></a>启动SystemServer.java的startOtherServices方法</h4></blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Starts a miscellaneous grab bag of stuff that has yet to be refactored</span><br><span class="line"> * and organized.</span><br><span class="line"> */</span><br><span class="line">private void startOtherServices() &#123;</span><br><span class="line"> .....</span><br><span class="line"> // We now tell the activity manager it is okay to run third party</span><br><span class="line"> // code.  It will call back into us once it has gotten to the state</span><br><span class="line"> // where third party code can really run (but before it has actually</span><br><span class="line"> // started launching the initial applications), for us to complete our</span><br><span class="line"> // initialization.</span><br><span class="line"> mActivityManagerService.systemReady(new Runnable() &#123;</span><br><span class="line">	 @Override</span><br><span class="line">	 public void run() &#123;</span><br><span class="line">		 Slog.i(TAG, &quot;Making services ready&quot;);</span><br><span class="line">		 .....</span><br><span class="line">	  &#125;</span><br><span class="line">	&#125;</span><br><span class="line"> .....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<h4 id="ActivityManagerService-java中的mStackSupervisor-resumeFocusedStackTopActivityLocked"><a href="#ActivityManagerService-java中的mStackSupervisor-resumeFocusedStackTopActivityLocked" class="headerlink" title="ActivityManagerService.java中的mStackSupervisor.resumeFocusedStackTopActivityLocked()"></a>ActivityManagerService.java中的mStackSupervisor.resumeFocusedStackTopActivityLocked()</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public void systemReady(final Runnable goingCallback) &#123;</span><br><span class="line">     .....  </span><br><span class="line">    Slog.i(TAG, &quot;System now ready&quot;);</span><br><span class="line">    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY,</span><br><span class="line">        SystemClock.uptimeMillis());</span><br><span class="line">     .....</span><br><span class="line">      </span><br><span class="line">    synchronized (this) &#123;</span><br><span class="line">        // Only start up encryption-aware persistent apps; once user is</span><br><span class="line">        // unlocked we&apos;ll come back around and start unaware apps</span><br><span class="line">        startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);</span><br><span class="line">.....</span><br><span class="line">  //调用ActivityStackSupervisor中的resumeFocusedStackTopActivityLocked方法</span><br><span class="line">        mStackSupervisor.resumeFocusedStackTopActivityLocked();</span><br><span class="line">        mUserController.sendUserSwitchBroadcastsLocked(-1, currentUserId);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<blockquote>
-<h4 id="ActivityStackSupervisor-java中的resumeFocusedStackTopActivityLocked方法"><a href="#ActivityStackSupervisor-java中的resumeFocusedStackTopActivityLocked方法" class="headerlink" title="ActivityStackSupervisor.java中的resumeFocusedStackTopActivityLocked方法"></a>ActivityStackSupervisor.java中的resumeFocusedStackTopActivityLocked方法</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    boolean resumeFocusedStackTopActivityLocked() &#123;</span><br><span class="line">        return resumeFocusedStackTopActivityLocked(null, null, null);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">boolean resumeFocusedStackTopActivityLocked(</span><br><span class="line">            ActivityStack targetStack, ActivityRecord target, ActivityOptions targetOptions) &#123;</span><br><span class="line">        if (targetStack != null &amp;&amp; isFocusedStack(targetStack)) &#123;</span><br><span class="line">            return targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);</span><br><span class="line">        &#125;</span><br><span class="line">        final ActivityRecord r = mFocusedStack.topRunningActivityLocked();</span><br><span class="line">        if (r == null || r.state != RESUMED) &#123;</span><br><span class="line">           //调用ActivityStack中的resumeTopActivityUncheckedLocked来保证栈中的顶层Activity被重新启动</span><br><span class="line">            mFocusedStack.resumeTopActivityUncheckedLocked(null, null);</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<blockquote>
-<h4 id="ActivityStack-java中的resumeTopActivityUncheckedLocked方法"><a href="#ActivityStack-java中的resumeTopActivityUncheckedLocked方法" class="headerlink" title="ActivityStack.java中的resumeTopActivityUncheckedLocked方法"></a>ActivityStack.java中的resumeTopActivityUncheckedLocked方法</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) &#123;</span><br><span class="line">    </span><br><span class="line">    ....</span><br><span class="line"></span><br><span class="line">    boolean result = false;</span><br><span class="line">    try &#123;</span><br><span class="line">        // Protect against recursion.</span><br><span class="line">        mStackSupervisor.inResumeTopActivity = true;</span><br><span class="line">        if (mService.mLockScreenShown == ActivityManagerService.LOCK_SCREEN_LEAVING) &#123;</span><br><span class="line">            mService.mLockScreenShown = ActivityManagerService.LOCK_SCREEN_HIDDEN;</span><br><span class="line">            mService.updateSleepIfNeededLocked();</span><br><span class="line">        &#125;</span><br><span class="line">        result = resumeTopActivityInnerLocked(prev, options);</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        mStackSupervisor.inResumeTopActivity = false;</span><br><span class="line">    &#125;</span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) &#123;</span><br><span class="line">     if (DEBUG_LOCKSCREEN) mService.logLockScreen(&quot;&quot;);</span><br><span class="line">     if (!mService.mBooting &amp;&amp; !mService.mBooted) &#123;</span><br><span class="line">        // Not ready yet!</span><br><span class="line">        return false;</span><br><span class="line">    &#125; </span><br><span class="line">    .....</span><br><span class="line">    if (next == null) &#123;</span><br><span class="line">         // There are no more activities!</span><br><span class="line">         final String reason = &quot;noMoreActivities&quot;;</span><br><span class="line">         final int returnTaskType = prevTask == null || !prevTask.isOverHomeStack()</span><br><span class="line">                 ? HOME_ACTIVITY_TYPE : prevTask.getTaskToReturnTo();</span><br><span class="line">         if (!mFullscreen &amp;&amp; adjustFocusToNextFocusableStackLocked(returnTaskType, reason)) &#123;</span><br><span class="line">             // Try to move focus to the next visible stack with a running activity if this</span><br><span class="line">             // stack is not covering the entire screen.</span><br><span class="line">             return mStackSupervisor.resumeFocusedStackTopActivityLocked(</span><br><span class="line">                     mStackSupervisor.getFocusedStack(), prev, null);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         // Let&apos;s just start up the Launcher...</span><br><span class="line">         ActivityOptions.abort(options);</span><br><span class="line">         if (DEBUG_STATES) Slog.d(TAG_STATES,</span><br><span class="line">                 &quot;resumeTopActivityLocked: No more activities go home&quot;);</span><br><span class="line">         if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();</span><br><span class="line">         // Only resume home if on home display</span><br><span class="line">         //调用ActivityStackSupervisor中的方法来恢复 Launcher所在的栈</span><br><span class="line">         return isOnHomeDisplay() &amp;&amp;</span><br><span class="line">                 mStackSupervisor.resumeHomeStackTask(returnTaskType, prev, reason);</span><br><span class="line">     &#125;</span><br><span class="line">     .....</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<h5 id="ActivityStackSupervisor-java中resumeHomeStackTask方法"><a href="#ActivityStackSupervisor-java中resumeHomeStackTask方法" class="headerlink" title="ActivityStackSupervisor.java中resumeHomeStackTask方法"></a>ActivityStackSupervisor.java中resumeHomeStackTask方法</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> boolean resumeHomeStackTask(int homeStackTaskType, ActivityRecord prev, String reason) &#123;</span><br><span class="line">      if (!mService.mBooting &amp;&amp; !mService.mBooted) &#123;</span><br><span class="line">          // Not ready yet!</span><br><span class="line">          return false;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      .....</span><br><span class="line"></span><br><span class="line">      mHomeStack.moveHomeStackTaskToTop(homeStackTaskType);</span><br><span class="line">      ActivityRecord r = getHomeActivity();</span><br><span class="line">      final String myReason = reason + &quot; resumeHomeStackTask&quot;;</span><br><span class="line"></span><br><span class="line">      // Only resume home activity if isn&apos;t finishing.</span><br><span class="line">      if (r != null &amp;&amp; !r.finishing) &#123;</span><br><span class="line">          mService.setFocusedActivityLocked(r, myReason);</span><br><span class="line">          return resumeFocusedStackTopActivityLocked(mHomeStack, prev, null);</span><br><span class="line">      &#125;</span><br><span class="line">启动launcher应用的锁屏界面</span><br><span class="line">      return mService.startHomeActivityLocked(mCurrentUser, myReason);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<blockquote>
-<h5 id="Android系统启动完成，打开了Launcher应用的Home界面。"><a href="#Android系统启动完成，打开了Launcher应用的Home界面。" class="headerlink" title="Android系统启动完成，打开了Launcher应用的Home界面。"></a>Android系统启动完成，打开了Launcher应用的Home界面。</h5></blockquote>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/android_init.png" alt="image"></p>
-]]></content>
-      <categories>
-        <category>源码分析</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>synchronized关键字的原理</title>
     <url>/2020/05/21/synchronized%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E5%8E%9F%E7%90%86/</url>
     <content><![CDATA[<blockquote>
@@ -313,65 +258,6 @@
       </categories>
       <tags>
         <tag>synchronized</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</title>
-    <url>/2020/05/21/%E4%BB%BF%E4%BA%AC%E4%B8%9C%E3%80%81%E6%B7%98%E5%AE%9D%E9%A6%96%E9%A1%B5%EF%BC%8C%E9%80%9A%E8%BF%87%E4%B8%A4%E5%B1%82%E5%B5%8C%E5%A5%97%E7%9A%84RecyclerView%E5%AE%9E%E7%8E%B0tab%E7%9A%84%E5%90%B8%E9%A1%B6%E6%95%88%E6%9E%9C/</url>
-    <content><![CDATA[<blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483770&amp;idx=1&amp;sn=38b95c3cff51e216248c0eb860155437&amp;chksm=fa237992cd54f084802be4b0be2b52e4f5052019d51562f65245ca8b0faf3e0d61d296fc0e7d&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a></p>
-</blockquote>
-<h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57" target="_blank" rel="noopener">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
-<a id="more"></a>
-<p>首先我们可以简单看下京东首页的效果gif，来看看我们到底是要实现什么样的效果：</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/jingdong.gif" alt="image"></p>
-<p>京东首页的tab筛选区将feed分为两个部分，上面是各种不同item，tab的下半部分可以左右横滑，并且下拉可以加重更多，只要网络有数据的情况下理论上是可以无限下拉的。</p>
-<p>其实用CoordinatorLayout来实现tab吸顶，如果能将一些细节问题处理好的话，其实大致可以实现类似京东首页的这个效果，具体细节问题可以参考文章开头说的之前的文章，文章里讲了下使用CoordinatorLayout来实现类似效果遇到的动画抖动问题以及页面回弹问题以及对应的解决方法。</p>
-<p>那么为什么会不采用CoordinatorLayout来实现，转而采用嵌套RecyclerView的方式呢？</p>
-<p>首先我们来看下CoordinatorLayout实现的大致布局：</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout.png" alt="image"></p>
-<p>一个问题是从AppBarLayout滑动效果是不能传递到下面的ViewPager里去的，我尝试了各种方式都没能解决掉这个问题，可以简单看下Demo效果图：</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinatorlayout_fix.gif" alt="image"></p>
-<p>从gif图大致可以看到AppBarLayout滑上去之后惯性消失了，tab下面的区域是不能接着滚动的。</p>
-<blockquote>
-<p>这个惯性消失的问题，我在网上找到了一个一篇解决惯性消失的文章如下<a href="https://blog.kyleduo.com/2017/07/21/alipay-home-3-alipay-home/" target="_blank" rel="noopener">支付宝首页交互三部曲3实现支付宝首页交互</a>,实现方式大致是自己把CoordinatorLayout这套机制再实现了一遍，因为是自己实现的，里面的一些机制是比较方便改动的，它处理惯性这个问题的逻辑大致是将AppBarLayout中未消费的y轴偏移量拿出来再交由RecyclerView去滑动，代码如下：</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">mHeaderView.setOnHeaderFlingUnConsumedListener(<span class="keyword">new</span> APHeaderView.OnHeaderFlingUnConsumedListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">onFlingUnConsumed</span><span class="params">(APHeaderView header, <span class="keyword">int</span> targetOffset, <span class="keyword">int</span> unconsumed)</span> </span>&#123;</span><br><span class="line">        APHeaderView.Behavior behavior = mHeaderView.getBehavior();</span><br><span class="line">        <span class="keyword">int</span> dy = -unconsumed;</span><br><span class="line">        <span class="keyword">if</span> (behavior != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mRecyclerView.scrollBy(<span class="number">0</span>, dy);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dy;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>这里由于篇幅原因，就不展开详细介绍了，感兴趣地同学可以点开上面的链接去研究研究，文章中也贴出了GitHub地址。</p>
-</blockquote>
-<p>我们重新回到我们一开始的问题，为什么想替换掉CoordinatorLayout，另外一个问题是CoordinatorLayout这种实现相对比较简单，但是会导致页面的嵌套层级很深，我们从上面贴出来的布局来看，view嵌套的层级特别深，而且如果我们要实现类似京东或者淘宝首页这样的效果，在TabLayout上面的区域，也就是下图箭头标注的地方必须要采用RecyclerView的来实现，因为tab上半部分的内容和个数都是不确定的，使用RecyclerView才比较方便，但是这样页面的层级就更深了，加载速度也变得更慢了。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout_fix.png" alt="image"></p>
-<h3 id="如何实现"><a href="#如何实现" class="headerlink" title="如何实现"></a>如何实现</h3><p>要抛弃CoordinatorLayout，那么如何实现呢？</p>
-<p>我们用Android Studio中的Layout Inspector工具看了下京东首页的布局，发现的确是采用两层RecyclerView嵌套来实现的，展示的布局大致如下所示：</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/jingdong_layout.png" alt="image"></p>
-<p>那么接下来是怎么去实现这个效果了。其实一开始我以为要采用嵌套滚动这套机制来实现，后来发现不采用嵌套滚动机制也是可以实现的。</p>
-<p>现在我们可以大致构造这样一个布局：</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested_recycler_view.png" alt="image"></p>
-<p>我们把ViewPager以及TabLayout这一块作为外部RecyclerView的一个item，ViewPager可能会有个多个内部RecyclerView，只要我们能让外部RecyclerView和内部RecyclerView的滑动事件正确分发基本就可以解决这个问题了。</p>
-<p>如果只是构造出这个布局出来，我们发现内部的RecyclerView都不会显示出来，因为滑动完全由外部RecyclerView接管了。</p>
-<p>那么重点来了，这种情况如何处理？</p>
-<p>其实RecyclerView的LayoutManager中有这两个方法用于判断RecyclerView在水平方向上和竖直方向上是否可以滚动的。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public boolean canScrollHorizontally() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public boolean canScrollVertically() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>然后LayoutManager有各种不同的实现LinearLayoutManager，StaggeredGridLayoutManager等</p>
-<p>这个LayoutManager中的canScrollVertically和canScrollHorizontally在RecyclerView的onInterceptTouchEvent中是会拿来作判断，判断当前RecyclerView是否需要处理滑动事件的。</p>
-<blockquote>
-<p>还有一点需要注意：我们处理内外两层RecyclerView的滑动冲突问题，主要是想解决下面两种场景：一、手指上滑时，当外部RecyclerView滑动底部的时候，内部的RecyclerView能继续去响应用户的滑动，因为内部的RecyclerView理论上是可以无限滚动的；二、手指下滑时，当内部的RecyclerView滑动到顶部的时候，外部的RecyclerView能够继续响应用户的下滑事件。</p>
-</blockquote>
-<p>其实上面已经说出了如何处理嵌套RecyclerView的最重要的点，其他的部分相当于都是一些细节的处理了。</p>
-<p>在外部RecyclerView(下面成ParentRecyclerView)中的重写LayoutManager的canScrollVertically方法如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fun initLayoutManager() &#123;</span><br><span class="line">    val linearLayoutManager = object :LinearLayoutManager(context) &#123;</span><br><span class="line"></span><br><span class="line">        override fun canScrollVertically():Boolean &#123;</span><br><span class="line">            //找到当前的childRecyclerView</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            //只有当前childRecyclerView滑动到顶部才认为ParentRecyclerView是可以竖直方向是可以滚动的</span><br><span class="line">            return childRecyclerView == null || childRecyclerView.isScrollTop()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    linearLayoutManager.orientation = LinearLayoutManager.VERTICAL</span><br><span class="line">    layoutManager = linearLayoutManager</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在内部RecyclerView(以下称ChildRecyclerView)中定义了isScrollTop()，用于判断ChildRecyclerView是否滚动到顶部。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fun isScrollTop(): Boolean &#123;</span><br><span class="line">    //RecyclerView.canScrollVertically(-1)的值表示是否能向下滚动，false表示已经滚动到顶部</span><br><span class="line">    return !canScrollVertically(-1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>另外，在ParentRecyclerView的onTouchEvent方法中：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onTouchEvent(e: MotionEvent): Boolean &#123;</span><br><span class="line">        if(lastY == 0f) &#123;</span><br><span class="line">            lastY = e.y</span><br><span class="line">        &#125;</span><br><span class="line">        if(isScrollEnd()) &#123;</span><br><span class="line">            //如果父RecyclerView已经滑动到底部，需要让子RecyclerView滑动剩余的距离</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            childRecyclerView?.run &#123;</span><br><span class="line">                val deltaY = (lastY - e.y).toInt()</span><br><span class="line">                if(deltaY != 0) &#123;</span><br><span class="line">                    scrollBy(0,deltaY)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        lastY = e.y</span><br><span class="line">        return try &#123;</span><br><span class="line">            super.onTouchEvent(e)</span><br><span class="line">        &#125; catch (e: Exception) &#123;</span><br><span class="line">            e.printStackTrace()</span><br><span class="line">            false</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
-<p>关于滑动事件主要代码就是上面这些，具体可以可以看看项目代码<a href="https://github.com/JasonGaoH/NestedRecyclerView" target="_blank" rel="noopener">NestedRecyclerView</a>。</p>
-<p>还有关于RecyclerView的fling部分，在RecyclerView的onScrollStateChanged回调中监听y轴的总的偏移量totalDy，然后在RecyclerView不滚动的时候交由内部或者外部RecyclerView去fling，这里就不赘述了，具体可以看项目的代码。</p>
-<p>最后贴上项目的运行gif图展示：</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/NestedRecyclerView/master/gif/nested_recyclerview_1.gif" alt="image"></p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/NestedRecyclerView/master/gif/nested_recyclerview_2.gif" alt="image"></p>
-<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>写作不易，欢迎大家点赞，如果有问题，欢迎提出一起讨论，您的点赞是我写作的最大动力，感谢！</p>
-]]></content>
-      <tags>
-        <tag>RecyclerView</tag>
       </tags>
   </entry>
   <entry>
@@ -445,6 +331,120 @@ an action to be performed on a different thread than your own.
       </categories>
       <tags>
         <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>android启动流程分析</title>
+    <url>/2020/05/21/android%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<blockquote>
+<h4 id="当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system-core-init-init-cpp）代码如下："><a href="#当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system-core-init-init-cpp）代码如下：" class="headerlink" title="当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system\core\init\init.cpp）代码如下："></a>当引导程序启动Linux内核后，会加载各种驱动和数据结构，当有了驱动以后，开始启动Android系统同时会加载用户级别的第一个进程init（system\core\init\init.cpp）代码如下：</h4></blockquote>
+ <a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(int argc, char** argv) &#123;</span><br><span class="line"></span><br><span class="line">    .....</span><br><span class="line">    //创建文件夹，挂载</span><br><span class="line">    // Get the basic filesystem setup we need put together in the initramdisk</span><br><span class="line">    // on / and then we&apos;ll let the rc file figure out the rest.</span><br><span class="line">    if (is_first_stage) &#123;</span><br><span class="line">         mount(&quot;tmpfs&quot;, &quot;/dev&quot;, &quot;tmpfs&quot;, MS_NOSUID, &quot;mode=0755&quot;);</span><br><span class="line">         mkdir(&quot;/dev/pts&quot;, 0755);</span><br><span class="line">         mkdir(&quot;/dev/socket&quot;, 0755);</span><br><span class="line">         mount(&quot;devpts&quot;, &quot;/dev/pts&quot;, &quot;devpts&quot;, 0, NULL);</span><br><span class="line">         #define MAKE_STR(x) __STRING(x)</span><br><span class="line">         mount(&quot;proc&quot;, &quot;/proc&quot;, &quot;proc&quot;, 0, &quot;hidepid=2,gid=&quot; MAKE_STR(AID_READPROC));</span><br><span class="line">         mount(&quot;sysfs&quot;, &quot;/sys&quot;, &quot;sysfs&quot;, 0, NULL);</span><br><span class="line">    &#125;</span><br><span class="line">    .....</span><br><span class="line"></span><br><span class="line">    //打印日志，设置log的级别</span><br><span class="line">    klog_init();</span><br><span class="line">    klog_set_level(KLOG_NOTICE_LEVEL);</span><br><span class="line">    .....</span><br><span class="line">    </span><br><span class="line">    Parser&amp; parser = Parser::GetInstance();</span><br><span class="line">    parser.AddSectionParser(&quot;service&quot;,std::make_unique&lt;ServiceParser&gt;());</span><br><span class="line">    parser.AddSectionParser(&quot;on&quot;, std::make_unique&lt;ActionParser&gt;());</span><br><span class="line">    parser.AddSectionParser(&quot;import&quot;, std::make_unique&lt;ImportParser&gt;());</span><br><span class="line">    // 加载init.rc配置文件</span><br><span class="line">    parser.ParseConfig(&quot;/init.rc&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h4 id="加载init-rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码："><a href="#加载init-rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码：" class="headerlink" title="加载init.rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码："></a>加载init.rc文件，会启动一个Zygote进程，此进程是Android系统的一个母进程，用来启动Android的其他服务进程，代码：</h4><p>从android L开始，在 /system/core/rootdir 目录中有 4 个 zygote 相关的启动脚本如下图：</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/init_rc_7.0.png" alt="image"></p>
+<p>在init.rc文件中，有如下代码：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import /init.environ.rc</span><br><span class="line">import /init.usb.rc</span><br><span class="line">import /init.$&#123;ro.hardware&#125;.rc</span><br><span class="line">import /init.usb.configfs.rc</span><br><span class="line">import /init.$&#123;ro.zygote&#125;.rc</span><br></pre></td></tr></table></figure></p>
+<p>注意到上面的代码import /init.${ro.zygote}.rc，这里会读取ro.zygote这个属性，导入相应的init.rc文件。<br>ro.zygote的属性可为：zygote32、zygote64、zygote32_64、zygote64_32。</p>
+<p>对于这个属性的解释如下。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">init.zygote32.rc：zygote 进程对应的执行程序是 app_process (纯 32bit 模式)</span><br><span class="line">init.zygote64.rc：zygote 进程对应的执行程序是 app_process64 (纯 64bit 模式)</span><br><span class="line">init.zygote32_64.rc：启动两个 zygote 进程 (名为 zygote 和 zygote_secondary)，对应的执行程序分别是 app_process32 (主模式)、app_process64。</span><br><span class="line">init.zygote64_32.rc：启动两个 zygote 进程 (名为 zygote 和 zygote_secondary)，对应的执行程序分别是 app_process64 (主模式)、app_process32</span><br></pre></td></tr></table></figure></p>
+<p>主流的机型属性都为zygote64_32，我们来看看init.zygote64_32.rc文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">service zygote /system/bin/app_process64 -Xzygote /system/bin --zygote --start-system-server --socket-name=zygote</span><br><span class="line">   class main</span><br><span class="line">   socket zygote stream 660 root system</span><br><span class="line">   onrestart write /sys/android_power/request_state wake</span><br><span class="line">   onrestart write /sys/power/state on</span><br><span class="line">   onrestart restart audioserver</span><br><span class="line">   onrestart restart cameraserver</span><br><span class="line">   onrestart restart media</span><br><span class="line">   onrestart restart netd</span><br><span class="line">    writepid /dev/cpuset/foreground/tasks</span><br><span class="line"></span><br><span class="line">service zygote_secondary /system/bin/app_process32 -Xzygote /system/bin --zygote --socket-name=zygote_secondary</span><br><span class="line">    class main</span><br><span class="line">    socket zygote_secondary stream 660 root system</span><br><span class="line">    onrestart restart zygote</span><br><span class="line">    writepid /dev/cpuset/foreground/tasks</span><br></pre></td></tr></table></figure></p>
+<p>在 linux 系统中，service 通常是一种被称为守护进程 (daemon) 的程序。它通常在系统启动时启动，并一直运行于后台，直到系统关闭时终止。</p>
+<p>这里会以service方式来启动zygote进程，app_process的代码位于/frameworks/base/cmds/app_process/路径下，该路径下有一个文件app_main.cpp,入口是main函数。</p>
+<blockquote>
+<h4 id="接下来看app-main-cpp函数，这里实现从c-代码调到java代码："><a href="#接下来看app-main-cpp函数，这里实现从c-代码调到java代码：" class="headerlink" title="接下来看app_main.cpp函数，这里实现从c++代码调到java代码："></a>接下来看app_main.cpp函数，这里实现从c++代码调到java代码：</h4></blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(int argc, char* const argv[])</span><br><span class="line">&#123;</span><br><span class="line">    .....</span><br><span class="line">    //android运行时环境</span><br><span class="line">    AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));</span><br><span class="line">    // Process command line arguments</span><br><span class="line">    // ignore argv[0]</span><br><span class="line">    argc--;</span><br><span class="line">    argv++;</span><br><span class="line"></span><br><span class="line">    .....</span><br><span class="line">    if (zygote) &#123;</span><br><span class="line">        //启动java代码</span><br><span class="line">        runtime.start(&quot;com.android.internal.os.ZygoteInit&quot;, args, zygote);</span><br><span class="line">    &#125; else if (className) &#123;</span><br><span class="line">        runtime.start(&quot;com.android.internal.os.RuntimeInit&quot;, args, zygote);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        fprintf(stderr, &quot;Error: no class name or --zygote supplied.\n&quot;);</span><br><span class="line">        app_usage();</span><br><span class="line">        LOG_ALWAYS_FATAL(&quot;app_process: no class name or --zygote supplied.&quot;);</span><br><span class="line">        return 10;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h4 id="ZygoteInit-java-代码："><a href="#ZygoteInit-java-代码：" class="headerlink" title="ZygoteInit.java 代码："></a>ZygoteInit.java 代码：</h4><p>/frameworks/base/core/java/com/android/internal/os/ZygoteInit.java<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> public static void main(String argv[]) &#123;</span><br><span class="line">     .....</span><br><span class="line">     try &#123;</span><br><span class="line">         .....</span><br><span class="line">         boolean startSystemServer = false;</span><br><span class="line">         String socketName = &quot;zygote&quot;;</span><br><span class="line">         String abiList = null;</span><br><span class="line">         for (int i = 1; i &lt; argv.length; i++) &#123;</span><br><span class="line">             if (&quot;start-system-server&quot;.equals(argv[i])) &#123;</span><br><span class="line">                 startSystemServer = true;</span><br><span class="line">             &#125; else if (argv[i].startsWith(ABI_LIST_ARG)) &#123;</span><br><span class="line">                 abiList = argv[i].substring(ABI_LIST_ARG.length());</span><br><span class="line">             &#125; else if (argv[i].startsWith(SOCKET_NAME_ARG)) &#123;</span><br><span class="line">                 socketName = argv[i].substring(SOCKET_NAME_ARG.length());</span><br><span class="line">             &#125; else &#123;</span><br><span class="line">                 throw new RuntimeException(&quot;Unknown command line argument: &quot; + argv[i]);</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         .....</span><br><span class="line">         //预加载android依赖的文件</span><br><span class="line">         preload();</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line">         if (startSystemServer) &#123;</span><br><span class="line">             //启动系统服务</span><br><span class="line">             startSystemServer(abiList, socketName);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">.....</span><br><span class="line">     &#125; catch (MethodAndArgsCaller caller) &#123;</span><br><span class="line">         caller.run();</span><br><span class="line">     &#125; catch (Throwable ex) &#123;</span><br><span class="line">         Log.e(TAG, &quot;Zygote died with exception&quot;, ex);</span><br><span class="line">         closeServerSocket();</span><br><span class="line">         throw ex;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>看这个类的main方法，最上面根据传入的参数判断是否将startSystemServer这个标记设为true，接着预加载android依赖的文件，最后根据上面设置的标记来判断是否能启动系统服务。</p>
+<p>接着看ZygoteInit.java中main方法在最后调用startSystemServer方法具体内容<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  private static boolean startSystemServer(String abiList, String socketName)</span><br><span class="line">          throws MethodAndArgsCaller, RuntimeException &#123;</span><br><span class="line">.....</span><br><span class="line">      /* Hardcoded command line to start the system server */</span><br><span class="line">      String args[] = &#123;</span><br><span class="line">          &quot;--setuid=1000&quot;,</span><br><span class="line">          &quot;--setgid=1000&quot;,</span><br><span class="line">          &quot;--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007,3009,3010&quot;,</span><br><span class="line">          &quot;--capabilities=&quot; + capabilities + &quot;,&quot; + capabilities,</span><br><span class="line">          &quot;--nice-name=system_server&quot;,</span><br><span class="line">          &quot;--runtime-args&quot;,</span><br><span class="line">          &quot;com.android.server.SystemServer&quot;,</span><br><span class="line">      &#125;;</span><br><span class="line">.....</span><br><span class="line">      try &#123;</span><br><span class="line">          parsedArgs = new ZygoteConnection.Arguments(args);</span><br><span class="line">          ZygoteConnection.applyDebuggerSystemProperty(parsedArgs);</span><br><span class="line">          ZygoteConnection.applyInvokeWithSystemProperty(parsedArgs);</span><br><span class="line"></span><br><span class="line">          //Zygote进程开始fork子进程，启动SystemServer</span><br><span class="line">          /* Request to fork the system server process */</span><br><span class="line">          pid = Zygote.forkSystemServer(</span><br><span class="line">                  parsedArgs.uid, parsedArgs.gid,</span><br><span class="line">                  parsedArgs.gids,</span><br><span class="line">                  parsedArgs.debugFlags,</span><br><span class="line">                  null,</span><br><span class="line">                  parsedArgs.permittedCapabilities,</span><br><span class="line">                  parsedArgs.effectiveCapabilities);</span><br><span class="line">      &#125; catch (IllegalArgumentException ex) &#123;</span><br><span class="line">          throw new RuntimeException(ex);</span><br><span class="line">      &#125;</span><br><span class="line">.....</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<h4 id="SystemServer-java-代码"><a href="#SystemServer-java-代码" class="headerlink" title="SystemServer.java 代码"></a>SystemServer.java 代码</h4><p>/frameworks/base/services/java/com/android/server/SystemServer.java<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">  /**</span><br><span class="line">* The main entry point from zygote.</span><br><span class="line">*/</span><br><span class="line">  public static void main(String[] args) &#123;</span><br><span class="line">    new SystemServer().run();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">private void run() &#123;</span><br><span class="line">    ......</span><br><span class="line">    // Start services.</span><br><span class="line">    try &#123;</span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, &quot;StartServices&quot;);</span><br><span class="line">        startBootstrapServices();</span><br><span class="line">        //启动核心Service</span><br><span class="line">        startCoreServices();</span><br><span class="line">        //启动其他Service</span><br><span class="line">        startOtherServices();</span><br><span class="line">    &#125; catch (Throwable ex) &#123;</span><br><span class="line">        Slog.e(&quot;System&quot;, &quot;******************************************&quot;);</span><br><span class="line">        Slog.e(&quot;System&quot;, &quot;************ Failure starting system services&quot;, ex);</span><br><span class="line">        throw ex;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Loop forever.</span><br><span class="line">    Looper.loop();</span><br><span class="line">    throw new RuntimeException(&quot;Main thread loop unexpectedly exited&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<h4 id="启动SystemServer-java的startOtherServices方法"><a href="#启动SystemServer-java的startOtherServices方法" class="headerlink" title="启动SystemServer.java的startOtherServices方法"></a>启动SystemServer.java的startOtherServices方法</h4></blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Starts a miscellaneous grab bag of stuff that has yet to be refactored</span><br><span class="line"> * and organized.</span><br><span class="line"> */</span><br><span class="line">private void startOtherServices() &#123;</span><br><span class="line"> .....</span><br><span class="line"> // We now tell the activity manager it is okay to run third party</span><br><span class="line"> // code.  It will call back into us once it has gotten to the state</span><br><span class="line"> // where third party code can really run (but before it has actually</span><br><span class="line"> // started launching the initial applications), for us to complete our</span><br><span class="line"> // initialization.</span><br><span class="line"> mActivityManagerService.systemReady(new Runnable() &#123;</span><br><span class="line">	 @Override</span><br><span class="line">	 public void run() &#123;</span><br><span class="line">		 Slog.i(TAG, &quot;Making services ready&quot;);</span><br><span class="line">		 .....</span><br><span class="line">	  &#125;</span><br><span class="line">	&#125;</span><br><span class="line"> .....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h4 id="ActivityManagerService-java中的mStackSupervisor-resumeFocusedStackTopActivityLocked"><a href="#ActivityManagerService-java中的mStackSupervisor-resumeFocusedStackTopActivityLocked" class="headerlink" title="ActivityManagerService.java中的mStackSupervisor.resumeFocusedStackTopActivityLocked()"></a>ActivityManagerService.java中的mStackSupervisor.resumeFocusedStackTopActivityLocked()</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public void systemReady(final Runnable goingCallback) &#123;</span><br><span class="line">     .....  </span><br><span class="line">    Slog.i(TAG, &quot;System now ready&quot;);</span><br><span class="line">    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY,</span><br><span class="line">        SystemClock.uptimeMillis());</span><br><span class="line">     .....</span><br><span class="line">      </span><br><span class="line">    synchronized (this) &#123;</span><br><span class="line">        // Only start up encryption-aware persistent apps; once user is</span><br><span class="line">        // unlocked we&apos;ll come back around and start unaware apps</span><br><span class="line">        startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);</span><br><span class="line">.....</span><br><span class="line">  //调用ActivityStackSupervisor中的resumeFocusedStackTopActivityLocked方法</span><br><span class="line">        mStackSupervisor.resumeFocusedStackTopActivityLocked();</span><br><span class="line">        mUserController.sendUserSwitchBroadcastsLocked(-1, currentUserId);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<h4 id="ActivityStackSupervisor-java中的resumeFocusedStackTopActivityLocked方法"><a href="#ActivityStackSupervisor-java中的resumeFocusedStackTopActivityLocked方法" class="headerlink" title="ActivityStackSupervisor.java中的resumeFocusedStackTopActivityLocked方法"></a>ActivityStackSupervisor.java中的resumeFocusedStackTopActivityLocked方法</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    boolean resumeFocusedStackTopActivityLocked() &#123;</span><br><span class="line">        return resumeFocusedStackTopActivityLocked(null, null, null);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">boolean resumeFocusedStackTopActivityLocked(</span><br><span class="line">            ActivityStack targetStack, ActivityRecord target, ActivityOptions targetOptions) &#123;</span><br><span class="line">        if (targetStack != null &amp;&amp; isFocusedStack(targetStack)) &#123;</span><br><span class="line">            return targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);</span><br><span class="line">        &#125;</span><br><span class="line">        final ActivityRecord r = mFocusedStack.topRunningActivityLocked();</span><br><span class="line">        if (r == null || r.state != RESUMED) &#123;</span><br><span class="line">           //调用ActivityStack中的resumeTopActivityUncheckedLocked来保证栈中的顶层Activity被重新启动</span><br><span class="line">            mFocusedStack.resumeTopActivityUncheckedLocked(null, null);</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<h4 id="ActivityStack-java中的resumeTopActivityUncheckedLocked方法"><a href="#ActivityStack-java中的resumeTopActivityUncheckedLocked方法" class="headerlink" title="ActivityStack.java中的resumeTopActivityUncheckedLocked方法"></a>ActivityStack.java中的resumeTopActivityUncheckedLocked方法</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) &#123;</span><br><span class="line">    </span><br><span class="line">    ....</span><br><span class="line"></span><br><span class="line">    boolean result = false;</span><br><span class="line">    try &#123;</span><br><span class="line">        // Protect against recursion.</span><br><span class="line">        mStackSupervisor.inResumeTopActivity = true;</span><br><span class="line">        if (mService.mLockScreenShown == ActivityManagerService.LOCK_SCREEN_LEAVING) &#123;</span><br><span class="line">            mService.mLockScreenShown = ActivityManagerService.LOCK_SCREEN_HIDDEN;</span><br><span class="line">            mService.updateSleepIfNeededLocked();</span><br><span class="line">        &#125;</span><br><span class="line">        result = resumeTopActivityInnerLocked(prev, options);</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        mStackSupervisor.inResumeTopActivity = false;</span><br><span class="line">    &#125;</span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) &#123;</span><br><span class="line">     if (DEBUG_LOCKSCREEN) mService.logLockScreen(&quot;&quot;);</span><br><span class="line">     if (!mService.mBooting &amp;&amp; !mService.mBooted) &#123;</span><br><span class="line">        // Not ready yet!</span><br><span class="line">        return false;</span><br><span class="line">    &#125; </span><br><span class="line">    .....</span><br><span class="line">    if (next == null) &#123;</span><br><span class="line">         // There are no more activities!</span><br><span class="line">         final String reason = &quot;noMoreActivities&quot;;</span><br><span class="line">         final int returnTaskType = prevTask == null || !prevTask.isOverHomeStack()</span><br><span class="line">                 ? HOME_ACTIVITY_TYPE : prevTask.getTaskToReturnTo();</span><br><span class="line">         if (!mFullscreen &amp;&amp; adjustFocusToNextFocusableStackLocked(returnTaskType, reason)) &#123;</span><br><span class="line">             // Try to move focus to the next visible stack with a running activity if this</span><br><span class="line">             // stack is not covering the entire screen.</span><br><span class="line">             return mStackSupervisor.resumeFocusedStackTopActivityLocked(</span><br><span class="line">                     mStackSupervisor.getFocusedStack(), prev, null);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         // Let&apos;s just start up the Launcher...</span><br><span class="line">         ActivityOptions.abort(options);</span><br><span class="line">         if (DEBUG_STATES) Slog.d(TAG_STATES,</span><br><span class="line">                 &quot;resumeTopActivityLocked: No more activities go home&quot;);</span><br><span class="line">         if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();</span><br><span class="line">         // Only resume home if on home display</span><br><span class="line">         //调用ActivityStackSupervisor中的方法来恢复 Launcher所在的栈</span><br><span class="line">         return isOnHomeDisplay() &amp;&amp;</span><br><span class="line">                 mStackSupervisor.resumeHomeStackTask(returnTaskType, prev, reason);</span><br><span class="line">     &#125;</span><br><span class="line">     .....</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<h5 id="ActivityStackSupervisor-java中resumeHomeStackTask方法"><a href="#ActivityStackSupervisor-java中resumeHomeStackTask方法" class="headerlink" title="ActivityStackSupervisor.java中resumeHomeStackTask方法"></a>ActivityStackSupervisor.java中resumeHomeStackTask方法</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> boolean resumeHomeStackTask(int homeStackTaskType, ActivityRecord prev, String reason) &#123;</span><br><span class="line">      if (!mService.mBooting &amp;&amp; !mService.mBooted) &#123;</span><br><span class="line">          // Not ready yet!</span><br><span class="line">          return false;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      .....</span><br><span class="line"></span><br><span class="line">      mHomeStack.moveHomeStackTaskToTop(homeStackTaskType);</span><br><span class="line">      ActivityRecord r = getHomeActivity();</span><br><span class="line">      final String myReason = reason + &quot; resumeHomeStackTask&quot;;</span><br><span class="line"></span><br><span class="line">      // Only resume home activity if isn&apos;t finishing.</span><br><span class="line">      if (r != null &amp;&amp; !r.finishing) &#123;</span><br><span class="line">          mService.setFocusedActivityLocked(r, myReason);</span><br><span class="line">          return resumeFocusedStackTopActivityLocked(mHomeStack, prev, null);</span><br><span class="line">      &#125;</span><br><span class="line">启动launcher应用的锁屏界面</span><br><span class="line">      return mService.startHomeActivityLocked(mCurrentUser, myReason);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<h5 id="Android系统启动完成，打开了Launcher应用的Home界面。"><a href="#Android系统启动完成，打开了Launcher应用的Home界面。" class="headerlink" title="Android系统启动完成，打开了Launcher应用的Home界面。"></a>Android系统启动完成，打开了Launcher应用的Home界面。</h5></blockquote>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/android_init.png" alt="image"></p>
+]]></content>
+      <categories>
+        <category>源码分析</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</title>
+    <url>/2020/05/21/%E4%BB%BF%E4%BA%AC%E4%B8%9C%E3%80%81%E6%B7%98%E5%AE%9D%E9%A6%96%E9%A1%B5%EF%BC%8C%E9%80%9A%E8%BF%87%E4%B8%A4%E5%B1%82%E5%B5%8C%E5%A5%97%E7%9A%84RecyclerView%E5%AE%9E%E7%8E%B0tab%E7%9A%84%E5%90%B8%E9%A1%B6%E6%95%88%E6%9E%9C/</url>
+    <content><![CDATA[<blockquote>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483770&amp;idx=1&amp;sn=38b95c3cff51e216248c0eb860155437&amp;chksm=fa237992cd54f084802be4b0be2b52e4f5052019d51562f65245ca8b0faf3e0d61d296fc0e7d&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a></p>
+</blockquote>
+<h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57" target="_blank" rel="noopener">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
+<a id="more"></a>
+<p>首先我们可以简单看下京东首页的效果gif，来看看我们到底是要实现什么样的效果：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/jingdong.gif" alt="image"></p>
+<p>京东首页的tab筛选区将feed分为两个部分，上面是各种不同item，tab的下半部分可以左右横滑，并且下拉可以加重更多，只要网络有数据的情况下理论上是可以无限下拉的。</p>
+<p>其实用CoordinatorLayout来实现tab吸顶，如果能将一些细节问题处理好的话，其实大致可以实现类似京东首页的这个效果，具体细节问题可以参考文章开头说的之前的文章，文章里讲了下使用CoordinatorLayout来实现类似效果遇到的动画抖动问题以及页面回弹问题以及对应的解决方法。</p>
+<p>那么为什么会不采用CoordinatorLayout来实现，转而采用嵌套RecyclerView的方式呢？</p>
+<p>首先我们来看下CoordinatorLayout实现的大致布局：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout.png" alt="image"></p>
+<p>一个问题是从AppBarLayout滑动效果是不能传递到下面的ViewPager里去的，我尝试了各种方式都没能解决掉这个问题，可以简单看下Demo效果图：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinatorlayout_fix.gif" alt="image"></p>
+<p>从gif图大致可以看到AppBarLayout滑上去之后惯性消失了，tab下面的区域是不能接着滚动的。</p>
+<blockquote>
+<p>这个惯性消失的问题，我在网上找到了一个一篇解决惯性消失的文章如下<a href="https://blog.kyleduo.com/2017/07/21/alipay-home-3-alipay-home/" target="_blank" rel="noopener">支付宝首页交互三部曲3实现支付宝首页交互</a>,实现方式大致是自己把CoordinatorLayout这套机制再实现了一遍，因为是自己实现的，里面的一些机制是比较方便改动的，它处理惯性这个问题的逻辑大致是将AppBarLayout中未消费的y轴偏移量拿出来再交由RecyclerView去滑动，代码如下：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">mHeaderView.setOnHeaderFlingUnConsumedListener(<span class="keyword">new</span> APHeaderView.OnHeaderFlingUnConsumedListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">onFlingUnConsumed</span><span class="params">(APHeaderView header, <span class="keyword">int</span> targetOffset, <span class="keyword">int</span> unconsumed)</span> </span>&#123;</span><br><span class="line">        APHeaderView.Behavior behavior = mHeaderView.getBehavior();</span><br><span class="line">        <span class="keyword">int</span> dy = -unconsumed;</span><br><span class="line">        <span class="keyword">if</span> (behavior != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mRecyclerView.scrollBy(<span class="number">0</span>, dy);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dy;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里由于篇幅原因，就不展开详细介绍了，感兴趣地同学可以点开上面的链接去研究研究，文章中也贴出了GitHub地址。</p>
+</blockquote>
+<p>我们重新回到我们一开始的问题，为什么想替换掉CoordinatorLayout，另外一个问题是CoordinatorLayout这种实现相对比较简单，但是会导致页面的嵌套层级很深，我们从上面贴出来的布局来看，view嵌套的层级特别深，而且如果我们要实现类似京东或者淘宝首页这样的效果，在TabLayout上面的区域，也就是下图箭头标注的地方必须要采用RecyclerView的来实现，因为tab上半部分的内容和个数都是不确定的，使用RecyclerView才比较方便，但是这样页面的层级就更深了，加载速度也变得更慢了。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout_fix.png" alt="image"></p>
+<h3 id="如何实现"><a href="#如何实现" class="headerlink" title="如何实现"></a>如何实现</h3><p>要抛弃CoordinatorLayout，那么如何实现呢？</p>
+<p>我们用Android Studio中的Layout Inspector工具看了下京东首页的布局，发现的确是采用两层RecyclerView嵌套来实现的，展示的布局大致如下所示：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/jingdong_layout.png" alt="image"></p>
+<p>那么接下来是怎么去实现这个效果了。其实一开始我以为要采用嵌套滚动这套机制来实现，后来发现不采用嵌套滚动机制也是可以实现的。</p>
+<p>现在我们可以大致构造这样一个布局：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested_recycler_view.png" alt="image"></p>
+<p>我们把ViewPager以及TabLayout这一块作为外部RecyclerView的一个item，ViewPager可能会有个多个内部RecyclerView，只要我们能让外部RecyclerView和内部RecyclerView的滑动事件正确分发基本就可以解决这个问题了。</p>
+<p>如果只是构造出这个布局出来，我们发现内部的RecyclerView都不会显示出来，因为滑动完全由外部RecyclerView接管了。</p>
+<p>那么重点来了，这种情况如何处理？</p>
+<p>其实RecyclerView的LayoutManager中有这两个方法用于判断RecyclerView在水平方向上和竖直方向上是否可以滚动的。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public boolean canScrollHorizontally() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public boolean canScrollVertically() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后LayoutManager有各种不同的实现LinearLayoutManager，StaggeredGridLayoutManager等</p>
+<p>这个LayoutManager中的canScrollVertically和canScrollHorizontally在RecyclerView的onInterceptTouchEvent中是会拿来作判断，判断当前RecyclerView是否需要处理滑动事件的。</p>
+<blockquote>
+<p>还有一点需要注意：我们处理内外两层RecyclerView的滑动冲突问题，主要是想解决下面两种场景：一、手指上滑时，当外部RecyclerView滑动底部的时候，内部的RecyclerView能继续去响应用户的滑动，因为内部的RecyclerView理论上是可以无限滚动的；二、手指下滑时，当内部的RecyclerView滑动到顶部的时候，外部的RecyclerView能够继续响应用户的下滑事件。</p>
+</blockquote>
+<p>其实上面已经说出了如何处理嵌套RecyclerView的最重要的点，其他的部分相当于都是一些细节的处理了。</p>
+<p>在外部RecyclerView(下面成ParentRecyclerView)中的重写LayoutManager的canScrollVertically方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fun initLayoutManager() &#123;</span><br><span class="line">    val linearLayoutManager = object :LinearLayoutManager(context) &#123;</span><br><span class="line"></span><br><span class="line">        override fun canScrollVertically():Boolean &#123;</span><br><span class="line">            //找到当前的childRecyclerView</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            //只有当前childRecyclerView滑动到顶部才认为ParentRecyclerView是可以竖直方向是可以滚动的</span><br><span class="line">            return childRecyclerView == null || childRecyclerView.isScrollTop()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    linearLayoutManager.orientation = LinearLayoutManager.VERTICAL</span><br><span class="line">    layoutManager = linearLayoutManager</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在内部RecyclerView(以下称ChildRecyclerView)中定义了isScrollTop()，用于判断ChildRecyclerView是否滚动到顶部。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fun isScrollTop(): Boolean &#123;</span><br><span class="line">    //RecyclerView.canScrollVertically(-1)的值表示是否能向下滚动，false表示已经滚动到顶部</span><br><span class="line">    return !canScrollVertically(-1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>另外，在ParentRecyclerView的onTouchEvent方法中：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override fun onTouchEvent(e: MotionEvent): Boolean &#123;</span><br><span class="line">        if(lastY == 0f) &#123;</span><br><span class="line">            lastY = e.y</span><br><span class="line">        &#125;</span><br><span class="line">        if(isScrollEnd()) &#123;</span><br><span class="line">            //如果父RecyclerView已经滑动到底部，需要让子RecyclerView滑动剩余的距离</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            childRecyclerView?.run &#123;</span><br><span class="line">                val deltaY = (lastY - e.y).toInt()</span><br><span class="line">                if(deltaY != 0) &#123;</span><br><span class="line">                    scrollBy(0,deltaY)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        lastY = e.y</span><br><span class="line">        return try &#123;</span><br><span class="line">            super.onTouchEvent(e)</span><br><span class="line">        &#125; catch (e: Exception) &#123;</span><br><span class="line">            e.printStackTrace()</span><br><span class="line">            false</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>关于滑动事件主要代码就是上面这些，具体可以可以看看项目代码<a href="https://github.com/JasonGaoH/NestedRecyclerView" target="_blank" rel="noopener">NestedRecyclerView</a>。</p>
+<p>还有关于RecyclerView的fling部分，在RecyclerView的onScrollStateChanged回调中监听y轴的总的偏移量totalDy，然后在RecyclerView不滚动的时候交由内部或者外部RecyclerView去fling，这里就不赘述了，具体可以看项目的代码。</p>
+<p>最后贴上项目的运行gif图展示：</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/NestedRecyclerView/master/gif/nested_recyclerview_1.gif" alt="image"></p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/NestedRecyclerView/master/gif/nested_recyclerview_2.gif" alt="image"></p>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>写作不易，欢迎大家点赞，如果有问题，欢迎提出一起讨论，您的点赞是我写作的最大动力，感谢！</p>
+]]></content>
+      <tags>
+        <tag>RecyclerView</tag>
       </tags>
   </entry>
   <entry>
@@ -560,58 +560,6 @@ an action to be performed on a different thread than your own.
       </categories>
       <tags>
         <tag>HashMap</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于TabLayout的indicator宽度的一次探索</title>
-    <url>/2019/03/22/%E5%85%B3%E4%BA%8ETabLayout%E7%9A%84indicator%E5%AE%BD%E5%BA%A6%E7%9A%84%E4%B8%80%E6%AC%A1%E6%8E%A2%E7%B4%A2/</url>
-    <content><![CDATA[<p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
-<blockquote>
-<p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
-</blockquote>
- <a id="more"></a>
-<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
-<p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
-<p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
-<p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
-<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left = selectedTitle.getLeft();   right = selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
-<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3" target="_blank" rel="noopener">方法一</a></p>
-<p><strong>主要代码如下：</strong><br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
-<p>这种情况下，需要指定TabLayout的tabMode为fixed，如果设置为scrollable，那么这段代码是不生效的。</p>
-<p>来看看这段代码的运行效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_3.png" alt="这里写图片描述"><br>这种情况下基本可以满足需求，这里的indicator的宽度基本和Tab的文字是等宽的。这种解决方法勉强可以达到这种需求，但是这里有个问题是当Tab的文字不统一的时候，Indicator的宽度会由最大的那个Tab的宽度决定。</p>
-<p>可以看到下面这个截图的效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_4.png" alt="这里写图片描述"></p>
-<p>如上截图，我们发现，当第二个tab的文字变长的时候，第一个tab的Indicator的宽度马上就超过了tab文字的宽度，作为一个追求完美的程序员，这样还是显得很别扭，所以接下来我们再来看看第二种方法。</p>
-<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903" target="_blank" rel="noopener">方法二</a></p>
-<p>贴上链接地址，这个作者针对第一种方式做了一些改善，我觉得文章写得很不错，不仅针对第一种方式给出了具体的方法，而且分析了为什么采取这种方式。</p>
-<p>这里简单总结下，你也可以点击上面的链接看原作者的分析。我们注意到，TabLayout内部对Tab的宽度有个特殊的处理，在onMeasure方法中，如下面的截图，首先循环遍历，取出Tab的最大宽度，然后再循环将最大的宽度设置为每个Tab的宽度，这样tab的宽度总是以所有tab中最大宽度的那个值来决定，而我们每个Tab的Indicator的width是和每个Tab的宽度相关的.<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_5.png" alt="这里写图片描述"></p>
-<p>我们来看下关键代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
-<p>通过反射拿到每个TabView的宽度，拿到TabView中每个TextView宽度，将TextView的宽度设置给每个TabView，这样我们的Tab的宽度就被压缩了，同时，每个Tab的Indicator的宽度就能和Tab的文字部分保持同样的宽度了。</p>
-<p>这种方式的效果截图如下：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_6.png" alt="这里写图片描述"></p>
-<p>这样看，是不是就没有上面的问题了。每个Tab的Indicator的width基本可以合Tab的文字宽度保持一致了。但是这里还有一个问题，就是采用这种方法虽然可以解决每个Tab的Indicator宽度太长的问题，但是，上面两种方法都有一个特点，就是通过反射将每个tab的padding设置为0，这样会导致每个tab的可点击区域变得很小，我么打开开发者模式里面显示布局边距这个选项来看下我们刚才的解决方法运行的截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_7.png" alt="这里写图片描述"><br>通过上面的截图可以清楚地发现每个tab的可点击区域被压缩得很窄。虽然这个在某些方面看来是可以接受的，但是我们来看文章最开始这张图。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"></p>
-<p>这里我么如果采取上面两种方式来压缩Tab来改变Indicator的width的话，就会导致每个Tab的边距变得很小，这样，就会导致Tab的可点击区域变小，这对于app的首页来说，肯定是不能接受的。所以，针对这一点来说，上面两种方式都是不符合要求的，所以需要找另一种方法来解决这个问题。</p>
-<h3 id="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"><a href="#第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。" class="headerlink" title="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"></a>第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。</h3><p>简单来说，就是将原生TabLayout代码复制一份，作为自己的代码，这样可以很容易地改动里面的代码，在使用的时候直接引用我们自己的这个TabLayout就行。</p>
-<p>接下来我们需要改原生TabLayout的一些逻辑，在保留原生TabLayout一些自定义属性的基础上，添加可以自定义Indicator的width的属性，<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_9.png" alt="这里写图片描述"></p>
-<p><strong>在代码中主要改两个地方，第一个地方如下</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_10.png" alt="这里写图片描述"></p>
-<p>在updateIndicatorPosition方法中，这里在处理Indicator的宽度的时候不是以Tab的左边坐标来算，将Indicator的left和right进行如下设置。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
-<p>并且，对于Indicator滑动中的状态也做相应的处理，即当mSelectionOffset大于0时对Indicator的left和right做同样的处理。</p>
-<p><strong>第二个改动的地方:</strong><br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png" alt="这里写图片描述"></p>
-<p>这里改动的是animateIndicatorToPosition方法，根据名字就可以基本知道这个是对Tab切换时Indicator的动画处理。</p>
-<p>如上截图，可以知道这个targetView就是TabLayout的每个Tab，对于targetLeft和targetRight我们做上面同样的处理。</p>
-<p>接下来我们可以验证下我们这样的改动方法是否有效，简单看下效果图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png" alt="这里写图片描述"></p>
-<p>可以看到，我们可以让TabLayout的Tab的可点击区域保持不变，并且可以修改Tab下面的Indicator的宽度，这里我们提供了TabLayout的Indicator的width的自定义。</p>
-<p>不多说，最后看下统一的效果截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png" alt="这里写图片描述"></p>
-<p><a href="https://github.com/JasonGaoH/XTabLayout/" target="_blank" rel="noopener">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
-<p>最后，感谢大家阅读这篇文章，如果觉得写得还不错的话，点个赞呗，实在不行，留个言也可以接受。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>TabLayout</tag>
       </tags>
   </entry>
   <entry>
@@ -810,6 +758,58 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
+    <title>关于TabLayout的indicator宽度的一次探索</title>
+    <url>/2019/03/22/%E5%85%B3%E4%BA%8ETabLayout%E7%9A%84indicator%E5%AE%BD%E5%BA%A6%E7%9A%84%E4%B8%80%E6%AC%A1%E6%8E%A2%E7%B4%A2/</url>
+    <content><![CDATA[<p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
+<blockquote>
+<p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
+</blockquote>
+ <a id="more"></a>
+<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
+<p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
+<p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
+<p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
+<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left = selectedTitle.getLeft();   right = selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
+<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3" target="_blank" rel="noopener">方法一</a></p>
+<p><strong>主要代码如下：</strong><br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这种情况下，需要指定TabLayout的tabMode为fixed，如果设置为scrollable，那么这段代码是不生效的。</p>
+<p>来看看这段代码的运行效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_3.png" alt="这里写图片描述"><br>这种情况下基本可以满足需求，这里的indicator的宽度基本和Tab的文字是等宽的。这种解决方法勉强可以达到这种需求，但是这里有个问题是当Tab的文字不统一的时候，Indicator的宽度会由最大的那个Tab的宽度决定。</p>
+<p>可以看到下面这个截图的效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_4.png" alt="这里写图片描述"></p>
+<p>如上截图，我们发现，当第二个tab的文字变长的时候，第一个tab的Indicator的宽度马上就超过了tab文字的宽度，作为一个追求完美的程序员，这样还是显得很别扭，所以接下来我们再来看看第二种方法。</p>
+<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903" target="_blank" rel="noopener">方法二</a></p>
+<p>贴上链接地址，这个作者针对第一种方式做了一些改善，我觉得文章写得很不错，不仅针对第一种方式给出了具体的方法，而且分析了为什么采取这种方式。</p>
+<p>这里简单总结下，你也可以点击上面的链接看原作者的分析。我们注意到，TabLayout内部对Tab的宽度有个特殊的处理，在onMeasure方法中，如下面的截图，首先循环遍历，取出Tab的最大宽度，然后再循环将最大的宽度设置为每个Tab的宽度，这样tab的宽度总是以所有tab中最大宽度的那个值来决定，而我们每个Tab的Indicator的width是和每个Tab的宽度相关的.<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_5.png" alt="这里写图片描述"></p>
+<p>我们来看下关键代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>通过反射拿到每个TabView的宽度，拿到TabView中每个TextView宽度，将TextView的宽度设置给每个TabView，这样我们的Tab的宽度就被压缩了，同时，每个Tab的Indicator的宽度就能和Tab的文字部分保持同样的宽度了。</p>
+<p>这种方式的效果截图如下：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_6.png" alt="这里写图片描述"></p>
+<p>这样看，是不是就没有上面的问题了。每个Tab的Indicator的width基本可以合Tab的文字宽度保持一致了。但是这里还有一个问题，就是采用这种方法虽然可以解决每个Tab的Indicator宽度太长的问题，但是，上面两种方法都有一个特点，就是通过反射将每个tab的padding设置为0，这样会导致每个tab的可点击区域变得很小，我么打开开发者模式里面显示布局边距这个选项来看下我们刚才的解决方法运行的截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_7.png" alt="这里写图片描述"><br>通过上面的截图可以清楚地发现每个tab的可点击区域被压缩得很窄。虽然这个在某些方面看来是可以接受的，但是我们来看文章最开始这张图。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"></p>
+<p>这里我么如果采取上面两种方式来压缩Tab来改变Indicator的width的话，就会导致每个Tab的边距变得很小，这样，就会导致Tab的可点击区域变小，这对于app的首页来说，肯定是不能接受的。所以，针对这一点来说，上面两种方式都是不符合要求的，所以需要找另一种方法来解决这个问题。</p>
+<h3 id="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"><a href="#第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。" class="headerlink" title="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"></a>第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。</h3><p>简单来说，就是将原生TabLayout代码复制一份，作为自己的代码，这样可以很容易地改动里面的代码，在使用的时候直接引用我们自己的这个TabLayout就行。</p>
+<p>接下来我们需要改原生TabLayout的一些逻辑，在保留原生TabLayout一些自定义属性的基础上，添加可以自定义Indicator的width的属性，<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_9.png" alt="这里写图片描述"></p>
+<p><strong>在代码中主要改两个地方，第一个地方如下</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_10.png" alt="这里写图片描述"></p>
+<p>在updateIndicatorPosition方法中，这里在处理Indicator的宽度的时候不是以Tab的左边坐标来算，将Indicator的left和right进行如下设置。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
+<p>并且，对于Indicator滑动中的状态也做相应的处理，即当mSelectionOffset大于0时对Indicator的left和right做同样的处理。</p>
+<p><strong>第二个改动的地方:</strong><br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png" alt="这里写图片描述"></p>
+<p>这里改动的是animateIndicatorToPosition方法，根据名字就可以基本知道这个是对Tab切换时Indicator的动画处理。</p>
+<p>如上截图，可以知道这个targetView就是TabLayout的每个Tab，对于targetLeft和targetRight我们做上面同样的处理。</p>
+<p>接下来我们可以验证下我们这样的改动方法是否有效，简单看下效果图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png" alt="这里写图片描述"></p>
+<p>可以看到，我们可以让TabLayout的Tab的可点击区域保持不变，并且可以修改Tab下面的Indicator的宽度，这里我们提供了TabLayout的Indicator的width的自定义。</p>
+<p>不多说，最后看下统一的效果截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png" alt="这里写图片描述"></p>
+<p><a href="https://github.com/JasonGaoH/XTabLayout/" target="_blank" rel="noopener">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
+<p>最后，感谢大家阅读这篇文章，如果觉得写得还不错的话，点个赞呗，实在不行，留个言也可以接受。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>TabLayout</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>快到年底的年中总结</title>
     <url>/2020/08/06/%E5%BF%AB%E5%88%B0%E5%B9%B4%E5%BA%95%E7%9A%84%E5%B9%B4%E4%B8%AD%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<p>今天聊聊技术以外的话题。</p>
@@ -852,139 +852,117 @@ an action to be performed on a different thread than your own.
 ]]></content>
   </entry>
   <entry>
-    <title>你可能需要这份大厂面经</title>
-    <url>/2020/08/29/%E6%88%91%E7%9A%842020%E5%B9%B4Android%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/</url>
-    <content><![CDATA[<p>今年小红书这边发完年终奖之后，心里隐隐觉得要出去看看机会，因为在小红书这边已经呆了快三年了，对于一些技术，业务总觉得有点麻木了，内心里总觉得自己啥都会了，但是很多只是知道个皮毛。</p>
-<p>有句话是这么说的，一个人在一个地方待久了，内心里以为他所处的这个环境就是全世界，所以想着做些改变，不管结果如何，至少让自己走出舒适区，同时也想着能去大厂看看。</p>
+    <title>分享一些有价值的博客</title>
+    <url>/2022/04/09/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>这周的文章延迟了。</p>
+<p>最近比较忙，清明节都在家里加班。</p>
 <a id="more"></a>
-<p>其实大家也不能特别迷信大厂，认为加入大厂就没有后顾之忧了，只能说目前对我现在这个阶段来说，加入大厂刷一下自己的大厂背景这个对于自己当下来说还是有益的。</p>
-<p>一开始也是不确定到底要不要出去看机会，一个是因为疫情，另一个是内心里总觉得没有准备好，其实很多事情在你开始行动的时候就没有那么多顾虑了，就像很多人在学生时代考试时一样，永远都会觉得自己没有复习好，但勇敢地迈出第一步，后面基本就没啥可恐惧的了。</p>
-<p>自己这段时间主要就面试了三家公司吧，字节，腾讯和阿里，但经历的面试场次感觉有十来场了，有的对应的是同一公司的不同业务吧，字节面的两个业务部门都失败了，腾讯那边QQ音乐团队给了Offer，阿里这边也给了Offer，说实话，面试还是蛮累的，于是后面其他的公司也没有再尝试了。</p>
-<h2 id="字节"><a href="#字节" class="headerlink" title="字节"></a>字节</h2><p>最开始面试的是字节在上海这边的在线教育部门，这算是自己今年的第一次面试吧。</p>
-<p>由于当时是处于一个基本没有啥准备的状态下面试的，最早是由于之前同事海哥帮忙内推的，我一开始的时候也是有点没想好是不是要面试，但因为海哥说了几次，索性我就面面看看吧，因为自己这个时间点基本是没有怎么准备，所以面试答的不怎么好，另外就是字节对于算法比较看重，我当时算法题没些出来，所以这一面基本就没有后续了。</p>
-<p>这次主要问了以下几个问题，都是我面试完通过记忆记录下来的。</p>
-<p>首先是自我介绍吧，介绍之前的一些经历和项目</p>
+<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
+<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
+<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
+<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
+<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
+<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
+<p>这个是我feedly的截图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG102.jpeg" alt></p>
+<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
+<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
+<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
+<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
+<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
+<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
+<p>还有一些英文的博客：</p>
+<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
+<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
 <ul>
-<li>做过哪些app的性能优化</li>
-<li>使用什么工具进行内存分析</li>
-<li>讲讲事件拦截机制</li>
-<li>对于网络的理解，http和https的区别</li>
-<li>讲讲对于UI的理解</li>
-<li>安全，怎么保证安全，除了网络层的安全，app其他地方如何保证安全</li>
-<li>App为什么要签名</li>
-<li>算法题，最大区间问题 已知一天内用户登录登出的日志（数据量较大），求这一天用户在线的最大峰值和持续时间段 日志包含字段（userid, login_time, logout_time） 登录登出时间精确到秒<br>从这次我也还是懒懒散散地在准备中，可能面试失败对我并没有产生多太多触动。</li>
-</ul>
-<p>这次面试没有后续之后，后来字节这边有个安全的团队也说是要和我聊聊，这次面试的时间是在周六，当时一共进行了两场面试，为什么是安全团队呢，因为他们看我的简历发现我是信息安全毕业的，但是说句实话，学校里学的那些关于信息安全相关的知识离工程实践还是有点远的，所以这次面试我基本上都是全程懵逼状态。</p>
-<p>下面列举的是这次面试的一些问题：</p>
-<ul>
-<li>bindService的流程</li>
-<li>应用双开的机制</li>
-<li>第三方的权限拦截</li>
-<li>自我hook</li>
-<li>gps的定位模拟</li>
-<li>imei号的伪造</li>
-<li>socket通信 JNI 输入</li>
-<li>WebView的读文件flag在4.4是否开启</li>
-<li>Android中的网络通信方式有哪些</li>
-<li>IPC的方式</li>
-<li>广播实现IPC方式的话有什么安全隐患，需要注意什么</li>
-</ul>
-<p>字节这边后面还面过抖音的上海部门，这会已经是后面了，因为这时基本已经拿到腾讯的Offer了，阿里这边也还在面试流程中，所以就想着面面看看情况，这次是一个之前的同事的同事帮忙内推的，这里同样列举下问的问题：</p>
-<ul>
-<li>问了我简历中做的那个吸顶效果，怎么实现的</li>
-<li>对象的创建的流程</li>
-<li>事件分发的流程</li>
-<li>OOM发生在哪些区域</li>
-<li>方法区加载的类是否会被GC</li>
-<li>startActivity的流程</li>
-<li>开机启动的流程</li>
-<li>RN的工作原理</li>
-<li>fluter了解嘛</li>
-<li>RN有些时候为什么有留白</li>
-<li>包体积优化</li>
-<li>Android的系统架构</li>
-<li>小红书首页过渡严重，过度绘制的解决</li>
-<li>优化做过哪些，数据是怎么样的</li>
-<li>小红书笔详的引导是怎么做的</li>
-<li>Android为什么有多进程，单进程都没有多进程通信的问题了，不挺好的嘛</li>
-<li>双指按下去一个View不抬起将View滑出屏幕这个流程是怎么样的</li>
-<li>yogo是干什么的</li>
-<li>litho的原理是什么</li>
-<li>指定start和end位置的链表的翻转</li>
-</ul>
-<p>相对来说，我觉得抖音的这次面试有些问题问的还是比较有难度的，加上我后面给了个算法题也还是没能写出来。所以基本上后续也没有消息了，唉，感觉自己还是太菜了。字节每一轮面试都会问一个算法，对于算法的考察应该算是大厂里面比较严格的。</p>
-<h2 id="腾讯"><a href="#腾讯" class="headerlink" title="腾讯"></a>腾讯</h2><p>后面有个猎头说是微信那边要招人，说是机会不错，于是我决定试试。当时想着就当增加增加面试经历吧。</p>
-<p>后面猎头推荐后，广州那边有个人打电话过来说是要进行电话面试。我当时其实关于算法这一块还是没怎么复习，于是这次微信的面试直接上来就是笔试，我记得是5道算法题，还有一个关于多线程的编程问题，要求45分钟内完成。</p>
-<p>大概的题目如下：</p>
-<p>题目1（算法）：给出n(n&gt;=1)，请把1,2,…,n，最小分成m组，使得每组内的数字都互质，求m值。例如n=7，可最小划分成3组，{1, 2, 3}, {4, 5}, {6, 7}<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">findmin</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>题目2（算法）：给定一个递增循环整数数组，从里面找出最小的元素，使用的算法越快越好。特别地，最小的元素可能出现在数组中间。比如：50, 52, 63, 90, 3, 8, 15, 44。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem2</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">findmin</span><span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//TODO</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>题目3（算法）：在二叉排序树上面找出第3大的节点。注意：不能把二叉树全量存储到另外的存储空间，比如存储到数组中，然后取出数组的第三个元素。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> value;</span><br><span class="line">    TreeNode left, right;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem3</span> </span>&#123;</span><br><span class="line">  <span class="function">TreeNode <span class="title">find</span><span class="params">(TreeNode root)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>题目4（语法）：用Java语言实现System#arraycopy数组拷贝，注意：不能直接使用System.arraycopy</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem4</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">arraycopy</span><span class="params">(Object src, <span class="keyword">int</span> srcPos, Object dest, <span class="keyword">int</span> destPos, <span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>题目5（多线程）：阅读下面代码，在2线程环境下，设计一个方案，判断无限数据流(Stream)每个正整数是否素数，越快越好<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Stream</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">long</span> <span class="title">get</span><span class="params">()</span></span>; <span class="comment">// 获取下一个需判断的整数</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">boolean</span> result)</span></span>; <span class="comment">// 返回整数是否素数的结果</span></span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrimeNumber</span><span class="params">(<span class="keyword">long</span> num)</span> </span>&#123; <span class="comment">// 判断一个整数是否素数</span></span><br><span class="line">    <span class="keyword">if</span> (num &lt; <span class="number">2</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">2</span>, s = (<span class="keyword">long</span>) Math.sqrt(num); i &lt;= s; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (num % i == <span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> Stream <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> (Stream) Class.forName(<span class="string">"StreamImpl"</span>).newInstance(); <span class="comment">// 运行环境保证不会异常</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//比如：Stream=&#123;1,2,3,4,...&#125;, Result=&#123;false,true,true,false,...&#125;，注意输出顺序。</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Problem</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> Stream stream = Stream.getInstance();</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Problem instance = <span class="keyword">new</span> Problem();</span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread1();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">"thread1"</span>).start();</span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread2();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">"thread2"</span>).start();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">thread1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">thread2</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>因为之前没准备，我当时连二叉搜索树是有序的这个概念都忘了，把二叉搜索树当做普通的二叉树去处理了，感觉当时在45分钟过后，面试官操着一口广东味的普通话来我和沟通的时候，让我当时有种直接挂断电话的冲动，总之，就感觉这次面试体验很不好，让我有种想去撞墙的冲动。</p>
-<p>也是从这个时候开始，开始意识到要好好准备算法，不然真的是没有继续面下去的必要。</p>
-<p>微信这边的面试基本没有后续了，答得这么差，有后续才怪咧。</p>
-<p>后面我的简历应该是被收到腾讯的人才库里去了，于是有深圳那边的业务开始打电话给我说是要面试。</p>
-<p>一开始是深圳的一个做SDK的部门，和我进行了一次腾讯会议的视频面试。这次基本就是聊技术，这个面试官对我的评价不错，主要聊了聊我在小红书做的一些东西和自己平时做的一些技术沉淀，然后问了一些Android相关的技术问题，觉得我的表现不错，但是因为他们是做SDK的，和我这边的经历不是特别匹配，面试官当时也直接说了可能不是特别匹配，但是他说会在面试反馈中给予我比较好的面试评价。</p>
-<p>可能也是因为这个原因，后面我的简历又被腾讯的其他业务部门捞起来了。</p>
-<p>首先是手机QQ团队，一面面试官问的都是一些Java和Android 基础问题，但是问的比较多，基本上各个知识点都问到了一些。</p>
-<p>一面基本上问了下面一些问题：</p>
-<ul>
-<li>做过哪些内存优化</li>
-<li>内存抖动，如何定位内存抖动</li>
-<li>view移动用动画实现有哪些方式</li>
-<li>自己实现区域解码，decodeFileDescriptor</li>
-<li>scrollto 和 scrollby 的区别</li>
-<li>内存泄漏如何分析</li>
-<li>mvc，mvp和mvvm的区别</li>
-<li>mvvm的缺点是什么，mvvm为啥不用DataBinding，不用DataBinding怎么实现双向绑定</li>
-<li>leakcanary 的原理</li>
-<li>事件冲突如何自己解决</li>
-<li>RecyclerView和ListView的区别</li>
-<li>Service和IntentService的区别</li>
-<li>Service如何stop，bindService的方式如何stop</li>
-<li>aidl 的原理</li>
-<li>多进程通信方式</li>
-<li>自己实现过多进程吗</li>
-<li>HashMap的原理是什么</li>
-<li>红黑树的原理是什么</li>
-<li>Handler可以在多个线程里使用嘛，有几个消息队列，每个线程的消息是如何发到另一个线程的</li>
-<li>aidl 自己写如何实现</li>
-<li>用过哪些设计模式，设计模式</li>
-<li><p>工厂和抽象工厂的区别（因为上面我说在项目中实践过工厂设计模式，所以他就问了工厂和抽象工厂的区别）<br>手Q二面是视频面试，问的问题是比较抽象一点，感觉一般没有固定的答案。</p>
+<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
 </li>
-<li><p>如果不采用改变Bitmap config的这种方式，如何做Bitmap的内存优化</p>
+<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
 </li>
-<li>网络优化怎么做</li>
-<li>单元测试</li>
-<li>硬件加速的原理，硬件加速是如何工作的</li>
-<li>RecyclerView 滑动到item不可见后，这部分内存时是如何回收的</li>
-<li>卡顿检测怎么做，如何上报</li>
-<li>写个死锁的代码</li>
-<li>假如字符串中所有字符都不重复，如何输出字符串的所有组合。例如：abc，结果应是a,b,c,ab,ac,bc,abc。</li>
+<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
+</li>
 </ul>
-<p>二面答的问题基本没怎么答好，有的是自己不怎么涉及这些，有些则是对于某些理解不够深入。其实我觉得这次面试失败是因为这个几个问题没回答好，我能感觉到面试官有种不想继续聊下去的冲动了，后面则是象征性地出了一道算法题。</p>
-<p>接着收到了QQ音乐的面试邀请，这次面了好几轮，一开始是那边的HR给我打了个电话，基本就是聊为啥换工作，能不能去深圳这样，以及在小红书的工作内容等等。</p>
-<p>接着面了好几轮，两轮技术面，一轮交叉面，还有总经理面试，最后还有HR面，因为面的轮次比较多，当时对于面试题也没有特殊整理，不过大概问的问题都是这些东西，和之前的面试问题大差不差。</p>
-<p>面到后来QQ音乐这边算是通过了，给的Offer还可以。</p>
-<p>腾讯这边还面过腾讯视频的岗位，这个是在自己懒散的情况下进行的，因为基本确定要去哪了，当时就想着涨涨面试经验啥的。这次面试基本面试完之后我就觉得没有后续了。下面是问的一些问题：</p>
-<p>算法题：输入[“eat”,”ate”,””tea”,”and”,”den”] 要求输出“换位词”，[[“eat”,”ate”,””tea”],[”and”],[”den”]]</p>
+<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
+<p>下面放一些目前的阅读笔记吧。</p>
+<p>挣钱不是一件事情，而是一种技巧。</p>
+<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
+<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
+<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
+<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
+<p>销售技巧是一种形式的独特知识。</p>
+<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
+<p>Sales skills </p>
+<p>Musical talents, with the ability to pick up any instrument </p>
+<p>An obsessive personality: you dive into things and remember them quickly </p>
+<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
+<p>Playing a lot of games, you understand game theory pretty well </p>
+<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
+<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
+<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
+<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
+<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
+<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
+<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
+<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
+<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
+<p>跟随你的好奇心去做事，而不是追寻热点。</p>
+<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
+<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
+<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
+<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
+<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
+<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
+<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
+<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
+<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
+<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>如何更好得阅读</title>
+    <url>/2022/04/15/%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E5%BE%97%E9%98%85%E8%AF%BB/</url>
+    <content><![CDATA[<p>今天在看geekplux的这篇 <a href="https://geekplux.com/newsletters/14" target="_blank" rel="noopener">我获取信息的方法 -#14</a> Newsletter的时候，在感慨作者获取信息源这么丰富的同时，发现原来自己最近的几篇文章其实算不上是博客，更应该算是一种Newsletter的形式。博客通常是有主题的，而Newsletter更多的时候算是一种信息输入后的整理输出，通常有多个主题。</p>
+<p>相对Newsletter来说，博客需要更多的时间去整理，去思考，而对于我每天10105的上班节奏来说，没有太多时间去整理输出类似博客这种相对有深度的文章。</p>
+<p>接下来，每周更多的是分享的一些Reading List，内容涉及书籍，博客，Newsletter，Twitter或YouTube等形式。</p>
+<p>这周讲讲如何更好的阅读。</p>
+<a id="more"></a>
+<p>Farnam Street上的两篇文章：</p>
 <ul>
-<li>业务上做的有挑战性的东西是啥</li>
-<li>RxJava底层进行数据通信的原理</li>
-<li>RxJava和EventBus做通信的区别</li>
-<li>线程的状态</li>
-<li>线程的两种创建状态</li>
-<li>线程池的种类，以及内部是如何管理线程的，什么时候创建，什么时候让线程运行</li>
+<li><a href="https://fs.blog/reading/" target="_blank" rel="noopener">Reading Better</a></li>
+<li><a href="https://fs.blog/remember-books/" target="_blank" rel="noopener">How to remember what you read</a></li>
 </ul>
-<h2 id="阿里"><a href="#阿里" class="headerlink" title="阿里"></a>阿里</h2><p>阿里这边就让同事认识的一个阿里员工内推了阿里的岗位，这次面的是淘宝下面的一个业务。当时是在差不多拿到QQ音乐Offer的时候开始的，当时也没有想太多，反正就是想试试，因为当时想的是，拿不到这边的机会，就去深圳工作去。</p>
-<p>阿里的面试一面问的基本都是业务相关的，基本就是讲自己在小红书做的东西和一些Android基础知识。这几次面试我也没有做什么面试题的记录。</p>
-<p>二面上来也是问技术啥的，后来搞了三个笔试题，一个是排序问题，一个是用栈来模拟队列，还有一个是写一个小的商品feed流的demo，难度不是特别大，关于问的一些具体的面试题我也忘了，差不多都是那些东西吧。</p>
-<p>最后一面是HR和Leader一起的终面，Leader应该是这个业务线的领导，没有问具体的技术问题，问的都是一些比较开放的问题，阿里的这次面试整体感觉还算顺利吧，后面就是算是通过了，给了Offer。</p>
-<p>基本上，自己面试比较顺利的几次都没有记录下来。关于Offer的选择，腾讯相对阿里，杭州相对深圳，压力要小很多，所以决定去阿里，所以就拒了QQ音乐这边的机会，但是心里还是蛮喜欢这个工作岗位的。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整体说来，这段时间的面试不能算是成功的，很多面试都没有通过，通过的还有运气成分在里面吧，这也提醒我自己要学习的东西还有好多吧，尤其自己在算法这一块还是比较薄弱的，对大多数人来说，算法题这块没有啥捷径吧，就是多刷题吧。</p>
-<p>我记录这些希望能对面试的人有些帮助吧，因为之前很多人让我写面经啥的，我也不太清楚怎么写，就是把一些问题记录下来吧，如果你觉得有帮助，可以帮忙点赞分享下，感谢。</p>
+<p>如何更好得阅读，有以下一些技巧：</p>
+<ul>
+<li>我们要学会筛选好书和坏书，我们的时间是宝贵的，坏书不值得我们浪费时间，而好书值得我们反复阅读。</li>
+<li>阅读有4个境界，为了娱乐阅读，为了了解阅读，为了理解阅读，为了掌握阅读。这个其实没有好坏之分，没有说为了娱乐阅读就一定比为了掌握阅读要低级，当你能从阅读中找到乐趣，这其实是个好事情。Naval就说过，阅读那些你喜欢的书直到你喜欢阅读为止。</li>
+<li>不要关注阅读速度，阅读的关键不在速度，而在你是否从中吸收了知识。</li>
+<li>如何选择好书？阅读经典的书，新书里面虽然有好书，但是数量不多，有很多质量不高的书，而经典的书经过时间的考验，值得花时间阅读。</li>
+<li>记笔记能提高你的阅读效率。文章中介绍了一种记笔记的方式如下：<ul>
+<li>在每个章节结尾写下这一章的总结或者一些特别的观点，要用自己的话写出来。</li>
+<li>在读完一周后，再回来回顾一下之前的笔记。盖上书本，尝试用你自己的话写下来这本书的主要观点，如果你发现有点困难，再重新去看你的笔记。这其实来自于<a href="https://baike.baidu.com/item/%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95/50895393#:~:text=%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95%E7%9A%84,%E6%B3%A8%E9%87%8D%E4%BA%86%E8%A7%A3%E6%9F%90%E4%BB%B6%E4%BA%8B%E7%89%A9%E3%80%82" target="_blank" rel="noopener">费曼学习法</a>。</li>
+<li>最后，将这些摘要手写抄下来或者输入到笔记工具(如EverNote)中去。</li>
+</ul>
+</li>
+</ul>
+<p>如何记住我们阅读的东西？这篇文章和上面那篇文章有些观点类似，这里就介绍一些不一样的观点。</p>
+<ul>
+<li>不要关注阅读的数量，要关注质量。</li>
+<li>不要去关注那些华而不实的App或者工具，关注书本的内容即可。</li>
+<li><p>不应该阅读让你觉得很枯燥的书，也不一定非得把某本书读完。</p>
+</li>
+<li><p>什么是主动阅读？你要在阅读某本书之前以及在整个阅读过程中你需要弄清楚你想在书中学到什么或者收获什么，将书中的内容和自己现有的知识进行关联，并尝试去应用这些知识。</p>
+</li>
+</ul>
+<p>之前看过Jiayuan的推文总结<a href="https://twitter.com/Tisoga/status/1260430958345543687?t=L4nvHixGM2gUEj4JWHuxJw&amp;s=19" target="_blank" rel="noopener">3wh2t阅读法</a>，我觉得总结的很好，这里介绍下。</p>
+<p>2wh2t的意思是Why，Who，What，How，Think以及Todo。</p>
+<p>Why表示为什么阅读，也就是要带着目的去阅读，当你带着目的去阅读的时候才会促进你思考，漫无目的的阅读其实就是在浪费时间。</p>
+<p>Who表示是谁，这本书是谁写的，以及书中介绍了哪些人物。这个点我理解不是必需的，但是如果你知道这些，比如作者写这本书的上下文，能够帮助更好得理解书本中的内容。</p>
+<p>What表示书写的是什么，你要搞清楚书中写的是什么，比如前面说到的通过费曼学习法来帮助自己记住书中的观点。</p>
+<p>How则表示怎么做，作者是怎么教你做的。</p>
+<p>最后2个t，一个表示Think(思考)，一个表示Todo(行动)。读完这本书给你带来的思考是什么？每个人的阅历都是不同的，你肯定有你自己不一样的思考，而这个思考才是真正属于你自己的东西。另一个表示行动，行动才是最重要的，没有付诸行动的想法不过是你脑中的一个概念而已。</p>
+<p>另外，上面的一些想法和之前读过的《麦肯锡精英高效阅读法》很多观点不谋而合，推荐大家去阅读这边书。</p>
+<p>最后放一下按照2wh2t 方法总结的《麦肯锡精英高效阅读法》的思维导图，思维导图是Jiayuan制作的，我是觉得总结的很好，就放在这里了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic20230904192030.png" alt></p>
 ]]></content>
   </entry>
   <entry>
@@ -1215,6 +1193,142 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
+    <title>你可能需要这份大厂面经</title>
+    <url>/2020/08/29/%E6%88%91%E7%9A%842020%E5%B9%B4Android%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/</url>
+    <content><![CDATA[<p>今年小红书这边发完年终奖之后，心里隐隐觉得要出去看看机会，因为在小红书这边已经呆了快三年了，对于一些技术，业务总觉得有点麻木了，内心里总觉得自己啥都会了，但是很多只是知道个皮毛。</p>
+<p>有句话是这么说的，一个人在一个地方待久了，内心里以为他所处的这个环境就是全世界，所以想着做些改变，不管结果如何，至少让自己走出舒适区，同时也想着能去大厂看看。</p>
+<a id="more"></a>
+<p>其实大家也不能特别迷信大厂，认为加入大厂就没有后顾之忧了，只能说目前对我现在这个阶段来说，加入大厂刷一下自己的大厂背景这个对于自己当下来说还是有益的。</p>
+<p>一开始也是不确定到底要不要出去看机会，一个是因为疫情，另一个是内心里总觉得没有准备好，其实很多事情在你开始行动的时候就没有那么多顾虑了，就像很多人在学生时代考试时一样，永远都会觉得自己没有复习好，但勇敢地迈出第一步，后面基本就没啥可恐惧的了。</p>
+<p>自己这段时间主要就面试了三家公司吧，字节，腾讯和阿里，但经历的面试场次感觉有十来场了，有的对应的是同一公司的不同业务吧，字节面的两个业务部门都失败了，腾讯那边QQ音乐团队给了Offer，阿里这边也给了Offer，说实话，面试还是蛮累的，于是后面其他的公司也没有再尝试了。</p>
+<h2 id="字节"><a href="#字节" class="headerlink" title="字节"></a>字节</h2><p>最开始面试的是字节在上海这边的在线教育部门，这算是自己今年的第一次面试吧。</p>
+<p>由于当时是处于一个基本没有啥准备的状态下面试的，最早是由于之前同事海哥帮忙内推的，我一开始的时候也是有点没想好是不是要面试，但因为海哥说了几次，索性我就面面看看吧，因为自己这个时间点基本是没有怎么准备，所以面试答的不怎么好，另外就是字节对于算法比较看重，我当时算法题没些出来，所以这一面基本就没有后续了。</p>
+<p>这次主要问了以下几个问题，都是我面试完通过记忆记录下来的。</p>
+<p>首先是自我介绍吧，介绍之前的一些经历和项目</p>
+<ul>
+<li>做过哪些app的性能优化</li>
+<li>使用什么工具进行内存分析</li>
+<li>讲讲事件拦截机制</li>
+<li>对于网络的理解，http和https的区别</li>
+<li>讲讲对于UI的理解</li>
+<li>安全，怎么保证安全，除了网络层的安全，app其他地方如何保证安全</li>
+<li>App为什么要签名</li>
+<li>算法题，最大区间问题 已知一天内用户登录登出的日志（数据量较大），求这一天用户在线的最大峰值和持续时间段 日志包含字段（userid, login_time, logout_time） 登录登出时间精确到秒<br>从这次我也还是懒懒散散地在准备中，可能面试失败对我并没有产生多太多触动。</li>
+</ul>
+<p>这次面试没有后续之后，后来字节这边有个安全的团队也说是要和我聊聊，这次面试的时间是在周六，当时一共进行了两场面试，为什么是安全团队呢，因为他们看我的简历发现我是信息安全毕业的，但是说句实话，学校里学的那些关于信息安全相关的知识离工程实践还是有点远的，所以这次面试我基本上都是全程懵逼状态。</p>
+<p>下面列举的是这次面试的一些问题：</p>
+<ul>
+<li>bindService的流程</li>
+<li>应用双开的机制</li>
+<li>第三方的权限拦截</li>
+<li>自我hook</li>
+<li>gps的定位模拟</li>
+<li>imei号的伪造</li>
+<li>socket通信 JNI 输入</li>
+<li>WebView的读文件flag在4.4是否开启</li>
+<li>Android中的网络通信方式有哪些</li>
+<li>IPC的方式</li>
+<li>广播实现IPC方式的话有什么安全隐患，需要注意什么</li>
+</ul>
+<p>字节这边后面还面过抖音的上海部门，这会已经是后面了，因为这时基本已经拿到腾讯的Offer了，阿里这边也还在面试流程中，所以就想着面面看看情况，这次是一个之前的同事的同事帮忙内推的，这里同样列举下问的问题：</p>
+<ul>
+<li>问了我简历中做的那个吸顶效果，怎么实现的</li>
+<li>对象的创建的流程</li>
+<li>事件分发的流程</li>
+<li>OOM发生在哪些区域</li>
+<li>方法区加载的类是否会被GC</li>
+<li>startActivity的流程</li>
+<li>开机启动的流程</li>
+<li>RN的工作原理</li>
+<li>fluter了解嘛</li>
+<li>RN有些时候为什么有留白</li>
+<li>包体积优化</li>
+<li>Android的系统架构</li>
+<li>小红书首页过渡严重，过度绘制的解决</li>
+<li>优化做过哪些，数据是怎么样的</li>
+<li>小红书笔详的引导是怎么做的</li>
+<li>Android为什么有多进程，单进程都没有多进程通信的问题了，不挺好的嘛</li>
+<li>双指按下去一个View不抬起将View滑出屏幕这个流程是怎么样的</li>
+<li>yogo是干什么的</li>
+<li>litho的原理是什么</li>
+<li>指定start和end位置的链表的翻转</li>
+</ul>
+<p>相对来说，我觉得抖音的这次面试有些问题问的还是比较有难度的，加上我后面给了个算法题也还是没能写出来。所以基本上后续也没有消息了，唉，感觉自己还是太菜了。字节每一轮面试都会问一个算法，对于算法的考察应该算是大厂里面比较严格的。</p>
+<h2 id="腾讯"><a href="#腾讯" class="headerlink" title="腾讯"></a>腾讯</h2><p>后面有个猎头说是微信那边要招人，说是机会不错，于是我决定试试。当时想着就当增加增加面试经历吧。</p>
+<p>后面猎头推荐后，广州那边有个人打电话过来说是要进行电话面试。我当时其实关于算法这一块还是没怎么复习，于是这次微信的面试直接上来就是笔试，我记得是5道算法题，还有一个关于多线程的编程问题，要求45分钟内完成。</p>
+<p>大概的题目如下：</p>
+<p>题目1（算法）：给出n(n&gt;=1)，请把1,2,…,n，最小分成m组，使得每组内的数字都互质，求m值。例如n=7，可最小划分成3组，{1, 2, 3}, {4, 5}, {6, 7}<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">findmin</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>题目2（算法）：给定一个递增循环整数数组，从里面找出最小的元素，使用的算法越快越好。特别地，最小的元素可能出现在数组中间。比如：50, 52, 63, 90, 3, 8, 15, 44。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem2</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">findmin</span><span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//TODO</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>题目3（算法）：在二叉排序树上面找出第3大的节点。注意：不能把二叉树全量存储到另外的存储空间，比如存储到数组中，然后取出数组的第三个元素。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> value;</span><br><span class="line">    TreeNode left, right;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem3</span> </span>&#123;</span><br><span class="line">  <span class="function">TreeNode <span class="title">find</span><span class="params">(TreeNode root)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>题目4（语法）：用Java语言实现System#arraycopy数组拷贝，注意：不能直接使用System.arraycopy</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem4</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">arraycopy</span><span class="params">(Object src, <span class="keyword">int</span> srcPos, Object dest, <span class="keyword">int</span> destPos, <span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>题目5（多线程）：阅读下面代码，在2线程环境下，设计一个方案，判断无限数据流(Stream)每个正整数是否素数，越快越好<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Stream</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">long</span> <span class="title">get</span><span class="params">()</span></span>; <span class="comment">// 获取下一个需判断的整数</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">boolean</span> result)</span></span>; <span class="comment">// 返回整数是否素数的结果</span></span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrimeNumber</span><span class="params">(<span class="keyword">long</span> num)</span> </span>&#123; <span class="comment">// 判断一个整数是否素数</span></span><br><span class="line">    <span class="keyword">if</span> (num &lt; <span class="number">2</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">2</span>, s = (<span class="keyword">long</span>) Math.sqrt(num); i &lt;= s; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (num % i == <span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> Stream <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> (Stream) Class.forName(<span class="string">"StreamImpl"</span>).newInstance(); <span class="comment">// 运行环境保证不会异常</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//比如：Stream=&#123;1,2,3,4,...&#125;, Result=&#123;false,true,true,false,...&#125;，注意输出顺序。</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Problem</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> Stream stream = Stream.getInstance();</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Problem instance = <span class="keyword">new</span> Problem();</span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread1();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">"thread1"</span>).start();</span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread2();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">"thread2"</span>).start();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">thread1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">thread2</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>因为之前没准备，我当时连二叉搜索树是有序的这个概念都忘了，把二叉搜索树当做普通的二叉树去处理了，感觉当时在45分钟过后，面试官操着一口广东味的普通话来我和沟通的时候，让我当时有种直接挂断电话的冲动，总之，就感觉这次面试体验很不好，让我有种想去撞墙的冲动。</p>
+<p>也是从这个时候开始，开始意识到要好好准备算法，不然真的是没有继续面下去的必要。</p>
+<p>微信这边的面试基本没有后续了，答得这么差，有后续才怪咧。</p>
+<p>后面我的简历应该是被收到腾讯的人才库里去了，于是有深圳那边的业务开始打电话给我说是要面试。</p>
+<p>一开始是深圳的一个做SDK的部门，和我进行了一次腾讯会议的视频面试。这次基本就是聊技术，这个面试官对我的评价不错，主要聊了聊我在小红书做的一些东西和自己平时做的一些技术沉淀，然后问了一些Android相关的技术问题，觉得我的表现不错，但是因为他们是做SDK的，和我这边的经历不是特别匹配，面试官当时也直接说了可能不是特别匹配，但是他说会在面试反馈中给予我比较好的面试评价。</p>
+<p>可能也是因为这个原因，后面我的简历又被腾讯的其他业务部门捞起来了。</p>
+<p>首先是手机QQ团队，一面面试官问的都是一些Java和Android 基础问题，但是问的比较多，基本上各个知识点都问到了一些。</p>
+<p>一面基本上问了下面一些问题：</p>
+<ul>
+<li>做过哪些内存优化</li>
+<li>内存抖动，如何定位内存抖动</li>
+<li>view移动用动画实现有哪些方式</li>
+<li>自己实现区域解码，decodeFileDescriptor</li>
+<li>scrollto 和 scrollby 的区别</li>
+<li>内存泄漏如何分析</li>
+<li>mvc，mvp和mvvm的区别</li>
+<li>mvvm的缺点是什么，mvvm为啥不用DataBinding，不用DataBinding怎么实现双向绑定</li>
+<li>leakcanary 的原理</li>
+<li>事件冲突如何自己解决</li>
+<li>RecyclerView和ListView的区别</li>
+<li>Service和IntentService的区别</li>
+<li>Service如何stop，bindService的方式如何stop</li>
+<li>aidl 的原理</li>
+<li>多进程通信方式</li>
+<li>自己实现过多进程吗</li>
+<li>HashMap的原理是什么</li>
+<li>红黑树的原理是什么</li>
+<li>Handler可以在多个线程里使用嘛，有几个消息队列，每个线程的消息是如何发到另一个线程的</li>
+<li>aidl 自己写如何实现</li>
+<li>用过哪些设计模式，设计模式</li>
+<li><p>工厂和抽象工厂的区别（因为上面我说在项目中实践过工厂设计模式，所以他就问了工厂和抽象工厂的区别）<br>手Q二面是视频面试，问的问题是比较抽象一点，感觉一般没有固定的答案。</p>
+</li>
+<li><p>如果不采用改变Bitmap config的这种方式，如何做Bitmap的内存优化</p>
+</li>
+<li>网络优化怎么做</li>
+<li>单元测试</li>
+<li>硬件加速的原理，硬件加速是如何工作的</li>
+<li>RecyclerView 滑动到item不可见后，这部分内存时是如何回收的</li>
+<li>卡顿检测怎么做，如何上报</li>
+<li>写个死锁的代码</li>
+<li>假如字符串中所有字符都不重复，如何输出字符串的所有组合。例如：abc，结果应是a,b,c,ab,ac,bc,abc。</li>
+</ul>
+<p>二面答的问题基本没怎么答好，有的是自己不怎么涉及这些，有些则是对于某些理解不够深入。其实我觉得这次面试失败是因为这个几个问题没回答好，我能感觉到面试官有种不想继续聊下去的冲动了，后面则是象征性地出了一道算法题。</p>
+<p>接着收到了QQ音乐的面试邀请，这次面了好几轮，一开始是那边的HR给我打了个电话，基本就是聊为啥换工作，能不能去深圳这样，以及在小红书的工作内容等等。</p>
+<p>接着面了好几轮，两轮技术面，一轮交叉面，还有总经理面试，最后还有HR面，因为面的轮次比较多，当时对于面试题也没有特殊整理，不过大概问的问题都是这些东西，和之前的面试问题大差不差。</p>
+<p>面到后来QQ音乐这边算是通过了，给的Offer还可以。</p>
+<p>腾讯这边还面过腾讯视频的岗位，这个是在自己懒散的情况下进行的，因为基本确定要去哪了，当时就想着涨涨面试经验啥的。这次面试基本面试完之后我就觉得没有后续了。下面是问的一些问题：</p>
+<p>算法题：输入[“eat”,”ate”,””tea”,”and”,”den”] 要求输出“换位词”，[[“eat”,”ate”,””tea”],[”and”],[”den”]]</p>
+<ul>
+<li>业务上做的有挑战性的东西是啥</li>
+<li>RxJava底层进行数据通信的原理</li>
+<li>RxJava和EventBus做通信的区别</li>
+<li>线程的状态</li>
+<li>线程的两种创建状态</li>
+<li>线程池的种类，以及内部是如何管理线程的，什么时候创建，什么时候让线程运行</li>
+</ul>
+<h2 id="阿里"><a href="#阿里" class="headerlink" title="阿里"></a>阿里</h2><p>阿里这边就让同事认识的一个阿里员工内推了阿里的岗位，这次面的是淘宝下面的一个业务。当时是在差不多拿到QQ音乐Offer的时候开始的，当时也没有想太多，反正就是想试试，因为当时想的是，拿不到这边的机会，就去深圳工作去。</p>
+<p>阿里的面试一面问的基本都是业务相关的，基本就是讲自己在小红书做的东西和一些Android基础知识。这几次面试我也没有做什么面试题的记录。</p>
+<p>二面上来也是问技术啥的，后来搞了三个笔试题，一个是排序问题，一个是用栈来模拟队列，还有一个是写一个小的商品feed流的demo，难度不是特别大，关于问的一些具体的面试题我也忘了，差不多都是那些东西吧。</p>
+<p>最后一面是HR和Leader一起的终面，Leader应该是这个业务线的领导，没有问具体的技术问题，问的都是一些比较开放的问题，阿里的这次面试整体感觉还算顺利吧，后面就是算是通过了，给了Offer。</p>
+<p>基本上，自己面试比较顺利的几次都没有记录下来。关于Offer的选择，腾讯相对阿里，杭州相对深圳，压力要小很多，所以决定去阿里，所以就拒了QQ音乐这边的机会，但是心里还是蛮喜欢这个工作岗位的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整体说来，这段时间的面试不能算是成功的，很多面试都没有通过，通过的还有运气成分在里面吧，这也提醒我自己要学习的东西还有好多吧，尤其自己在算法这一块还是比较薄弱的，对大多数人来说，算法题这块没有啥捷径吧，就是多刷题吧。</p>
+<p>我记录这些希望能对面试的人有些帮助吧，因为之前很多人让我写面经啥的，我也不太清楚怎么写，就是把一些问题记录下来吧，如果你觉得有帮助，可以帮忙点赞分享下，感谢。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>深入分析AsyncTask</title>
     <url>/2019/03/23/%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90AsyncTask/</url>
     <content><![CDATA[<ol>
@@ -1401,120 +1515,6 @@ an action to be performed on a different thread than your own.
       <tags>
         <tag>volatile</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>分享一些有价值的博客</title>
-    <url>/2022/04/09/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>这周的文章延迟了。</p>
-<p>最近比较忙，清明节都在家里加班。</p>
-<a id="more"></a>
-<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
-<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
-<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
-<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
-<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
-<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
-<p>这个是我feedly的截图：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG102.jpeg" alt></p>
-<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
-<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
-<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
-<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
-<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
-<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
-<p>还有一些英文的博客：</p>
-<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
-<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
-<ul>
-<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
-</li>
-<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
-</li>
-<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
-</li>
-</ul>
-<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
-<p>下面放一些目前的阅读笔记吧。</p>
-<p>挣钱不是一件事情，而是一种技巧。</p>
-<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
-<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
-<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
-<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
-<p>销售技巧是一种形式的独特知识。</p>
-<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
-<p>Sales skills </p>
-<p>Musical talents, with the ability to pick up any instrument </p>
-<p>An obsessive personality: you dive into things and remember them quickly </p>
-<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
-<p>Playing a lot of games, you understand game theory pretty well </p>
-<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
-<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
-<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
-<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
-<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
-<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
-<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
-<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
-<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
-<p>跟随你的好奇心去做事，而不是追寻热点。</p>
-<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
-<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
-<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
-<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
-<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
-<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
-<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
-<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
-<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
-<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>如何更好得阅读</title>
-    <url>/2022/04/15/%E5%A6%82%E4%BD%95%E6%9B%B4%E5%A5%BD%E5%BE%97%E9%98%85%E8%AF%BB/</url>
-    <content><![CDATA[<p>今天在看geekplux的这篇 <a href="https://geekplux.com/newsletters/14" target="_blank" rel="noopener">我获取信息的方法 -#14</a> Newsletter的时候，在感慨作者获取信息源这么丰富的同时，发现原来自己最近的几篇文章其实算不上是博客，更应该算是一种Newsletter的形式。博客通常是有主题的，而Newsletter更多的时候算是一种信息输入后的整理输出，通常有多个主题。</p>
-<p>相对Newsletter来说，博客需要更多的时间去整理，去思考，而对于我每天10105的上班节奏来说，没有太多时间去整理输出类似博客这种相对有深度的文章。</p>
-<p>接下来，每周更多的是分享的一些Reading List，内容涉及书籍，博客，Newsletter，Twitter或YouTube等形式。</p>
-<p>这周讲讲如何更好的阅读。</p>
-<a id="more"></a>
-<p>Farnam Street上的两篇文章：</p>
-<ul>
-<li><a href="https://fs.blog/reading/" target="_blank" rel="noopener">Reading Better</a></li>
-<li><a href="https://fs.blog/remember-books/" target="_blank" rel="noopener">How to remember what you read</a></li>
-</ul>
-<p>如何更好得阅读，有以下一些技巧：</p>
-<ul>
-<li>我们要学会筛选好书和坏书，我们的时间是宝贵的，坏书不值得我们浪费时间，而好书值得我们反复阅读。</li>
-<li>阅读有4个境界，为了娱乐阅读，为了了解阅读，为了理解阅读，为了掌握阅读。这个其实没有好坏之分，没有说为了娱乐阅读就一定比为了掌握阅读要低级，当你能从阅读中找到乐趣，这其实是个好事情。Naval就说过，阅读那些你喜欢的书直到你喜欢阅读为止。</li>
-<li>不要关注阅读速度，阅读的关键不在速度，而在你是否从中吸收了知识。</li>
-<li>如何选择好书？阅读经典的书，新书里面虽然有好书，但是数量不多，有很多质量不高的书，而经典的书经过时间的考验，值得花时间阅读。</li>
-<li>记笔记能提高你的阅读效率。文章中介绍了一种记笔记的方式如下：<ul>
-<li>在每个章节结尾写下这一章的总结或者一些特别的观点，要用自己的话写出来。</li>
-<li>在读完一周后，再回来回顾一下之前的笔记。盖上书本，尝试用你自己的话写下来这本书的主要观点，如果你发现有点困难，再重新去看你的笔记。这其实来自于<a href="https://baike.baidu.com/item/%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95/50895393#:~:text=%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95%E7%9A%84,%E6%B3%A8%E9%87%8D%E4%BA%86%E8%A7%A3%E6%9F%90%E4%BB%B6%E4%BA%8B%E7%89%A9%E3%80%82" target="_blank" rel="noopener">费曼学习法</a>。</li>
-<li>最后，将这些摘要手写抄下来或者输入到笔记工具(如EverNote)中去。</li>
-</ul>
-</li>
-</ul>
-<p>如何记住我们阅读的东西？这篇文章和上面那篇文章有些观点类似，这里就介绍一些不一样的观点。</p>
-<ul>
-<li>不要关注阅读的数量，要关注质量。</li>
-<li>不要去关注那些华而不实的App或者工具，关注书本的内容即可。</li>
-<li><p>不应该阅读让你觉得很枯燥的书，也不一定非得把某本书读完。</p>
-</li>
-<li><p>什么是主动阅读？你要在阅读某本书之前以及在整个阅读过程中你需要弄清楚你想在书中学到什么或者收获什么，将书中的内容和自己现有的知识进行关联，并尝试去应用这些知识。</p>
-</li>
-</ul>
-<p>之前看过Jiayuan的推文总结<a href="https://twitter.com/Tisoga/status/1260430958345543687?t=L4nvHixGM2gUEj4JWHuxJw&amp;s=19" target="_blank" rel="noopener">3wh2t阅读法</a>，我觉得总结的很好，这里介绍下。</p>
-<p>2wh2t的意思是Why，Who，What，How，Think以及Todo。</p>
-<p>Why表示为什么阅读，也就是要带着目的去阅读，当你带着目的去阅读的时候才会促进你思考，漫无目的的阅读其实就是在浪费时间。</p>
-<p>Who表示是谁，这本书是谁写的，以及书中介绍了哪些人物。这个点我理解不是必需的，但是如果你知道这些，比如作者写这本书的上下文，能够帮助更好得理解书本中的内容。</p>
-<p>What表示书写的是什么，你要搞清楚书中写的是什么，比如前面说到的通过费曼学习法来帮助自己记住书中的观点。</p>
-<p>How则表示怎么做，作者是怎么教你做的。</p>
-<p>最后2个t，一个表示Think(思考)，一个表示Todo(行动)。读完这本书给你带来的思考是什么？每个人的阅历都是不同的，你肯定有你自己不一样的思考，而这个思考才是真正属于你自己的东西。另一个表示行动，行动才是最重要的，没有付诸行动的想法不过是你脑中的一个概念而已。</p>
-<p>另外，上面的一些想法和之前读过的《麦肯锡精英高效阅读法》很多观点不谋而合，推荐大家去阅读这边书。</p>
-<p>最后放一下按照2wh2t 方法总结的《麦肯锡精英高效阅读法》的思维导图，思维导图是Jiayuan制作的，我是觉得总结的很好，就放在这里了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic20230904192030.png" alt></p>
-]]></content>
   </entry>
   <entry>
     <title>解决CoordinatorLayout的动画抖动以及回弹问题</title>
