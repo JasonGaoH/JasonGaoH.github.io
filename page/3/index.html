@@ -27,7 +27,7 @@
 
   
   
-    <script src="js/local-search.js" async></script>
+    <script src="js/local-search.js"></script>
   
 <link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
@@ -168,6 +168,35 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2019/03/23/analys-of-AsyncTask/">深入分析AsyncTask</a>
+      </h2>
+      <p class="article-date">March 23, 2019</p>
+      
+        
+  <a href="/tags#Android">
+    <span class="tag-code">Android</span>
+  </a>
+
+  <a href="/tags#AsyncTask">
+    <span class="tag-code">AsyncTask</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          <ol>
+<li>什么是AsyncTask</li>
+</ol>
+<hr>
+<p>AsyncTask 即 asynchronous task，异步任务。</p>
+<p>AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。<br>
+        
+      </p></div>
+      <a class="more" href="/2019/03/23/analys-of-AsyncTask/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2019/03/22/how-to-change-indicator-width-of-Tablayout/">关于TabLayout的indicator宽度的一次探索</a>
       </h2>
       <p class="article-date">March 22, 2019</p>
@@ -210,6 +239,8 @@
     <div class="scroll-top">
   <span class="arrow-icon"></span>
 </div>
+
+
     <footer class="app-footer">
   <p class="copyright">
     &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>

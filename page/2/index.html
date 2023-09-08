@@ -27,7 +27,7 @@
 
   
   
-    <script src="js/local-search.js" async></script>
+    <script src="js/local-search.js"></script>
   
 <link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
@@ -165,6 +165,26 @@
 </header>
 
     <main class="app-body">
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2020/08/06/Optimization-Practices-on-Feeds/">Feed流上的优化实践.md</a>
+      </h2>
+      <p class="article-date">August 6, 2020</p>
+      
+        
+  <a href="/tags#性能优化 RecyclerView缓存">
+    <span class="tag-code">性能优化 RecyclerView缓存</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          <p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
+        
+      </div>
+      <a class="more" href="/2020/08/06/Optimization-Practices-on-Feeds/">Read more</a>
+    </article>
   
     <article class="article-card">
       <h2 class="article-head">
@@ -372,35 +392,6 @@
       <a class="more" href="/2020/05/21/The-analysis-of-the-Android-startup-process/">Read more</a>
     </article>
   
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2019/03/23/analys-of-AsyncTask/">深入分析AsyncTask</a>
-      </h2>
-      <p class="article-date">March 23, 2019</p>
-      
-        
-  <a href="/tags#Android">
-    <span class="tag-code">Android</span>
-  </a>
-
-  <a href="/tags#AsyncTask">
-    <span class="tag-code">AsyncTask</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          <ol>
-<li>什么是AsyncTask</li>
-</ol>
-<hr>
-<p>AsyncTask 即 asynchronous task，异步任务。</p>
-<p>AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。<br>
-        
-      </p></div>
-      <a class="more" href="/2019/03/23/analys-of-AsyncTask/">Read more</a>
-    </article>
-  
 
   
     <div class="guide-pager">
@@ -418,6 +409,8 @@
     <div class="scroll-top">
   <span class="arrow-icon"></span>
 </div>
+
+
     <footer class="app-footer">
   <p class="copyright">
     &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
