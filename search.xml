@@ -1,6 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Feed流上的优化实践.md</title>
+    <url>/2020/08/06/Optimization-Practices-on-Feeds/</url>
+    <content><![CDATA[<p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
+ <a id="more"></a>
+<p>这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。</p>
+<p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png" alt></p>
+<h3 id="关于优化"><a href="#关于优化" class="headerlink" title="关于优化"></a>关于优化</h3><p>优化整体可以分为两大类，软优化和硬优化。那么什么是软优化呢？软优化并不会改变某段代码的执行效率，而是通过调整这段代码的执行时机，来优化整体代码的运行性能。软优化里由分为三大类，分别为预加载，异步加载和懒加载。</p>
+<h4 id="软优化"><a href="#软优化" class="headerlink" title="软优化"></a>软优化</h4><ul>
+<li>预加载<br>这几种加载方式都很好理解，改变的都是执行时机，预加载就是提前加载，把一些重要的数据提前加载好，等到合适的时机，就可以直接展示给用户，而不是在这个合适的时机才去加载数据，这种方式给用户地感觉是加载变快了。</li>
+<li>异步加载<br>而异步加载在Android中则很常见了，移动应用中有主线程的概念，主线程需要实时地对用户的操作予以反馈，这种反馈要非常及时，否则就会让用户觉得卡顿。因此，主线程的工作不宜有耗时操作，而且对于一些执行比较慢的代码，而且不需要同步执行的代码，我们可以考虑将它放到异步线程去执行。</li>
+<li>懒加载<br>最后就是懒加载了，懒加载就是把一些不是需要立即展示的东西往后放，因为我们的手机性能，内存是有限的，有些功能用户不是需要马上看到，则可以考虑在后续的某个适当的时机执行加载。</li>
+</ul>
+<h4 id="硬优化"><a href="#硬优化" class="headerlink" title="硬优化"></a>硬优化</h4><p>接下来说说硬优化，硬优化这个东西就比较偏细节了。一段逻辑，我们用两层循环实现，功能肯定是OK的，但是如果在实现功能的情况下，我们用一层循环就可以解决了，这样不就提高了这段代码的运行效率了。这种方式的优化就是硬优化了，关于硬优化往往没有具体的方法，很多都是各种见仁见智，通过调整代码的逻辑来提高运行效率都可以称为硬优化。</p>
+<h4 id="Feed流上的问题发现和解决"><a href="#Feed流上的问题发现和解决" class="headerlink" title="Feed流上的问题发现和解决"></a>Feed流上的问题发现和解决</h4><p>很多人会说，上面说了这么多软优化和硬优化，有什么用呢？别急，我们慢慢来说。上面说的算是一种对于优化的指导思想吧，下次我们遇到类似的问题可以从这几个维度来进行分析。</p>
+<p>我们要做优化，首先肯定是要发现问题，也就是对症下药。</p>
+<p>我之前主要处理的是Feed流的卡顿优化，所以我基本上都是通过Android Studio的Profiler工具来查看问题，现在Profiler的体验相对之前功能算是更加强大了，我每次都是使用Profiler来尝试抓一下Feed流滑动时的代码执行情况。<br>然后一个一个查看滑动过程中我们的耗时是在哪些地方。</p>
+<h5 id="通过Profiler发现的问题"><a href="#通过Profiler发现的问题" class="headerlink" title="通过Profiler发现的问题"></a>通过Profiler发现的问题</h5><p>通过Profiler发现了以下几点问题：</p>
+<ol>
+<li>发现有一些比较耗时的方法，比如图文笔记上的滤镜的回收方法比较耗时，针对这样的可以考虑做这个release操作放到异步里面去；</li>
+<li>另外也发现一些业务的打点会在OnBindViewHolder中调用的很频繁，虽然点位数据的发送是在异步线程里，但是在发送数据之前会有数据的拼装操作，多少会有些性能损耗，而且打点这一类数据完全可以放到异步线程中去，因为这种打点并不需要很高的实时性；</li>
+<li>对于一些跨进程的操作，比如从Context中拿Service获取WiFi状态，这种在onBind中回调是非常不好的，所以针对这个我们只需要构造一个广播来监听WIFI状态变化即可，然后每次只需要拿那个记录好的网络状态变量即可</li>
+<li>还有关于视频笔记的处理，我们需要根据RecyclerView滑动过程中当前item中的视频start，stop和prepare做相应的调整，正常情况下，当RecyclerView处于滑动状态是不应该去prepare和start的，而且也不应该创建播放器实例和Texture View的；</li>
+<li>最后，通过Profiler我们还发现TextView的setText是很耗时的，当我们复杂多行文本的情况时，TextView去setText的时候需要进行复杂的测量，在测量完之后还需要绘制，所以针对这个场景可以考虑使用StaticLayout对Feed流中的文本作预渲染，关于StaticLayout的教程网上也有不少，后面有时间我也会抽空写下关于这块的实践。</li>
+</ol>
+<p>上面都是通过Profiler来发现的一些问题。</p>
+<h5 id="View层级"><a href="#View层级" class="headerlink" title="View层级"></a>View层级</h5><p>另外还有一些算是基础的优化吧。因为View的层级随着Feed流的业务变得越来越深，我们需要进可能地减少View的层级，同时也尽量减少View的个数，可以考虑使用ConstraintLayout，但是ConstraintLayout这个东西要慎用，对于一些迭代比较快的业务场景，使用ConstraintLayout会增加我们的维护成本，而且会有一些比较坑的问题。</p>
+<p>关于View层级的缩减基本没啥可讲的，尽量用merge和ViewStub，这个就是根据实际情况去消除一些不必要的层级。</p>
+<h5 id="RecyclerView缓存的利用"><a href="#RecyclerView缓存的利用" class="headerlink" title="RecyclerView缓存的利用"></a>RecyclerView缓存的利用</h5><p>最后，我们也尝试了从RecyclerView缓存的角度来解决这个问题，RecyclerView默认会有四级缓存的概念，正常情况下，当我们的RecyclerView的卡片撑满屏幕的时候，我们进入该页面的时候，我们的RecyclerView会先创建ViewHolder，然后再bind这个ViewHolder，然后当我们向下滑动的时候，会再次创建一个ViewHolder，接着再执行Bind操作，只有当我们的RecycledView Pool的池子满了之后才不会继续创建ViewHolder，往后的滑动RecyclerViwe就只会执行bind操作了，这个时候我们发现这个OnCreateViewHolder需要从xml里去解析view，并且创建这个ViewHolder，这个创建对于我们的滑动是会有性能损耗，其实还是因为我们的这个卡片太复杂了。</p>
+<p>所以，我们可以考虑提前创建一些ViewHolder，放到ViewHolder的池子里去，这样我们在滑动的时候，就不需要先Create再Bind了。</p>
+<p>提前创建ViewHolder，在主线程Idle的状态下提前创建ViewHolder放到RecycledViewPool中，这个pool的size默认是5。<br>   <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">recyclerView.setRecycledViewPool(RecyclerView.RecycledViewPool().apply &#123;</span><br><span class="line">	LightExecutor.postIdle(Runnable &#123;</span><br><span class="line">		repeat(<span class="number">5</span>) &#123;</span><br><span class="line">			<span class="comment">//RecycledViewPool 默认size为5个，RecyclerView内部会有判断，如果满了不会create</span></span><br><span class="line">			<span class="comment">//注意这里取得是typePool的倒数第一个和第二个位置，需要保证注册的时候视频卡片和笔记在最后两个位置</span></span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">1</span>))</span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">2</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><p>在做完这些优化之后，在Feed流上的卡顿就有很大改善了，另外，对于业务侧的指标也有一定的数据提升。</p>
+<h4 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h4><p>对于这块业务的性能监控可以实施起来，这样有利于我们尽早发现卡顿问题，另外，对于一些优化的点其实还可以继续深挖，比如前创建ViewHolder是否可以使用AsyncLayoutInflator进行inflate，还有针对文本的预渲染可以考虑抽成组件形式，方便其他业务使用。</p>
+<p>感谢您的阅读，如果觉得我的文章对你有帮助，请帮忙点赞，有问题可以评论留言。</p>
+]]></content>
+      <tags>
+        <tag>性能优化 RecyclerView缓存</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RoamResearch,一款帮助我们更好思考的笔记工具</title>
+    <url>/2022/03/19/RoamResearch-a-tool-which-can-help-us-think-better/</url>
+    <content><![CDATA[<h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>上一次发公众号文章是 2020 年的 8 月 29 号，马上都快两年了，很久没更新了，真是太惭愧了。那些没取关的朋友们算是真爱了吧，或者是因为忘记在某个角落还关注着这个沉寂的没有提供什么价值的公众号，如果是因为后者，那可以考虑取关了 😂😂，咳~，开个玩笑。</p>
+<p>虽然不应该给自己找理由，但是没有怎么更新的原因的确是因为太忙了，工作上的节奏也比之前更快了，生活上，因为去年小孩出生了，从去年 5 月份到现在，工作之外的大部分时间都是陪小孩去了，很少会有自己可以自由支配的时间。</p>
+<p>最近这段时间想了很久，还是觉得要将之前的公众号捡起来，继续写点东西。先立个 flag，每周更新一篇，内容涉及平时的技术总结、阅读思考以及一些提升效率的技巧吧。</p>
+<a id="more"></a>
+<h3 id="什么是Roam-Research"><a href="#什么是Roam-Research" class="headerlink" title="什么是Roam Research"></a>什么是Roam Research</h3><p>今天主要来介绍一下<code>Roam Reseach</code>这个工具吧。之前还在小红书的时候就使用过一个月，后面因为需要付费就没有继续用了，今年年初的时候看到关于<code>Roam Research</code>的推特，没忍住花钱买了一年的会员，目前用了一段时间整体感觉还可以，下面分享一下自己的使用经验。</p>
+<p>在分享我自己的使用经验之前，首先来介绍下<code>Roam Reseach</code>是什么？简单来说，它就是一个笔记工具，和传统的笔记工具如<code>Evernote</code>、<code>有道云笔记</code>相比，它有什么不一样呢？传统的这类笔记工具他往往是线性的，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picyoudao_note.jpg" alt></p>
+<p><code>Roam Reseach</code>（下面都简称 Roam）的官方网站是<a href="https://roamresearch.com/" target="_blank" rel="noopener">Roam官网</a>，作者是<a href="https://twitter.com/Conaw" target="_blank" rel="noopener">Conaw</a>,目前有Web、Mac以及Windows版本，新用户可以试用一个月，后面就需要收费了，另外有免费的替代软件Obsidian和Logseq，这两个基本都是借鉴的 <code>Roam</code>的思想。</p>
+<p>而<code>Roam</code>则是网状的，结构上有点类似于我们的神经元。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picshenjingyuan.jpg" alt></p>
+<p>我们在使用传统笔记工具时，很多时候都是先建立一个分类，可能该分类下面还有一个小的分类，最后才是我们笔记的具体内容。而 Roam 则不是，比如笔记 A 讨论了 C 这个主题，笔记 B 也讨论了 C 这个主题，这样 A 和 B 就一起关联到 C 这个主题下面，注意这里的顺序，是先有 A 和 B，才有了 C 这个分类，这其实是一种自底向上的方法，程序员们对于这个方法应该不陌生，我们很多时候程序设计都会采用这种方法，由局部到整体逐步完善。</p>
+<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_graph.jpg" alt><br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_network.jpeg" alt></p>
+<p>那么<code>Roam</code>是如何实现这种网状结构的呢？主要是靠它的双向链表的能力。<code>Roam</code>使用[[]]来实现双向链表，所有被[[]] 包起来的内容会自动生成一个 page，而在这个 page 里又可以使用[[]]继续构造新的 page，这样，这两个 page 之间就构成了一个双向链表，由很多个这种双向链表组合起来，整体就形成了一个网状的结构。</p>
+<p><code>Roam</code>每天会自动生成一个以当前日期为标题的 page。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_daily_page.jpg" alt></p>
+<p>比如我在今天自动生成的 page 的 Daily Log 下面关联了<code>Roam</code><br>而从<code>Roam Reseach</code>点进去则是下面这样的，</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_research_page.jpg" alt></p>
+<p>这里列出了所有链接到当前的内容，表示下面这些节点都是与 Roam Research 相关。</p>
+<p>而点击右侧的[Open Graph View] 则可以从图结构上更直观地看到当前节点关联的内容。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_single_graph.jpg" alt></p>
+<p>另外，Roam 还提供块的引用，使用(())可以实现，被(()) 包含的内容可以称之为块，这个块可以是其他 Page 里面某一句文本或一个片段，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_block_ref.jpg" alt></p>
+<p>图片中 1 所指示的部分就被两个地方引用到，2 处所显示的数字则是当前内容被引用的次数，通过点击 2 处可以实现折叠和展开这部分引用的内容。</p>
+<p>另外，Roam 还提供一些快捷的命令，通过输入/即可显示。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_command.jpg" alt></p>
+<p>对于图片，可以直接将剪贴板中的图片进行上传，对于Twitter和YouTube也是可以解析出来的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_twitter.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_youtobe.jpg" alt></p>
+<p>当我们了解了以上一些技巧之后就日常使用就没有什么问题了。</p>
+<h3 id="使用经验"><a href="#使用经验" class="headerlink" title="使用经验"></a>使用经验</h3><p>接下来，介绍一下平时我自己的一些使用技巧。</p>
+<p>在每天自动生成的 page 下面，我一般会创建 Daily Log，MIT3，Tasks，Daily Reading 以及 Thinking 这 6 个节点。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_tips.jpg" alt></p>
+<p><code>Daily Log</code> 主要是记录下每天的工作记录，主要是记录自己每天的时间花在哪里，从而提升工作效率，而不是每天浑浑噩噩不知道每天干了些啥。</p>
+<p>这个方法主要来自这篇文章，<a href="https://betterhumans.pub/replace-your-to-do-list-with-interstitial-journaling-to-increase-productivity-4e43109d15ef" target="_blank" rel="noopener">Replace Your To-Do List With Interstitial Journaling To Increase Productivity</a>，主要思想是：通过记录日志来替代使用 TODO List，当你从一个工作切换到另一个工作的时候做下记录，写几句话描述一下上一个任务做了啥，以及下一个任务准备做啥，尽量描述清楚，而不是用几个简单的词语来描述。</p>
+<p>原因是因为我们人的大脑是不能多线程工作的，我们需要在做当前工作的时候保持足够的专注度来提高我们整体的效率，所以我们需要在当前工作之前把上一个工作梳理下，并放空我们的大脑，让我们的大脑休息一下。</p>
+<p><code>MIT3</code> 记录每天最重要的 3 件事，每天将这个里面的事情完成那么这一天就算是目标达成了。</p>
+<p><code>Tasks</code> 记录每天的一些任务，很多时候同时会有多个事情过来，如果不记录下来则很容易忘。</p>
+<p><code>Daily Reading</code> 则是记录每天的一些阅读记录，包括博客，文章和书籍。</p>
+<p><code>Thinking</code> 则是记录每天的一些思考，有的可能是灵光一闪的想法。</p>
+<p>上面就是一些 Roam 的一些实践的经验，介绍到这里，可能有人会问，我上面介绍的这些和是否使用 Roam 关系并不大啊，这些使用系统默认带的备忘录都是可以实现的啊？</p>
+<p>嗯，这个，也不是没有道理的，重要的其实是方法，工具更多的只是辅助。</p>
+<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><p>最后，再来介绍一种使用 Roam 来记笔记的最佳实践。Roam 与其说是一个工具，倒不如说是一种思想。其实 Roam 的这种设计理念是来自德国的社会学家和系统理论家 —— 尼克拉斯 · 卢曼（Niklas Luhmann），方法名叫 Zettelkasten，卢曼使用这套方法，积累了 90000 个知识卡片，一生中写了 60 本书和其他大量出版物。</p>
+<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picslip_box.jpg" alt></p>
+<p>Zettelkasten 是由许多单独的笔记组成，其中包括想法和其他简短的信息，这些信息一般是在平时学习或者思考时记下的。这些笔记可以分层编号，以便在适当的地方插入新的笔记，并包含元数据，使记录者能够将笔记相互关联。</p>
+<p>从这个基础上，就慢慢衍生出了类似 Roam 这类的软件。在<a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>这篇文章中就详细介绍了由 Zettelkasten 扩展出来的一种记笔记方法，写得很详细，大家有兴趣可以看看原文。</p>
+<p>我目前主要使用以下几种类型的笔记：<br><code>Fleeting Notes</code> 记录一些临时的想法，看书过程中的一些注解等。</p>
+<p><code>Bibliographical Notes</code> 主要是在阅读过程中的一些划线部分的摘抄，我主要是从微信读书或者 Kindle 中导出。</p>
+<p><code>Literature Notes</code> 是用自己的话记录下阅读过的文献笔记，不能复制、粘贴，这样能迫使自己增强对于原文的理解。</p>
+<p><code>Permanent Notes</code>则是将当前的笔记和自己之前的笔记进行关联，从而输出一个自己的全新的理解的内容，这个部分更多的是和自己之前的知识体系进行融合。</p>
+<p>通过 <code>Roam</code> 就比较容易实现上面的这些，关键在链接，只有将新的知识融合进自己已有的知识体系，我们才算是真正掌握。</p>
+<p>我现在会写很多 Literature Notes，主要是帮助自己去吸收理解一些知识，很多东西你以为你掌握了，但是让你用一句话说出来都不行那就不是真的掌握。不要害怕写的不对或者写的没有文采，这些都不重要，重要的是你的思考过程，写作本质上可以帮助更好地进行思考。</p>
+<p>每个人的知识体系都是不一样的，所以我们每个人对于知识的理解也是不一样的，不要去复述别人的理解，而是要有你自己的理解，表达自己的观点，不一定对，但是得有自己的思考，这样我们的知识体系才能不断生长，不断扩张，自身才能得到成长。</p>
+<hr>
+]]></content>
+  </entry>
+  <entry>
     <title>快到年底的年中总结</title>
     <url>/2020/08/06/Mid-year-review/</url>
     <content><![CDATA[<p>今天聊聊技术以外的话题。</p>
@@ -41,45 +138,6 @@
 <p>逼自己一把，远离舒适区，大概就是这样想的吧。</p>
 <p>2020年，注定是不平凡的一年，对世界如此，对我奕如此。</p>
 ]]></content>
-  </entry>
-  <entry>
-    <title>Feed流上的优化实践.md</title>
-    <url>/2020/08/06/Optimization-Practices-on-Feeds/</url>
-    <content><![CDATA[<p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
- <a id="more"></a>
-<p>这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。</p>
-<p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png" alt></p>
-<h3 id="关于优化"><a href="#关于优化" class="headerlink" title="关于优化"></a>关于优化</h3><p>优化整体可以分为两大类，软优化和硬优化。那么什么是软优化呢？软优化并不会改变某段代码的执行效率，而是通过调整这段代码的执行时机，来优化整体代码的运行性能。软优化里由分为三大类，分别为预加载，异步加载和懒加载。</p>
-<h4 id="软优化"><a href="#软优化" class="headerlink" title="软优化"></a>软优化</h4><ul>
-<li>预加载<br>这几种加载方式都很好理解，改变的都是执行时机，预加载就是提前加载，把一些重要的数据提前加载好，等到合适的时机，就可以直接展示给用户，而不是在这个合适的时机才去加载数据，这种方式给用户地感觉是加载变快了。</li>
-<li>异步加载<br>而异步加载在Android中则很常见了，移动应用中有主线程的概念，主线程需要实时地对用户的操作予以反馈，这种反馈要非常及时，否则就会让用户觉得卡顿。因此，主线程的工作不宜有耗时操作，而且对于一些执行比较慢的代码，而且不需要同步执行的代码，我们可以考虑将它放到异步线程去执行。</li>
-<li>懒加载<br>最后就是懒加载了，懒加载就是把一些不是需要立即展示的东西往后放，因为我们的手机性能，内存是有限的，有些功能用户不是需要马上看到，则可以考虑在后续的某个适当的时机执行加载。</li>
-</ul>
-<h4 id="硬优化"><a href="#硬优化" class="headerlink" title="硬优化"></a>硬优化</h4><p>接下来说说硬优化，硬优化这个东西就比较偏细节了。一段逻辑，我们用两层循环实现，功能肯定是OK的，但是如果在实现功能的情况下，我们用一层循环就可以解决了，这样不就提高了这段代码的运行效率了。这种方式的优化就是硬优化了，关于硬优化往往没有具体的方法，很多都是各种见仁见智，通过调整代码的逻辑来提高运行效率都可以称为硬优化。</p>
-<h4 id="Feed流上的问题发现和解决"><a href="#Feed流上的问题发现和解决" class="headerlink" title="Feed流上的问题发现和解决"></a>Feed流上的问题发现和解决</h4><p>很多人会说，上面说了这么多软优化和硬优化，有什么用呢？别急，我们慢慢来说。上面说的算是一种对于优化的指导思想吧，下次我们遇到类似的问题可以从这几个维度来进行分析。</p>
-<p>我们要做优化，首先肯定是要发现问题，也就是对症下药。</p>
-<p>我之前主要处理的是Feed流的卡顿优化，所以我基本上都是通过Android Studio的Profiler工具来查看问题，现在Profiler的体验相对之前功能算是更加强大了，我每次都是使用Profiler来尝试抓一下Feed流滑动时的代码执行情况。<br>然后一个一个查看滑动过程中我们的耗时是在哪些地方。</p>
-<h5 id="通过Profiler发现的问题"><a href="#通过Profiler发现的问题" class="headerlink" title="通过Profiler发现的问题"></a>通过Profiler发现的问题</h5><p>通过Profiler发现了以下几点问题：</p>
-<ol>
-<li>发现有一些比较耗时的方法，比如图文笔记上的滤镜的回收方法比较耗时，针对这样的可以考虑做这个release操作放到异步里面去；</li>
-<li>另外也发现一些业务的打点会在OnBindViewHolder中调用的很频繁，虽然点位数据的发送是在异步线程里，但是在发送数据之前会有数据的拼装操作，多少会有些性能损耗，而且打点这一类数据完全可以放到异步线程中去，因为这种打点并不需要很高的实时性；</li>
-<li>对于一些跨进程的操作，比如从Context中拿Service获取WiFi状态，这种在onBind中回调是非常不好的，所以针对这个我们只需要构造一个广播来监听WIFI状态变化即可，然后每次只需要拿那个记录好的网络状态变量即可</li>
-<li>还有关于视频笔记的处理，我们需要根据RecyclerView滑动过程中当前item中的视频start，stop和prepare做相应的调整，正常情况下，当RecyclerView处于滑动状态是不应该去prepare和start的，而且也不应该创建播放器实例和Texture View的；</li>
-<li>最后，通过Profiler我们还发现TextView的setText是很耗时的，当我们复杂多行文本的情况时，TextView去setText的时候需要进行复杂的测量，在测量完之后还需要绘制，所以针对这个场景可以考虑使用StaticLayout对Feed流中的文本作预渲染，关于StaticLayout的教程网上也有不少，后面有时间我也会抽空写下关于这块的实践。</li>
-</ol>
-<p>上面都是通过Profiler来发现的一些问题。</p>
-<h5 id="View层级"><a href="#View层级" class="headerlink" title="View层级"></a>View层级</h5><p>另外还有一些算是基础的优化吧。因为View的层级随着Feed流的业务变得越来越深，我们需要进可能地减少View的层级，同时也尽量减少View的个数，可以考虑使用ConstraintLayout，但是ConstraintLayout这个东西要慎用，对于一些迭代比较快的业务场景，使用ConstraintLayout会增加我们的维护成本，而且会有一些比较坑的问题。</p>
-<p>关于View层级的缩减基本没啥可讲的，尽量用merge和ViewStub，这个就是根据实际情况去消除一些不必要的层级。</p>
-<h5 id="RecyclerView缓存的利用"><a href="#RecyclerView缓存的利用" class="headerlink" title="RecyclerView缓存的利用"></a>RecyclerView缓存的利用</h5><p>最后，我们也尝试了从RecyclerView缓存的角度来解决这个问题，RecyclerView默认会有四级缓存的概念，正常情况下，当我们的RecyclerView的卡片撑满屏幕的时候，我们进入该页面的时候，我们的RecyclerView会先创建ViewHolder，然后再bind这个ViewHolder，然后当我们向下滑动的时候，会再次创建一个ViewHolder，接着再执行Bind操作，只有当我们的RecycledView Pool的池子满了之后才不会继续创建ViewHolder，往后的滑动RecyclerViwe就只会执行bind操作了，这个时候我们发现这个OnCreateViewHolder需要从xml里去解析view，并且创建这个ViewHolder，这个创建对于我们的滑动是会有性能损耗，其实还是因为我们的这个卡片太复杂了。</p>
-<p>所以，我们可以考虑提前创建一些ViewHolder，放到ViewHolder的池子里去，这样我们在滑动的时候，就不需要先Create再Bind了。</p>
-<p>提前创建ViewHolder，在主线程Idle的状态下提前创建ViewHolder放到RecycledViewPool中，这个pool的size默认是5。<br>   <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">recyclerView.setRecycledViewPool(RecyclerView.RecycledViewPool().apply &#123;</span><br><span class="line">	LightExecutor.postIdle(Runnable &#123;</span><br><span class="line">		repeat(<span class="number">5</span>) &#123;</span><br><span class="line">			<span class="comment">//RecycledViewPool 默认size为5个，RecyclerView内部会有判断，如果满了不会create</span></span><br><span class="line">			<span class="comment">//注意这里取得是typePool的倒数第一个和第二个位置，需要保证注册的时候视频卡片和笔记在最后两个位置</span></span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">1</span>))</span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">2</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
-<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><p>在做完这些优化之后，在Feed流上的卡顿就有很大改善了，另外，对于业务侧的指标也有一定的数据提升。</p>
-<h4 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h4><p>对于这块业务的性能监控可以实施起来，这样有利于我们尽早发现卡顿问题，另外，对于一些优化的点其实还可以继续深挖，比如前创建ViewHolder是否可以使用AsyncLayoutInflator进行inflate，还有针对文本的预渲染可以考虑抽成组件形式，方便其他业务使用。</p>
-<p>感谢您的阅读，如果觉得我的文章对你有帮助，请帮忙点赞，有问题可以评论留言。</p>
-]]></content>
-      <tags>
-        <tag>性能优化 RecyclerView缓存</tag>
-      </tags>
   </entry>
   <entry>
     <title>你可能需要这份大厂面经</title>
@@ -215,6 +273,73 @@
 <p>基本上，自己面试比较顺利的几次都没有记录下来。关于Offer的选择，腾讯相对阿里，杭州相对深圳，压力要小很多，所以决定去阿里，所以就拒了QQ音乐这边的机会，但是心里还是蛮喜欢这个工作岗位的。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整体说来，这段时间的面试不能算是成功的，很多面试都没有通过，通过的还有运气成分在里面吧，这也提醒我自己要学习的东西还有好多吧，尤其自己在算法这一块还是比较薄弱的，对大多数人来说，算法题这块没有啥捷径吧，就是多刷题吧。</p>
 <p>我记录这些希望能对面试的人有些帮助吧，因为之前很多人让我写面经啥的，我也不太清楚怎么写，就是把一些问题记录下来吧，如果你觉得有帮助，可以帮忙点赞分享下，感谢。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>分享一些有价值的博客</title>
+    <url>/2022/04/09/Share-some-valuable-blogs./</url>
+    <content><![CDATA[<p>这周的文章延迟了。</p>
+<p>最近比较忙，清明节都在家里加班。</p>
+<a id="more"></a>
+<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
+<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
+<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
+<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
+<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
+<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
+<p>这个是我feedly的截图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG102.jpeg" alt></p>
+<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
+<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
+<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
+<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
+<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
+<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
+<p>还有一些英文的博客：</p>
+<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
+<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
+<ul>
+<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
+</li>
+<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
+</li>
+<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
+</li>
+</ul>
+<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
+<p>下面放一些目前的阅读笔记吧。</p>
+<p>挣钱不是一件事情，而是一种技巧。</p>
+<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
+<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
+<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
+<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
+<p>销售技巧是一种形式的独特知识。</p>
+<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
+<p>Sales skills </p>
+<p>Musical talents, with the ability to pick up any instrument </p>
+<p>An obsessive personality: you dive into things and remember them quickly </p>
+<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
+<p>Playing a lot of games, you understand game theory pretty well </p>
+<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
+<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
+<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
+<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
+<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
+<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
+<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
+<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
+<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
+<p>跟随你的好奇心去做事，而不是追寻热点。</p>
+<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
+<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
+<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
+<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
+<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
+<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
+<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
+<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
+<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
+<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
 ]]></content>
   </entry>
   <entry>
@@ -471,131 +596,6 @@
       </tags>
   </entry>
   <entry>
-    <title>RoamResearch,一款帮助我们更好思考的笔记工具</title>
-    <url>/2022/03/19/RoamResearch-a-tool-which-can-help-us-think-better/</url>
-    <content><![CDATA[<h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>上一次发公众号文章是 2020 年的 8 月 29 号，马上都快两年了，很久没更新了，真是太惭愧了。那些没取关的朋友们算是真爱了吧，或者是因为忘记在某个角落还关注着这个沉寂的没有提供什么价值的公众号，如果是因为后者，那可以考虑取关了 😂😂，咳~，开个玩笑。</p>
-<p>虽然不应该给自己找理由，但是没有怎么更新的原因的确是因为太忙了，工作上的节奏也比之前更快了，生活上，因为去年小孩出生了，从去年 5 月份到现在，工作之外的大部分时间都是陪小孩去了，很少会有自己可以自由支配的时间。</p>
-<p>最近这段时间想了很久，还是觉得要将之前的公众号捡起来，继续写点东西。先立个 flag，每周更新一篇，内容涉及平时的技术总结、阅读思考以及一些提升效率的技巧吧。</p>
-<a id="more"></a>
-<h3 id="什么是Roam-Research"><a href="#什么是Roam-Research" class="headerlink" title="什么是Roam Research"></a>什么是Roam Research</h3><p>今天主要来介绍一下<code>Roam Reseach</code>这个工具吧。之前还在小红书的时候就使用过一个月，后面因为需要付费就没有继续用了，今年年初的时候看到关于<code>Roam Research</code>的推特，没忍住花钱买了一年的会员，目前用了一段时间整体感觉还可以，下面分享一下自己的使用经验。</p>
-<p>在分享我自己的使用经验之前，首先来介绍下<code>Roam Reseach</code>是什么？简单来说，它就是一个笔记工具，和传统的笔记工具如<code>Evernote</code>、<code>有道云笔记</code>相比，它有什么不一样呢？传统的这类笔记工具他往往是线性的，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picyoudao_note.jpg" alt></p>
-<p><code>Roam Reseach</code>（下面都简称 Roam）的官方网站是<a href="https://roamresearch.com/" target="_blank" rel="noopener">Roam官网</a>，作者是<a href="https://twitter.com/Conaw" target="_blank" rel="noopener">Conaw</a>,目前有Web、Mac以及Windows版本，新用户可以试用一个月，后面就需要收费了，另外有免费的替代软件Obsidian和Logseq，这两个基本都是借鉴的 <code>Roam</code>的思想。</p>
-<p>而<code>Roam</code>则是网状的，结构上有点类似于我们的神经元。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picshenjingyuan.jpg" alt></p>
-<p>我们在使用传统笔记工具时，很多时候都是先建立一个分类，可能该分类下面还有一个小的分类，最后才是我们笔记的具体内容。而 Roam 则不是，比如笔记 A 讨论了 C 这个主题，笔记 B 也讨论了 C 这个主题，这样 A 和 B 就一起关联到 C 这个主题下面，注意这里的顺序，是先有 A 和 B，才有了 C 这个分类，这其实是一种自底向上的方法，程序员们对于这个方法应该不陌生，我们很多时候程序设计都会采用这种方法，由局部到整体逐步完善。</p>
-<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_graph.jpg" alt><br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_network.jpeg" alt></p>
-<p>那么<code>Roam</code>是如何实现这种网状结构的呢？主要是靠它的双向链表的能力。<code>Roam</code>使用[[]]来实现双向链表，所有被[[]] 包起来的内容会自动生成一个 page，而在这个 page 里又可以使用[[]]继续构造新的 page，这样，这两个 page 之间就构成了一个双向链表，由很多个这种双向链表组合起来，整体就形成了一个网状的结构。</p>
-<p><code>Roam</code>每天会自动生成一个以当前日期为标题的 page。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_daily_page.jpg" alt></p>
-<p>比如我在今天自动生成的 page 的 Daily Log 下面关联了<code>Roam</code><br>而从<code>Roam Reseach</code>点进去则是下面这样的，</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_research_page.jpg" alt></p>
-<p>这里列出了所有链接到当前的内容，表示下面这些节点都是与 Roam Research 相关。</p>
-<p>而点击右侧的[Open Graph View] 则可以从图结构上更直观地看到当前节点关联的内容。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_single_graph.jpg" alt></p>
-<p>另外，Roam 还提供块的引用，使用(())可以实现，被(()) 包含的内容可以称之为块，这个块可以是其他 Page 里面某一句文本或一个片段，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_block_ref.jpg" alt></p>
-<p>图片中 1 所指示的部分就被两个地方引用到，2 处所显示的数字则是当前内容被引用的次数，通过点击 2 处可以实现折叠和展开这部分引用的内容。</p>
-<p>另外，Roam 还提供一些快捷的命令，通过输入/即可显示。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_command.jpg" alt></p>
-<p>对于图片，可以直接将剪贴板中的图片进行上传，对于Twitter和YouTube也是可以解析出来的。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_twitter.jpg" alt></p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_youtobe.jpg" alt></p>
-<p>当我们了解了以上一些技巧之后就日常使用就没有什么问题了。</p>
-<h3 id="使用经验"><a href="#使用经验" class="headerlink" title="使用经验"></a>使用经验</h3><p>接下来，介绍一下平时我自己的一些使用技巧。</p>
-<p>在每天自动生成的 page 下面，我一般会创建 Daily Log，MIT3，Tasks，Daily Reading 以及 Thinking 这 6 个节点。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_tips.jpg" alt></p>
-<p><code>Daily Log</code> 主要是记录下每天的工作记录，主要是记录自己每天的时间花在哪里，从而提升工作效率，而不是每天浑浑噩噩不知道每天干了些啥。</p>
-<p>这个方法主要来自这篇文章，<a href="https://betterhumans.pub/replace-your-to-do-list-with-interstitial-journaling-to-increase-productivity-4e43109d15ef" target="_blank" rel="noopener">Replace Your To-Do List With Interstitial Journaling To Increase Productivity</a>，主要思想是：通过记录日志来替代使用 TODO List，当你从一个工作切换到另一个工作的时候做下记录，写几句话描述一下上一个任务做了啥，以及下一个任务准备做啥，尽量描述清楚，而不是用几个简单的词语来描述。</p>
-<p>原因是因为我们人的大脑是不能多线程工作的，我们需要在做当前工作的时候保持足够的专注度来提高我们整体的效率，所以我们需要在当前工作之前把上一个工作梳理下，并放空我们的大脑，让我们的大脑休息一下。</p>
-<p><code>MIT3</code> 记录每天最重要的 3 件事，每天将这个里面的事情完成那么这一天就算是目标达成了。</p>
-<p><code>Tasks</code> 记录每天的一些任务，很多时候同时会有多个事情过来，如果不记录下来则很容易忘。</p>
-<p><code>Daily Reading</code> 则是记录每天的一些阅读记录，包括博客，文章和书籍。</p>
-<p><code>Thinking</code> 则是记录每天的一些思考，有的可能是灵光一闪的想法。</p>
-<p>上面就是一些 Roam 的一些实践的经验，介绍到这里，可能有人会问，我上面介绍的这些和是否使用 Roam 关系并不大啊，这些使用系统默认带的备忘录都是可以实现的啊？</p>
-<p>嗯，这个，也不是没有道理的，重要的其实是方法，工具更多的只是辅助。</p>
-<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><p>最后，再来介绍一种使用 Roam 来记笔记的最佳实践。Roam 与其说是一个工具，倒不如说是一种思想。其实 Roam 的这种设计理念是来自德国的社会学家和系统理论家 —— 尼克拉斯 · 卢曼（Niklas Luhmann），方法名叫 Zettelkasten，卢曼使用这套方法，积累了 90000 个知识卡片，一生中写了 60 本书和其他大量出版物。</p>
-<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picslip_box.jpg" alt></p>
-<p>Zettelkasten 是由许多单独的笔记组成，其中包括想法和其他简短的信息，这些信息一般是在平时学习或者思考时记下的。这些笔记可以分层编号，以便在适当的地方插入新的笔记，并包含元数据，使记录者能够将笔记相互关联。</p>
-<p>从这个基础上，就慢慢衍生出了类似 Roam 这类的软件。在<a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>这篇文章中就详细介绍了由 Zettelkasten 扩展出来的一种记笔记方法，写得很详细，大家有兴趣可以看看原文。</p>
-<p>我目前主要使用以下几种类型的笔记：<br><code>Fleeting Notes</code> 记录一些临时的想法，看书过程中的一些注解等。</p>
-<p><code>Bibliographical Notes</code> 主要是在阅读过程中的一些划线部分的摘抄，我主要是从微信读书或者 Kindle 中导出。</p>
-<p><code>Literature Notes</code> 是用自己的话记录下阅读过的文献笔记，不能复制、粘贴，这样能迫使自己增强对于原文的理解。</p>
-<p><code>Permanent Notes</code>则是将当前的笔记和自己之前的笔记进行关联，从而输出一个自己的全新的理解的内容，这个部分更多的是和自己之前的知识体系进行融合。</p>
-<p>通过 <code>Roam</code> 就比较容易实现上面的这些，关键在链接，只有将新的知识融合进自己已有的知识体系，我们才算是真正掌握。</p>
-<p>我现在会写很多 Literature Notes，主要是帮助自己去吸收理解一些知识，很多东西你以为你掌握了，但是让你用一句话说出来都不行那就不是真的掌握。不要害怕写的不对或者写的没有文采，这些都不重要，重要的是你的思考过程，写作本质上可以帮助更好地进行思考。</p>
-<p>每个人的知识体系都是不一样的，所以我们每个人对于知识的理解也是不一样的，不要去复述别人的理解，而是要有你自己的理解，表达自己的观点，不一定对，但是得有自己的思考，这样我们的知识体系才能不断生长，不断扩张，自身才能得到成长。</p>
-<hr>
-]]></content>
-  </entry>
-  <entry>
-    <title>分享一些有价值的博客</title>
-    <url>/2022/04/09/Share-some-valuable-blogs./</url>
-    <content><![CDATA[<p>这周的文章延迟了。</p>
-<p>最近比较忙，清明节都在家里加班。</p>
-<a id="more"></a>
-<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
-<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
-<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
-<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
-<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
-<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
-<p>这个是我feedly的截图：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG102.jpeg" alt></p>
-<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
-<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
-<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
-<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
-<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
-<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
-<p>还有一些英文的博客：</p>
-<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
-<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
-<ul>
-<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
-</li>
-<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
-</li>
-<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
-</li>
-</ul>
-<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
-<p>下面放一些目前的阅读笔记吧。</p>
-<p>挣钱不是一件事情，而是一种技巧。</p>
-<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
-<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
-<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
-<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
-<p>销售技巧是一种形式的独特知识。</p>
-<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
-<p>Sales skills </p>
-<p>Musical talents, with the ability to pick up any instrument </p>
-<p>An obsessive personality: you dive into things and remember them quickly </p>
-<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
-<p>Playing a lot of games, you understand game theory pretty well </p>
-<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
-<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
-<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
-<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
-<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
-<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
-<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
-<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
-<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
-<p>跟随你的好奇心去做事，而不是追寻热点。</p>
-<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
-<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
-<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
-<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
-<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
-<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
-<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
-<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
-<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
-<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
-]]></content>
-  </entry>
-  <entry>
     <title>深入分析AsyncTask</title>
     <url>/2019/03/23/analys-of-AsyncTask/</url>
     <content><![CDATA[<ol>
@@ -746,58 +746,6 @@
       </categories>
       <tags>
         <tag>ConcurrentHashMap</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于TabLayout的indicator宽度的一次探索</title>
-    <url>/2019/03/22/how-to-change-indicator-width-of-Tablayout/</url>
-    <content><![CDATA[<p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
-<blockquote>
-<p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
-</blockquote>
- <a id="more"></a>
-<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
-<p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
-<p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
-<p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
-<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left = selectedTitle.getLeft();   right = selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
-<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3" target="_blank" rel="noopener">方法一</a></p>
-<p><strong>主要代码如下：</strong><br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
-<p>这种情况下，需要指定TabLayout的tabMode为fixed，如果设置为scrollable，那么这段代码是不生效的。</p>
-<p>来看看这段代码的运行效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_3.png" alt="这里写图片描述"><br>这种情况下基本可以满足需求，这里的indicator的宽度基本和Tab的文字是等宽的。这种解决方法勉强可以达到这种需求，但是这里有个问题是当Tab的文字不统一的时候，Indicator的宽度会由最大的那个Tab的宽度决定。</p>
-<p>可以看到下面这个截图的效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_4.png" alt="这里写图片描述"></p>
-<p>如上截图，我们发现，当第二个tab的文字变长的时候，第一个tab的Indicator的宽度马上就超过了tab文字的宽度，作为一个追求完美的程序员，这样还是显得很别扭，所以接下来我们再来看看第二种方法。</p>
-<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903" target="_blank" rel="noopener">方法二</a></p>
-<p>贴上链接地址，这个作者针对第一种方式做了一些改善，我觉得文章写得很不错，不仅针对第一种方式给出了具体的方法，而且分析了为什么采取这种方式。</p>
-<p>这里简单总结下，你也可以点击上面的链接看原作者的分析。我们注意到，TabLayout内部对Tab的宽度有个特殊的处理，在onMeasure方法中，如下面的截图，首先循环遍历，取出Tab的最大宽度，然后再循环将最大的宽度设置为每个Tab的宽度，这样tab的宽度总是以所有tab中最大宽度的那个值来决定，而我们每个Tab的Indicator的width是和每个Tab的宽度相关的.<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_5.png" alt="这里写图片描述"></p>
-<p>我们来看下关键代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
-<p>通过反射拿到每个TabView的宽度，拿到TabView中每个TextView宽度，将TextView的宽度设置给每个TabView，这样我们的Tab的宽度就被压缩了，同时，每个Tab的Indicator的宽度就能和Tab的文字部分保持同样的宽度了。</p>
-<p>这种方式的效果截图如下：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_6.png" alt="这里写图片描述"></p>
-<p>这样看，是不是就没有上面的问题了。每个Tab的Indicator的width基本可以合Tab的文字宽度保持一致了。但是这里还有一个问题，就是采用这种方法虽然可以解决每个Tab的Indicator宽度太长的问题，但是，上面两种方法都有一个特点，就是通过反射将每个tab的padding设置为0，这样会导致每个tab的可点击区域变得很小，我么打开开发者模式里面显示布局边距这个选项来看下我们刚才的解决方法运行的截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_7.png" alt="这里写图片描述"><br>通过上面的截图可以清楚地发现每个tab的可点击区域被压缩得很窄。虽然这个在某些方面看来是可以接受的，但是我们来看文章最开始这张图。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"></p>
-<p>这里我么如果采取上面两种方式来压缩Tab来改变Indicator的width的话，就会导致每个Tab的边距变得很小，这样，就会导致Tab的可点击区域变小，这对于app的首页来说，肯定是不能接受的。所以，针对这一点来说，上面两种方式都是不符合要求的，所以需要找另一种方法来解决这个问题。</p>
-<h3 id="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"><a href="#第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。" class="headerlink" title="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"></a>第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。</h3><p>简单来说，就是将原生TabLayout代码复制一份，作为自己的代码，这样可以很容易地改动里面的代码，在使用的时候直接引用我们自己的这个TabLayout就行。</p>
-<p>接下来我们需要改原生TabLayout的一些逻辑，在保留原生TabLayout一些自定义属性的基础上，添加可以自定义Indicator的width的属性，<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_9.png" alt="这里写图片描述"></p>
-<p><strong>在代码中主要改两个地方，第一个地方如下</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_10.png" alt="这里写图片描述"></p>
-<p>在updateIndicatorPosition方法中，这里在处理Indicator的宽度的时候不是以Tab的左边坐标来算，将Indicator的left和right进行如下设置。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
-<p>并且，对于Indicator滑动中的状态也做相应的处理，即当mSelectionOffset大于0时对Indicator的left和right做同样的处理。</p>
-<p><strong>第二个改动的地方:</strong><br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png" alt="这里写图片描述"></p>
-<p>这里改动的是animateIndicatorToPosition方法，根据名字就可以基本知道这个是对Tab切换时Indicator的动画处理。</p>
-<p>如上截图，可以知道这个targetView就是TabLayout的每个Tab，对于targetLeft和targetRight我们做上面同样的处理。</p>
-<p>接下来我们可以验证下我们这样的改动方法是否有效，简单看下效果图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png" alt="这里写图片描述"></p>
-<p>可以看到，我们可以让TabLayout的Tab的可点击区域保持不变，并且可以修改Tab下面的Indicator的宽度，这里我们提供了TabLayout的Indicator的width的自定义。</p>
-<p>不多说，最后看下统一的效果截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png" alt="这里写图片描述"></p>
-<p><a href="https://github.com/JasonGaoH/XTabLayout/" target="_blank" rel="noopener">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
-<p>最后，感谢大家阅读这篇文章，如果觉得写得还不错的话，点个赞呗，实在不行，留个言也可以接受。</p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>TabLayout</tag>
       </tags>
   </entry>
   <entry>
@@ -1069,42 +1017,6 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
-    <title>Mac上你一定要装的效率神器</title>
-    <url>/2022/05/06/awsome-tools-in-mac/</url>
-    <content><![CDATA[<p>今天想介绍一下Mac上的效率神器 — Alfred。</p>
-<p>其实关于Alfred的介绍有很多，但我还是忍不住想介绍一下这个工具，个人感觉它真的是Mac上一个特别好用的提升效率的工具了。</p>
- <a id="more"></a>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_1.jpg" alt></p>
-<p>Alfred 和Mac自带的Spotlight都属于同一类工具，但是比Spotlight 功能却要强大很多，下面会慢慢介绍它的强大之处。</p>
-<p>Alfred 默认是使用Alt+空格键触发的，这里你也可以按照你的习惯修改启动的默认快捷键。</p>
-<h3 id="基础功能中我觉得比较好用的"><a href="#基础功能中我觉得比较好用的" class="headerlink" title="基础功能中我觉得比较好用的"></a>基础功能中我觉得比较好用的</h3><h4 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h4><p>在唤起Alfred之后，输入’ 符号或者按下空格就可以进行文件搜索，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_2.jpg" alt></p>
-<p>文件搜索配合下面Alfred中封装的一些通用操作对于文件的操作会特别方便。</p>
-<p>在搜索到我们需要的文件时，这个时候只需要按下→键就可以列出一些通用的操作列表，如下所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_3.jpg" alt></p>
-<p>Alfred 中封装了很多对于文件的操作，可以看到图中有很多，常用的比如打开，在Finder中打开，在当前位置打开终端，拷贝文件路径等等，真的是非常方便。</p>
-<h4 id="网页搜索"><a href="#网页搜索" class="headerlink" title="网页搜索"></a>网页搜索</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_4.jpg" alt></p>
-<p>这个里面支持的搜索就很多了，我这边比较常用的就是Google和youtobe搜索了，通过在Alfred中输入google和youtobe就可以触发相应的搜索功能了，你只需要输入相应的关键字就可以了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_5.jpg" alt></p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_6.jpg" alt></p>
-<h4 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_7.jpeg" alt></p>
-<p>Alfred 能够记录剪贴板历史，有时候我们需要查看之前剪贴板中的内容，这个功能用的相对不多，但是关键时刻还是特别管用的。</p>
-<h4 id="Snippets-摘要功能"><a href="#Snippets-摘要功能" class="headerlink" title="Snippets(摘要功能)"></a>Snippets(摘要功能)</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_8.jpeg" alt></p>
-<p>Snippets 的功能类似TextExpander ，就是使用剪短字符来扩展大段的文字，对于一些比较模式化的文本，我们经常要输入，但是因为很长，输入很费时，如果你将这些文本存在某个地方还要花时间去搜索，这个时候，就可以通过配置Snippet来实现这个功能。其实mac系统自带的也有类似的功能，就是系统自带的Text Replacement，如下图所示，比如输入msd可以提示帮你补全”马上到！”的文本。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_13.jpeg" alt></p>
-<h4 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h4><p>通过键盘输入相关的命令控制Mac的睡眠，启动等等，另外还可以通过输入hide来隐藏某个软件，输入quit来关闭某个软件，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_14.jpg" alt><br>这个功能用的不多，更多的是要对电脑进行息屏等操作的时候比较方便，不需要记一些快捷键，也不需要使用鼠标去进行点击，相对鼠标，键盘肯定是效率要高不少的。</p>
-<h3 id="高级功能workflow"><a href="#高级功能workflow" class="headerlink" title="高级功能workflow"></a>高级功能workflow</h3><p>workflow是Alfred高级功能，是需要付费才能用的，我觉得这个是 Alfred 最牛逼的地方了，网上有很多好用的Workflow，因为有了自定义Workflow的功能，所以，只要你想，你可以将日常中几乎所有模板化的流程设计成你自己的workflow。</p>
-<p>我用的比较多的workflow有以下几个。</p>
-<p><a href="https://github.com/wensonsmith/YoudaoTranslator" target="_blank" rel="noopener">有道翻译</a>，输入yd即可进行单词的翻译，另外需要注意的是有道的翻译需要注册有道智云的账号，在workflow里设置你的应用id和密钥才可以使用</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_9.png" alt></p>
-<p><a href="https://github.com/cj1128/alfred-qrcode-workflow" target="_blank" rel="noopener">二维码生成</a>，输入qr 再输入文本回车即可以将目标文本生成二维码，我在平时开发中经常需要构造一个二维码进行扫码调试，这个workflow让生成二维码的效率大大提高。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_10.jpeg" alt></p>
-<p><a href="https://github.com/sballin/alfred-search-notes-app" target="_blank" rel="noopener">搜索备忘录里的一些文本</a>，输入nb则可以搜索进行文本内容的搜索，输入nt进行hashtag的搜索。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_11.png" alt></p>
-]]></content>
-  </entry>
-  <entry>
     <title>认知觉醒,开启自我改变的原动力</title>
     <url>/2022/03/25/how-to-improve-yourself/</url>
     <content><![CDATA[<p>上一篇<a href="https://jasongaoh.github.io/2022/03/19/RoamResearch-%E4%B8%80%E6%AC%BE%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E6%9B%B4%E5%A5%BD%E6%80%9D%E8%80%83%E7%9A%84%E7%AC%94%E8%AE%B0%E5%B7%A5%E5%85%B7/" target="_blank" rel="noopener">RoamResearch,一款帮助我们更好思考的笔记工具</a>文章里提到要每周写一篇文章，类似最近比较流行的<code>Newsletter</code> 模式，公开地提出来也算是让大家监督我，从而让我可以坚持下去。<br> <a id="more"></a></p>
@@ -1138,65 +1050,6 @@ an action to be performed on a different thread than your own.
 <p>作家 CJ Chilvers 写了 35 年的 newsletter，他在它的 <a href="https://www.cjchilvers.com/blog/35-lessons-from-35-years-of-newsletter-publishing?utm_campaign=%E5%8F%AF%E4%B9%90&amp;utm_medium=email&amp;utm_source=Revue%20newsletter" target="_blank" rel="noopener">35 Lessons from 35 Years of Newsletter Publishing</a> 中写到，Deliver value, not word counts. Solve someone else’s problem — the bigger the better. It’s nice if it solves your problem too. 简单翻译下就是：传递价值，而不是字数。解决别人的问题，越大的问题越好。如果同时也能解决你的问题，就更好了。</p>
 <p>我觉得上面这两段话已经很好的写出了我想要表达的东西。我写的东西首先肯定是我自己觉得有用的，对于大家，可能有用，也可能没用，但是我尽量输出我自己觉得有价值的，暂时肯定不考虑流量的问题，更多的是提升自己的思考能力，提高自己的文字表达能力，如果对于大家在某些方面有些启发，那我觉得就算是成功的了。</p>
 <p>另外，这本书在关于潜意识、元认知等基本概念的解读上有着独到的见解，另外在学习力、情绪力、专注力等这些具体能力的提升上都有具体可行的方法。感兴趣的可以自己亲自去阅读看看，非常不错的一本书。</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>大厂是一座围城-- 聊聊最近两年我在阿里的经历</title>
-    <url>/2023/09/12/exp-in-Alibaba/</url>
-    <content><![CDATA[<p>今年年初碰上裁员，回想二月中下旬那些日子，现在想想都觉得心中有点发慌。 </p>
-<p>自己从这波裁员中挺过来，算是有很多运气成分在里面，二月份的后两个星期，白天上班还得干一些没啥意义的工作，晚上回家还得各种复习，刷题，毕竟自己是有房贷，有小孩的人，需要有份工作来养家糊口。</p>
-<p>准备借着这个时机，将最近两年自己的一些经历，心路历程做个简单总结吧，不一定公开，但至少让自己有一些回头的思考。</p>
-<p>我是20年8月份从上海来杭州的，其实从20年初的时候自己就陆续开始接触一些外部的面试了，因为疫情的缘故，很多面试都是线上视频面的。</p>
-<p>之前同事问我为什么要离职，我仔细想了一下，第一个原因算是因为上海房价太高了，上海10年的房价队伍来说还是挺高的，因为当时18年低因为要准备结婚的缘故在合肥买了一套，按当时的政策再买房算是二套了，二套首付比例要6成以上，所以上海那个时候的房价对我算是望尘莫及了；第二个原因是自己那个时候想去大公司看看，我还记得当时提离职的时候，主管说，我其实理解你这种想去大公司看看的心情，但等你去了你就会发现，大公司其实也就那样，并没有什么特别的地方，现在想来，的确是这么回事，作为一个普通一本毕业的计算机专业的学生，在某些方面，憋着一股劲，想去大厂证明一下自己，心底里某个声音仿佛在说，看，我也是能够进大厂的！</p>
-<p>当时面试的是阿里淘特的业务线，也就是那个前两年被炒得热火朝天，现在基本被阿里放弃的一个业务，因为当时没想那么多再去试试其他的业务了，于是把腾讯音乐那边在深圳的Offer给拒掉了。</p>
-<h2 id="在阿里淘特这两年的感受"><a href="#在阿里淘特这两年的感受" class="headerlink" title="在阿里淘特这两年的感受"></a>在阿里淘特这两年的感受</h2><p>未完。。。</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>如何更好得阅读</title>
-    <url>/2022/04/15/how-to-read-better/</url>
-    <content><![CDATA[<p>今天在看geekplux的这篇 <a href="https://geekplux.com/newsletters/14" target="_blank" rel="noopener">我获取信息的方法 -#14</a> Newsletter的时候，在感慨作者获取信息源这么丰富的同时，发现原来自己最近的几篇文章其实算不上是博客，更应该算是一种Newsletter的形式。博客通常是有主题的，而Newsletter更多的时候算是一种信息输入后的整理输出，通常有多个主题。</p>
-<p>相对Newsletter来说，博客需要更多的时间去整理，去思考，而对于我每天10105的上班节奏来说，没有太多时间去整理输出类似博客这种相对有深度的文章。</p>
-<p>接下来，每周更多的是分享的一些Reading List，内容涉及书籍，博客，Newsletter，Twitter或YouTube等形式。</p>
-<p>这周讲讲如何更好的阅读。</p>
-<a id="more"></a>
-<p>Farnam Street上的两篇文章：</p>
-<ul>
-<li><a href="https://fs.blog/reading/" target="_blank" rel="noopener">Reading Better</a></li>
-<li><a href="https://fs.blog/remember-books/" target="_blank" rel="noopener">How to remember what you read</a></li>
-</ul>
-<p>如何更好得阅读，有以下一些技巧：</p>
-<ul>
-<li>我们要学会筛选好书和坏书，我们的时间是宝贵的，坏书不值得我们浪费时间，而好书值得我们反复阅读。</li>
-<li>阅读有4个境界，为了娱乐阅读，为了了解阅读，为了理解阅读，为了掌握阅读。这个其实没有好坏之分，没有说为了娱乐阅读就一定比为了掌握阅读要低级，当你能从阅读中找到乐趣，这其实是个好事情。Naval就说过，阅读那些你喜欢的书直到你喜欢阅读为止。</li>
-<li>不要关注阅读速度，阅读的关键不在速度，而在你是否从中吸收了知识。</li>
-<li>如何选择好书？阅读经典的书，新书里面虽然有好书，但是数量不多，有很多质量不高的书，而经典的书经过时间的考验，值得花时间阅读。</li>
-<li>记笔记能提高你的阅读效率。文章中介绍了一种记笔记的方式如下：<ul>
-<li>在每个章节结尾写下这一章的总结或者一些特别的观点，要用自己的话写出来。</li>
-<li>在读完一周后，再回来回顾一下之前的笔记。盖上书本，尝试用你自己的话写下来这本书的主要观点，如果你发现有点困难，再重新去看你的笔记。这其实来自于<a href="https://baike.baidu.com/item/%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95/50895393#:~:text=%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95%E7%9A%84,%E6%B3%A8%E9%87%8D%E4%BA%86%E8%A7%A3%E6%9F%90%E4%BB%B6%E4%BA%8B%E7%89%A9%E3%80%82" target="_blank" rel="noopener">费曼学习法</a>。</li>
-<li>最后，将这些摘要手写抄下来或者输入到笔记工具(如EverNote)中去。</li>
-</ul>
-</li>
-</ul>
-<p>如何记住我们阅读的东西？这篇文章和上面那篇文章有些观点类似，这里就介绍一些不一样的观点。</p>
-<ul>
-<li>不要关注阅读的数量，要关注质量。</li>
-<li>不要去关注那些华而不实的App或者工具，关注书本的内容即可。</li>
-<li><p>不应该阅读让你觉得很枯燥的书，也不一定非得把某本书读完。</p>
-</li>
-<li><p>什么是主动阅读？你要在阅读某本书之前以及在整个阅读过程中你需要弄清楚你想在书中学到什么或者收获什么，将书中的内容和自己现有的知识进行关联，并尝试去应用这些知识。</p>
-</li>
-</ul>
-<p>之前看过Jiayuan的推文总结<a href="https://twitter.com/Tisoga/status/1260430958345543687?t=L4nvHixGM2gUEj4JWHuxJw&amp;s=19" target="_blank" rel="noopener">3wh2t阅读法</a>，我觉得总结的很好，这里介绍下。</p>
-<p>2wh2t的意思是Why，Who，What，How，Think以及Todo。</p>
-<p>Why表示为什么阅读，也就是要带着目的去阅读，当你带着目的去阅读的时候才会促进你思考，漫无目的的阅读其实就是在浪费时间。</p>
-<p>Who表示是谁，这本书是谁写的，以及书中介绍了哪些人物。这个点我理解不是必需的，但是如果你知道这些，比如作者写这本书的上下文，能够帮助更好得理解书本中的内容。</p>
-<p>What表示书写的是什么，你要搞清楚书中写的是什么，比如前面说到的通过费曼学习法来帮助自己记住书中的观点。</p>
-<p>How则表示怎么做，作者是怎么教你做的。</p>
-<p>最后2个t，一个表示Think(思考)，一个表示Todo(行动)。读完这本书给你带来的思考是什么？每个人的阅历都是不同的，你肯定有你自己不一样的思考，而这个思考才是真正属于你自己的东西。另一个表示行动，行动才是最重要的，没有付诸行动的想法不过是你脑中的一个概念而已。</p>
-<p>另外，上面的一些想法和之前读过的《麦肯锡精英高效阅读法》很多观点不谋而合，推荐大家去阅读这边书。</p>
-<p>最后放一下按照2wh2t 方法总结的《麦肯锡精英高效阅读法》的思维导图，思维导图是Jiayuan制作的，我是觉得总结的很好，就放在这里了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic20230904192030.png" alt></p>
 ]]></content>
   </entry>
   <entry>
@@ -1300,6 +1153,173 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
+    <title>关于TabLayout的indicator宽度的一次探索</title>
+    <url>/2019/03/22/how-to-change-indicator-width-of-Tablayout/</url>
+    <content><![CDATA[<p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
+<blockquote>
+<p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
+</blockquote>
+ <a id="more"></a>
+<h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
+<p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
+<p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
+<p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
+<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left = selectedTitle.getLeft();   right = selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
+<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3" target="_blank" rel="noopener">方法一</a></p>
+<p><strong>主要代码如下：</strong><br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这种情况下，需要指定TabLayout的tabMode为fixed，如果设置为scrollable，那么这段代码是不生效的。</p>
+<p>来看看这段代码的运行效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_3.png" alt="这里写图片描述"><br>这种情况下基本可以满足需求，这里的indicator的宽度基本和Tab的文字是等宽的。这种解决方法勉强可以达到这种需求，但是这里有个问题是当Tab的文字不统一的时候，Indicator的宽度会由最大的那个Tab的宽度决定。</p>
+<p>可以看到下面这个截图的效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_4.png" alt="这里写图片描述"></p>
+<p>如上截图，我们发现，当第二个tab的文字变长的时候，第一个tab的Indicator的宽度马上就超过了tab文字的宽度，作为一个追求完美的程序员，这样还是显得很别扭，所以接下来我们再来看看第二种方法。</p>
+<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903" target="_blank" rel="noopener">方法二</a></p>
+<p>贴上链接地址，这个作者针对第一种方式做了一些改善，我觉得文章写得很不错，不仅针对第一种方式给出了具体的方法，而且分析了为什么采取这种方式。</p>
+<p>这里简单总结下，你也可以点击上面的链接看原作者的分析。我们注意到，TabLayout内部对Tab的宽度有个特殊的处理，在onMeasure方法中，如下面的截图，首先循环遍历，取出Tab的最大宽度，然后再循环将最大的宽度设置为每个Tab的宽度，这样tab的宽度总是以所有tab中最大宽度的那个值来决定，而我们每个Tab的Indicator的width是和每个Tab的宽度相关的.<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_5.png" alt="这里写图片描述"></p>
+<p>我们来看下关键代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>通过反射拿到每个TabView的宽度，拿到TabView中每个TextView宽度，将TextView的宽度设置给每个TabView，这样我们的Tab的宽度就被压缩了，同时，每个Tab的Indicator的宽度就能和Tab的文字部分保持同样的宽度了。</p>
+<p>这种方式的效果截图如下：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_6.png" alt="这里写图片描述"></p>
+<p>这样看，是不是就没有上面的问题了。每个Tab的Indicator的width基本可以合Tab的文字宽度保持一致了。但是这里还有一个问题，就是采用这种方法虽然可以解决每个Tab的Indicator宽度太长的问题，但是，上面两种方法都有一个特点，就是通过反射将每个tab的padding设置为0，这样会导致每个tab的可点击区域变得很小，我么打开开发者模式里面显示布局边距这个选项来看下我们刚才的解决方法运行的截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_7.png" alt="这里写图片描述"><br>通过上面的截图可以清楚地发现每个tab的可点击区域被压缩得很窄。虽然这个在某些方面看来是可以接受的，但是我们来看文章最开始这张图。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"></p>
+<p>这里我么如果采取上面两种方式来压缩Tab来改变Indicator的width的话，就会导致每个Tab的边距变得很小，这样，就会导致Tab的可点击区域变小，这对于app的首页来说，肯定是不能接受的。所以，针对这一点来说，上面两种方式都是不符合要求的，所以需要找另一种方法来解决这个问题。</p>
+<h3 id="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"><a href="#第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。" class="headerlink" title="第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。"></a>第三种方法：这种方法简单来说就是改源码。因为目前遇到的问题是，通过反射修改原生TabLayout一些属性并不能完全达到所需要的效果，但是自定义选择自定义TabLayout的成本相对比较大，而且我不想很大地去改动TabLayout的一些调用逻辑，因为我想通过很小的改动来达到这种效果，所以我选择这种方式来改。</h3><p>简单来说，就是将原生TabLayout代码复制一份，作为自己的代码，这样可以很容易地改动里面的代码，在使用的时候直接引用我们自己的这个TabLayout就行。</p>
+<p>接下来我们需要改原生TabLayout的一些逻辑，在保留原生TabLayout一些自定义属性的基础上，添加可以自定义Indicator的width的属性，<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_9.png" alt="这里写图片描述"></p>
+<p><strong>在代码中主要改两个地方，第一个地方如下</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_10.png" alt="这里写图片描述"></p>
+<p>在updateIndicatorPosition方法中，这里在处理Indicator的宽度的时候不是以Tab的左边坐标来算，将Indicator的left和right进行如下设置。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
+<p>并且，对于Indicator滑动中的状态也做相应的处理，即当mSelectionOffset大于0时对Indicator的left和right做同样的处理。</p>
+<p><strong>第二个改动的地方:</strong><br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png" alt="这里写图片描述"></p>
+<p>这里改动的是animateIndicatorToPosition方法，根据名字就可以基本知道这个是对Tab切换时Indicator的动画处理。</p>
+<p>如上截图，可以知道这个targetView就是TabLayout的每个Tab，对于targetLeft和targetRight我们做上面同样的处理。</p>
+<p>接下来我们可以验证下我们这样的改动方法是否有效，简单看下效果图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png" alt="这里写图片描述"></p>
+<p>可以看到，我们可以让TabLayout的Tab的可点击区域保持不变，并且可以修改Tab下面的Indicator的宽度，这里我们提供了TabLayout的Indicator的width的自定义。</p>
+<p>不多说，最后看下统一的效果截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png" alt="这里写图片描述"></p>
+<p><a href="https://github.com/JasonGaoH/XTabLayout/" target="_blank" rel="noopener">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
+<p>最后，感谢大家阅读这篇文章，如果觉得写得还不错的话，点个赞呗，实在不行，留个言也可以接受。</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>TabLayout</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>关于HashMap你需要知道的一些细节</title>
+    <url>/2020/05/21/some-knowledge-about-hashmap/</url>
+    <content><![CDATA[<blockquote>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483757&amp;idx=1&amp;sn=f8cf2e5f82b6cf0e64aab6febf7e7584&amp;chksm=fa237985cd54f0937f9c3c2d3df40b1136602b00d253d2104452ef72319bae6ca7ffcc4f1183&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">关于HashMap你需要知道的一些细节</a></p>
+</blockquote>
+<p>在官方文档中的描述：</p>
+<blockquote>
+<p>Hash table based implementation of the Map interface. This implementation provides all of the optional map operations, and permits null values and the null key. (The HashMap class is roughly equivalent to Hashtable, except that it is unsynchronized and permits nulls.) This class makes no guarantees as to the order of the map; in particular, it does not guarantee that the order will remain constant over time.</p>
+</blockquote>
+<a id="more"></a>
+<blockquote>
+<p>基于Map接口的哈希表的实现。此实现提供所有可选的映射操作，并允许空值和空键。（HashMap类大致等同于HashTable，只是它不同步并且允许空值。）这个类不保证映射的顺序；特别是，它不保证顺序会随着时间的推移而保持不变。</p>
+</blockquote>
+<h3 id="两个重要的参数"><a href="#两个重要的参数" class="headerlink" title="两个重要的参数"></a>两个重要的参数</h3><p>在HashMap中有两个很重要的参数，容量(Capacity)和负载因子(Load factor)</p>
+<blockquote>
+<ul>
+<li>Initial capacity The capacity is the number of buckets in the hash table, The initial capacity is simply the capacity at the time the hash table is created.</li>
+<li>Load factor The load factor is a measure of how full the hash table is allowed to get before its capacity is automatically increased.</li>
+</ul>
+</blockquote>
+<p>简单的说，Capacity就是buckets的数目，Load factor就是buckets填满程度的最大比例。如果对迭代性能要求很高的话不要把capacity设置过大，也不要把load factor设置过小。当bucket填充的数目（即hashmap中元素的个数）大于capacity*load factor时就需要调整buckets的数目为当前的2倍。</p>
+<p>首先，我们来一起看看 HashMap 内部的结构，它可以看作是数组(Node[] table)和链表结 合组成的复合结构，数组被分为一个个桶(bucket)，通过哈希值决定了键值对在这个数组的寻址;哈希值相同的键值对，则以链表形式存储，你可以参考下面的示意图。这里需要注意的是，如果链表大小超过阈值(TREEIFY_THRESHOLD, 8)，图中的链表就会被改造为树形结构。</p>
+<p><img src="../img/Buckets.jpg" alt></p>
+<h3 id="put函数的实现"><a href="#put函数的实现" class="headerlink" title="put函数的实现"></a>put函数的实现</h3><p>接着来看 put 方法实现:</p>
+<p>put函数大致的思路为：</p>
+<ol>
+<li>对key的hashCode()做hash，然后再计算index;</li>
+<li>如果没碰撞直接放到bucket里；</li>
+<li>如果碰撞了，以链表的形式存在buckets后；</li>
+<li>如果碰撞导致链表过长(大于等于TREEIFY_THRESHOLD)，就把链表转换成红黑树；</li>
+<li>如果节点已经存在就替换old value(保证key的唯一性)</li>
+<li>如果bucket满了(超过load factor*current capacity)，就要resize。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 对key的hashCode()做hash</span></span><br><span class="line">    <span class="keyword">return</span> putVal(hash(key), key, value, <span class="keyword">false</span>, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">final</span> V <span class="title">putVal</span><span class="params">(<span class="keyword">int</span> hash, K key, V value, <span class="keyword">boolean</span> onlyIfAbsent,</span></span></span><br><span class="line"><span class="function"><span class="params">               <span class="keyword">boolean</span> evict)</span> </span>&#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; <span class="keyword">int</span> n, i;</span><br><span class="line">    <span class="comment">// tab为空则创建</span></span><br><span class="line">    <span class="keyword">if</span> ((tab = table) == <span class="keyword">null</span> || (n = tab.length) == <span class="number">0</span>)</span><br><span class="line">        n = (tab = resize()).length;</span><br><span class="line">    <span class="comment">// 计算index，并对null做处理</span></span><br><span class="line">    <span class="keyword">if</span> ((p = tab[i = (n - <span class="number">1</span>) &amp; hash]) == <span class="keyword">null</span>)</span><br><span class="line">        tab[i] = newNode(hash, key, value, <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        Node&lt;K,V&gt; e; K k;</span><br><span class="line">        <span class="comment">// 节点存在</span></span><br><span class="line">        <span class="keyword">if</span> (p.hash == hash &amp;&amp;</span><br><span class="line">            ((k = p.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k))))</span><br><span class="line">            e = p;</span><br><span class="line">        <span class="comment">// 该链为树</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (p <span class="keyword">instanceof</span> TreeNode)</span><br><span class="line">            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(<span class="keyword">this</span>, tab, hash, key, value);</span><br><span class="line">        <span class="comment">// 该链为链表</span></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> binCount = <span class="number">0</span>; ; ++binCount) &#123;</span><br><span class="line">                <span class="keyword">if</span> ((e = p.next) == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    p.next = newNode(hash, key, value, <span class="keyword">null</span>);</span><br><span class="line">                    <span class="keyword">if</span> (binCount &gt;= TREEIFY_THRESHOLD - <span class="number">1</span>) <span class="comment">// -1 for 1st</span></span><br><span class="line">                        treeifyBin(tab, hash);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (e.hash == hash &amp;&amp;</span><br><span class="line">                    ((k = e.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k))))</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                p = e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 写入</span></span><br><span class="line">        <span class="keyword">if</span> (e != <span class="keyword">null</span>) &#123; <span class="comment">// existing mapping for key</span></span><br><span class="line">            V oldValue = e.value;</span><br><span class="line">            <span class="keyword">if</span> (!onlyIfAbsent || oldValue == <span class="keyword">null</span>)</span><br><span class="line">                e.value = value;</span><br><span class="line">            afterNodeAccess(e);</span><br><span class="line">            <span class="keyword">return</span> oldValue;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ++modCount;</span><br><span class="line">    <span class="comment">// 超过load factor*current capacity，resize</span></span><br><span class="line">    <span class="keyword">if</span> (++size &gt; threshold)</span><br><span class="line">        resize();</span><br><span class="line">    afterNodeInsertion(evict);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从 putVal 方法最初的几行，我们就可以发现几个有意思的地方:</p>
+<ul>
+<li>如果表格是 null，resize 方法会负责初始化它，这从 tab = resize() 可以看出。</li>
+<li>resize 方法兼顾两个职责，创建初始存储表格，或者在容量不满足需求的时候，进行扩容 (resize)。</li>
+<li>在放置新的键值对的过程中，如果发生下面条件，就会发生扩容。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (++size &gt; threshold)</span><br><span class="line">resize();</span><br></pre></td></tr></table></figure>
+<ul>
+<li>具体键值对在哈希表中的位置(数组 index)取决于下面的位运算:</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">i = (n - <span class="number">1</span>) &amp; hash</span><br></pre></td></tr></table></figure>
+<p>仔细观察哈希值的源头，我们会发现，它并不是 key 本身的 hashCode，而是来自于 HashMap 内部的另外一个 hash 方法。注意，为什么这里需要将高位数据移位到低位进行异或运算呢?这是因为有些数据计算出的哈希值差异主要在高位，而 HashMap 里的哈希寻址是忽 略容量以上的高位的，那么这种处理就可以有效避免类似情况下的哈希碰撞。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object kye)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt;<span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>我前面提到的链表结构(这里叫 bin)，会在达到一定门限值时，发生树化，我稍后会分析 为什么 HashMap 需要对 bin 进行处理。</li>
+</ul>
+<p>可以看到，putVal 方法本身逻辑非常集中，从初始化、扩容到树化，全部都和它有关。</p>
+<p>进一步分析一下身兼多职的 resize 方法，很多朋友都反馈经常被面试官追问它的源码设计。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    </span><br><span class="line"><span class="keyword">final</span> Node&lt;K,V&gt;[] resize() &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> ((newCap = oldCap &lt;&lt; <span class="number">1</span>) &lt; MAXIMUM_CAPACIY &amp;&amp;</span><br><span class="line">                oldCap &gt;= DEFAULT_INITIAL_CAPAITY)</span><br><span class="line">        newThr = oldThr &lt;&lt; <span class="number">1</span>; <span class="comment">// double there</span></span><br><span class="line">       <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (oldThr &gt; <span class="number">0</span>) <span class="comment">// initial capacity was placed in threshold</span></span><br><span class="line">        newCap = oldThr;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// zero initial threshold signifies using defaultsfults newCap = DEFAULT_INITIAL_CAPAITY;</span></span><br><span class="line">        newThr = (<span class="keyword">int</span>)(DEFAULT_LOAD_ATOR* DEFAULT_INITIAL_CAPACITY;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (newThr ==<span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">float</span> ft = (<span class="keyword">float</span>)newCap * loadFator;</span><br><span class="line">        newThr = (newCap &lt; MAXIMUM_CAPACITY &amp;&amp; ft &lt; (<span class="keyword">float</span>)MAXIMUM_CAPACITY ?(<span class="keyword">int</span>)ft : Intege</span><br><span class="line">    &#125;</span><br><span class="line">    threshold = neThr;</span><br><span class="line">    Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])<span class="keyword">new</span> Node[newap]; table = n;</span><br><span class="line">    <span class="comment">// 移动到新的数组结构 e 数组结构 &#125;</span></span><br></pre></td></tr></table></figure>
+<p>依据 resize 源码，不考虑极端情况(容量理论最大极限由 MAXIMUM_CAPACITY 指定，数值 为 1&lt;&lt;30，也就是 2 的 30 次方)，我们可以归纳为:</p>
+<ul>
+<li>门限值等于(负载因子)x(容量)，如果构建 HashMap 的时候没有指定它们，那么就是依 据相应的默认常量值。</li>
+<li>门限通常是以倍数进行调整 (newThr = oldThr &lt;&lt; 1)，我前面提到，根据 putVal 中的逻 辑，当元素个数超过门限大小时，则调整 Map 大小。</li>
+<li>扩容后，需要将老的数组中的元素重新放置到新的数组，这是扩容的一个主要开销来源。</li>
+</ul>
+<h3 id="容量、负载因子"><a href="#容量、负载因子" class="headerlink" title="容量、负载因子"></a>容量、负载因子</h3><p>前面我们快速梳理了一下 HashMap 从创建到放入键值对的相关逻辑，现在思考一下，为什么 我们需要在乎容量和负载因子呢?</p>
+<p>这是因为容量和负载系数决定了可用的桶的数量，空桶太多会浪费空间，如果使用的太满则会严<br>重影响操作的性能。极端情况下，假设只有一个桶，那么它就退化成了链表，完全不能提供所谓<br>常数时间存储的性能。<br>既然容量和负载因子这么重要，我们在实践中应该如何选择呢?</p>
+<p>如果能够知道 HashMap 要存取的键值对数量，可以考虑预先设置合适的容量大小。具体数值 我们可以根据扩容发生的条件来做简单预估，根据前面的代码分析，我们知道它需要符合计算条件:</p>
+<p>负载因子 * 容量 &gt; 元素数量</p>
+<p>所以，预先设置的容量需要满足，大于“预估元素数量 / 负载因子”，同时它是 2 的幂数，结论已经非常清晰了。</p>
+<p>而对于负载因子，我建议:</p>
+<ul>
+<li><p>如果没有特别需求，不要轻易进行更改，因为 JDK 自身的默认负载因子是非常符合通用场景的需求的。</p>
+</li>
+<li><p>如果确实需要调整，建议不要设置超过 0.75 的数值，因为会显著增加冲突，降低 HashMap 的性能。</p>
+</li>
+<li>如果使用太小的负载因子，按照上面的公式，预设容量值也进行调整，否则可能会导致更加<br>频繁的扩容，增加无谓的开销，本身访问性能也会受影响。</li>
+</ul>
+<h3 id="树化改造"><a href="#树化改造" class="headerlink" title="树化改造"></a>树化改造</h3><p> 我们前面提到了树化改造，对应逻辑主要在 putVal 和 treeifyBin 中。</p>
+ <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">treeifyBin</span><span class="params">(Node&lt;K,V&gt;[] tab, <span class="keyword">int</span> hash)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n, index; Node&lt;K,V&gt; e;</span><br><span class="line">    <span class="keyword">if</span> (tab == <span class="keyword">null</span> || (n = tab.length) &lt; MIN_TREEIFY_CAPACITY)</span><br><span class="line">        resize();</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> ((e = tab[index = (n - <span class="number">1</span>) &amp; hash]) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 树化改造逻辑 </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面是精简过的 treeifyBin 示意，综合这两个方法，树化改造的逻辑就非常清晰了，可以理解为，当 bin 的数量大于 TREEIFY_THRESHOLD 时:</p>
+<ul>
+<li>如果容量小于 MIN_TREEIFY_CAPACITY，只会进行简单的扩容。</li>
+<li>如果容量大于 MIN_TREEIFY_CAPACITY ，则会进行树化改造。 </li>
+</ul>
+<p>那么，为什么 HashMap 要树化呢?</p>
+<p>本质上这是个安全问题。因为在元素放置过程中，如果一个对象哈希冲突，都被放置到同一个桶<br>里，则会形成一个链表，我们知道链表查询是线性的，会严重影响存取的性能。</p>
+<h3 id="hash函数的实现"><a href="#hash函数的实现" class="headerlink" title="hash函数的实现"></a>hash函数的实现</h3><p>接着我们着重来看hash函数的实现：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object kye)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt;<span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这段代码实际上称为“扰动函数”，Java 8的代码相对Java 7是做过简化的，但原理是不变的。</p>
+<p>我们都知道上面代码里的key.hashCode()函数调用的是key键值类型自带的哈希函数，返回int型散列值。</p>
+<p>理论上hashCode是一个int值，这个int值范围在-2147483648和2147483648之间，如果直接拿这个hashCode作为HashMap中数组的下标来访问的话，正常情况下是不会出现hash碰撞的。<br>但是这样的话会导致这个HashMap的数组长度比较长，长度大概为40亿，内存肯定是放不下的，所以这个时候需要把这个hashCode对数组长度取余，用得到的余数来访问数组下标。</p>
+<p>所以我们看到HashMap中get方法和put方法都有下面这样的代码：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">tab[(n - <span class="number">1</span>) &amp; hash]</span><br></pre></td></tr></table></figure></p>
+<p>(n-1)&amp;hash实际上相当于hash%n取余数，但&amp;计算速度更快。</p>
+<p>这里我们举个例子：<br>以初始长度为16为例，16-1=15。2进制表示是00000000 00000000 00001111。<br>我们把15和某hashCode值做“与”操作如下，结果就是截取了最低的四位值。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="number">10100101</span> <span class="number">11000100</span> <span class="number">00100101</span></span><br><span class="line">&amp;	<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00001111</span></span><br><span class="line">----------------------------------</span><br><span class="line">	<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000101</span>    <span class="comment">//高位全部归零，只保留末四位</span></span><br></pre></td></tr></table></figure></p>
+<p>这样问题就来了，我们如果只是取低位的情况下，碰撞就会很严重。</p>
+<p>这时候“扰动函数”的价值就体现出来了，我们来看下面这张图片：<br><img src="../img/hashmap_hash.jpg" alt></p>
+<p>右位移16位，正好是32bit的一半，自己的高半区和低半区做异或，就是为了混合原始哈希码的高位和低位，以此来加大低位的随机性。而且混合后的低位掺杂了高位的部分特征，这样高位的信息也被变相保留下来。</p>
+<p>这样大多数的hashCode的分布已经很不错了，就算是发生了碰撞也用O(logn)的tree去做了。仅仅异或一下，既减少了系统的开销，也不会造成的因为高位没有参与下标的计算(table长度比较小时)，从而引起的碰撞。</p>
+<p>以上就是关于HashMap中hash函数设计的原理。</p>
+<h3 id="resize的实现原理"><a href="#resize的实现原理" class="headerlink" title="resize的实现原理"></a>resize的实现原理</h3><p>当put时，如果发现目前的bucket占用程度已经超过了Load Factor所希望的比例，那么就会发生resize。在resize的过程，简单的说就是把bucket扩充为2倍，之后重新计算index，把节点再放到新的bucket中。resize的注释是这样描述的：</p>
+<blockquote>
+<p>Initializes or doubles table size. If null, allocates in accord with initial capacity target held in field threshold. Otherwise, because we are using power-of-two expansion, the elements from each bin must either stay at same index, or move with a power of two offset in the new table.</p>
+</blockquote>
+<p>大致意思就是说，当超过限制的时候会resize，然而又因为我们使用的是2次幂的扩展(指长度扩为原来2倍)，所以，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。</p>
+<p><img src="../img/hashmap_resize.jpg" alt></p>
+<p>我们来上面这张图，n为table的长度，图（a）表示扩容前的key1和key2两种key确定索引位置的示例，图（b）表示扩容后key1和key2两种key确定索引位置的示例，其中hash1是key1对应的哈希值(也就是根据key1算出来的hashcode值)与高位与运算的结果。</p>
+<p>元素在重新计算hash之后，因为n变为2倍，那么n-1的mask范围在高位多1bit(红色)，因此新的index就会发生这样的变化：<br><img src="../img/hashmap_resize2.jpg" alt></p>
+<p> 这样我们resize的时候，不需要像JDK1.7的实现那样重新计算hash，只需要看看原来的hash值新增的那个bit是1还是0就好了，是0的话索引没变，是1的话索引变成“原索引+oldCap。</p>
+<p> 这个就是resize设计巧妙的地方，在扩容的时候，我们不需要重新去计算hash的值，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。</p>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><p> <a href="https://yikun.github.io/2015/04/01/Java-HashMap%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/" target="_blank" rel="noopener">Java HashMap工作原理及实现</a></p>
+<p><a href="https://www.zhihu.com/question/20733617" target="_blank" rel="noopener">HashMap 的 hash 方法原理</a></p>
+<p><a href="https://blog.csdn.net/u012961566/article/details/72963157" target="_blank" rel="noopener">HashMap的扩容机制</a></p>
+]]></content>
+      <categories>
+        <category>源码分析</category>
+      </categories>
+      <tags>
+        <tag>HashMap</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何轻松更新公众号文章</title>
     <url>/2023/09/12/how-to-publish-artiles-to-wechat-easily/</url>
     <content><![CDATA[<p>虽然博客写的不多，但我自己的写作流程是先使用 VSCode 和 <a href="https://typora.io/" target="_blank" rel="noopener">Typora</a> 来写文章，一些图片则通过 <a href="https://github.com/Molunerfinn/PicGo" target="_blank" rel="noopener">PicGo</a> 上传到GitHub 上去，当这篇文章写的差不多后，会考虑发布自己的博客 <a href="https://jasongaohui.top/" target="_blank" rel="noopener">JasonGao Thoughts</a> 或者掘金，简书这种社区里去，对于掘金、简书这样的平台，是支持Markdown 语法的，唯一麻烦的点就是这些平台会将文章中的外部图片上传到自己的CDN上去，以提升文章的渲染速度，这也无可厚非。</p>
@@ -1313,6 +1333,87 @@ an action to be performed on a different thread than your own.
 <p>目前还没有做到完全自动话，我理解我自己手动执行一下脚步成本不高，其实可以考虑监听 GitHub Actions 再来执行脚步，暂时先这样，有时间再看下。</p>
 <p>需要注意的是，脚步中有一些需要使用公众号的开发工具，需要使用 APPID 和 AppSecret 来获取 token 来调用公众号后台的一些接口，这部分可以配置在你自己服务器的环境变量里面去，目前脚步中是从系统环境变量获取的，另外还需要设置访问下面这里设置IP白名单，只有在这里配置了白名单才可以访问相关接口,这个在下面的 仓库的 README 中也有相应的说明。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202309122106783.png" alt></p>
 <p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202309131707770.png" alt></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>分享一些好用的 Chrome 插件</title>
+    <url>/2023/09/12/some-useful-chrome-extensions/</url>
+    <content><![CDATA[<p>分享一些我觉得比较好用的 Chrome 插件，算是珍藏多年的东西了😄。</p>
+<blockquote>
+<p>首先是关于浏览器 Tab 相关的插件。</p>
+</blockquote>
+<h3 id="Momentum"><a href="#Momentum" class="headerlink" title="Momentum"></a>Momentum</h3><p><a href="https://chrome.google.com/webstore/detail/momentum/laookkfknpbbblfpciffpaejjkokdgca" target="_blank" rel="noopener">Momentum</a> 非常好看的 New Tab Page 插件，主要是美化 New Tab 页面，喜欢这个插件的原因是每天会生成一张好看的图片，一版是世界各个地方的风景图，质量一般都很高，让你使用浏览器的时候心情舒畅。<br> <img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picpic202309142034225_optimized.png" alt></p>
+<p> 除此之外，还有一些工具比如 TOOD 管理，显示最常访问的网站等功能，可以按需开启。</p>
+<h3 id="OneTab"><a href="#OneTab" class="headerlink" title="OneTab"></a>OneTab</h3><p><a href="https://chrome.google.com/webstore/detail/onetab/chphlpgkkbolifaimnlloiipkdnihall" target="_blank" rel="noopener">OneTab</a> 可以一键将浏览器的 Tab 收拢到第一个 Tab 下面，根据我自己的使用体验来说，大多数时候， OneTab 下面的页面重新再访问的不多，但是有时候遇到某些页面你发现很重要，需要回头，OneTab 的优势就体现出来了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202309142037348.png" alt></p>
+<h3 id="The-Great-Suspender"><a href="#The-Great-Suspender" class="headerlink" title="The Great Suspender"></a>The Great Suspender</h3><p><a href="https://chrome.google.com/webstore/detail/the-great-suspender-notra/ahkbmjhfoplmfkpncgoedjgkajkehcgo" target="_blank" rel="noopener">The Great Suspender</a> 可以将一些长时间没有使用的网页进行回收，但不会直接关闭，当你切回来的时候，点击一下页面即可重新加载，这样可以减少资源的占用。</p>
+<h3 id="Popup-Tab-Switcher"><a href="#Popup-Tab-Switcher" class="headerlink" title="Popup Tab Switcher"></a>Popup Tab Switcher</h3><p>有时候，我们想使用快捷键方便的切换到浏览器的另一个 Tab，而不是每次都要使用鼠标去点一下，使用快捷键可以切换最近的几个浏览器 Tab。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310112057942.png" alt><br>这个时候你就需要考虑这个插件了<a href="https://chrome.google.com/webstore/detail/popup-tab-switcher/cehdjppppegalmaffcdffkkpmoflfhkc" target="_blank" rel="noopener">Popup Tab Switcher</a>。<br>这个插件支持 Alt + Y 来切换最近的几个 TAB 。</p>
+<h3 id="Chrome同步助手"><a href="#Chrome同步助手" class="headerlink" title="Chrome同步助手"></a>Chrome同步助手</h3><p>在没有科学上网的情况下，无法使用 Chrome 的同步功能，这个插件主要是用来解决这个问题的。</p>
+<h3 id="Adblock-Plus"><a href="#Adblock-Plus" class="headerlink" title="Adblock Plus"></a>Adblock Plus</h3><p>屏蔽广告，不说了，好用。</p>
+<h3 id="crxMouse"><a href="#crxMouse" class="headerlink" title="crxMouse"></a>crxMouse</h3><p>浏览器手势，可以通过鼠标的滑动方向来进行浏览器页面的前进和后退，向上滚动，向下滚动等。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202309150959592.png" alt></p>
+<h3 id="FeHelper"><a href="#FeHelper" class="headerlink" title="FeHelper"></a>FeHelper</h3><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310091045664.png" alt><br>前端开发都知道的工具，里面有一些小的工具可以安装，里面有些比较常用的工具，如 JSON 格式化等。</p>
+<h3 id="Hypothesis"><a href="#Hypothesis" class="headerlink" title="Hypothesis"></a>Hypothesis</h3><p>网页标注工具，高亮、评论，并且配合 Obsidian 的<a href="https://github.com/weichenw/obsidian-hypothesis-plugin" target="_blank" rel="noopener">Hypothesis Obsidian同步插件</a>同步到 Obsidian 中去。<br><a href="https://x.com/jasongaohui/status/1689256626342219776?s=20" target="_blank" rel="noopener">网页标注工具 Hypothesis</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310100955860.png" alt></p>
+<h3 id="Octotree"><a href="#Octotree" class="headerlink" title="Octotree"></a>Octotree</h3><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310091956849.png" alt><br>GitHub 的代码浏览工具，可以支持在网页上类似文件管理器的方式看 Github 仓库的代码。GitHub 之前的版本是不支持以文件管理器的方式看代码的，那个时候这个工具算是神器了，现在 GitHub 已经支持这个功能了，所以用的不多了，但是也还没删除掉。</p>
+<h3 id="Grammarly"><a href="#Grammarly" class="headerlink" title="Grammarly"></a>Grammarly</h3><p><a href="https://app.grammarly.com/" target="_blank" rel="noopener">Grammarly</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092000642.png" alt></p>
+<p>在浏览器里输入英文的时候会自动检查你的输入的英文是否正确，对于经常需要进行英文书写的兄弟很需要。<br>另外，最新的 Grammarly 也有Android 和 iOS 版本了。</p>
+<h3 id="Immersion-translator-沉浸式翻译"><a href="#Immersion-translator-沉浸式翻译" class="headerlink" title="Immersion translator 沉浸式翻译"></a>Immersion translator 沉浸式翻译</h3><p>主要功能是支持翻译整个网页，功能类似彩云小译，目前基础的翻译是免费的，而彩云小译用了几次之后再用就需要付费了。<br>这个体验下来，功能还是很强大的。</p>
+<p>下面这张图是使用该插件对 <a href="https://news.ycombinator.com/" target="_blank" rel="noopener">Hacker News</a> 整个网页的翻译，很强大。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092003370.png" alt></p>
+<h3 id="沙拉查词"><a href="#沙拉查词" class="headerlink" title="沙拉查词"></a>沙拉查词</h3><p>支持选中单词，自动显示 popup，点击即可进行翻译，另外下面的插件 Trancy 也有这个功能，但是功能相对比较简单，沙拉查词支持将生词保存下来，同时可以同步到 Anki 里面去。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092008054.png" alt></p>
+<p>下面这个是沙拉查词的设置页面，功能还是比较多的，很多东西支持配置，目前很多功能我还没有完全用到。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092013116.png" alt></p>
+<h3 id="Trancy-AI沉浸翻译和YouTube-Netflix双字幕"><a href="#Trancy-AI沉浸翻译和YouTube-Netflix双字幕" class="headerlink" title="Trancy AI沉浸翻译和YouTube/Netflix双字幕"></a>Trancy AI沉浸翻译和YouTube/Netflix双字幕</h3><p>Trancy主要是针对 Youtobe的字幕翻译，相对 CCViewer 体验会好一点，有多种展现形式，比如剧场模式和练习模式，可以使用这个来提升自己的英语能力。<br>下图则是使用 Trancy 翻译 Youtobe 英文视频的一个界面：<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092015639.png" alt></p>
+<h3 id="Voice-Control-for-ChatGPT"><a href="#Voice-Control-for-ChatGPT" class="headerlink" title="Voice Control for ChatGPT"></a>Voice Control for ChatGPT</h3><p>当你安装完这个插件，会在ChatGPT 底部生成一个录制音频的按钮，按住按钮你就可以和ChatGPT 进行对话了，可以使用它来练习英语口语。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092020612.png" alt></p>
+<h3 id="篡改猴"><a href="#篡改猴" class="headerlink" title="篡改猴"></a>篡改猴</h3><p>大名鼎鼎的油猴，可以安装各种脚本，支持各种不同的功能。<br>脚本一般可以在这个平台进行安装，有很多比较使用的功能，<a href="https://greasyfork.org/zh-CN/scripts" target="_blank" rel="noopener">Greasy Fork</a>。<br>比较常用的如 网盘直链获取，全网VIP视频去广告，百度文库下载器等。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310112058748.png" alt></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>如何更好得阅读</title>
+    <url>/2022/04/15/how-to-read-better/</url>
+    <content><![CDATA[<p>今天在看geekplux的这篇 <a href="https://geekplux.com/newsletters/14" target="_blank" rel="noopener">我获取信息的方法 -#14</a> Newsletter的时候，在感慨作者获取信息源这么丰富的同时，发现原来自己最近的几篇文章其实算不上是博客，更应该算是一种Newsletter的形式。博客通常是有主题的，而Newsletter更多的时候算是一种信息输入后的整理输出，通常有多个主题。</p>
+<p>相对Newsletter来说，博客需要更多的时间去整理，去思考，而对于我每天10105的上班节奏来说，没有太多时间去整理输出类似博客这种相对有深度的文章。</p>
+<p>接下来，每周更多的是分享的一些Reading List，内容涉及书籍，博客，Newsletter，Twitter或YouTube等形式。</p>
+<p>这周讲讲如何更好的阅读。</p>
+<a id="more"></a>
+<p>Farnam Street上的两篇文章：</p>
+<ul>
+<li><a href="https://fs.blog/reading/" target="_blank" rel="noopener">Reading Better</a></li>
+<li><a href="https://fs.blog/remember-books/" target="_blank" rel="noopener">How to remember what you read</a></li>
+</ul>
+<p>如何更好得阅读，有以下一些技巧：</p>
+<ul>
+<li>我们要学会筛选好书和坏书，我们的时间是宝贵的，坏书不值得我们浪费时间，而好书值得我们反复阅读。</li>
+<li>阅读有4个境界，为了娱乐阅读，为了了解阅读，为了理解阅读，为了掌握阅读。这个其实没有好坏之分，没有说为了娱乐阅读就一定比为了掌握阅读要低级，当你能从阅读中找到乐趣，这其实是个好事情。Naval就说过，阅读那些你喜欢的书直到你喜欢阅读为止。</li>
+<li>不要关注阅读速度，阅读的关键不在速度，而在你是否从中吸收了知识。</li>
+<li>如何选择好书？阅读经典的书，新书里面虽然有好书，但是数量不多，有很多质量不高的书，而经典的书经过时间的考验，值得花时间阅读。</li>
+<li>记笔记能提高你的阅读效率。文章中介绍了一种记笔记的方式如下：<ul>
+<li>在每个章节结尾写下这一章的总结或者一些特别的观点，要用自己的话写出来。</li>
+<li>在读完一周后，再回来回顾一下之前的笔记。盖上书本，尝试用你自己的话写下来这本书的主要观点，如果你发现有点困难，再重新去看你的笔记。这其实来自于<a href="https://baike.baidu.com/item/%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95/50895393#:~:text=%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95%E7%9A%84,%E6%B3%A8%E9%87%8D%E4%BA%86%E8%A7%A3%E6%9F%90%E4%BB%B6%E4%BA%8B%E7%89%A9%E3%80%82" target="_blank" rel="noopener">费曼学习法</a>。</li>
+<li>最后，将这些摘要手写抄下来或者输入到笔记工具(如EverNote)中去。</li>
+</ul>
+</li>
+</ul>
+<p>如何记住我们阅读的东西？这篇文章和上面那篇文章有些观点类似，这里就介绍一些不一样的观点。</p>
+<ul>
+<li>不要关注阅读的数量，要关注质量。</li>
+<li>不要去关注那些华而不实的App或者工具，关注书本的内容即可。</li>
+<li><p>不应该阅读让你觉得很枯燥的书，也不一定非得把某本书读完。</p>
+</li>
+<li><p>什么是主动阅读？你要在阅读某本书之前以及在整个阅读过程中你需要弄清楚你想在书中学到什么或者收获什么，将书中的内容和自己现有的知识进行关联，并尝试去应用这些知识。</p>
+</li>
+</ul>
+<p>之前看过Jiayuan的推文总结<a href="https://twitter.com/Tisoga/status/1260430958345543687?t=L4nvHixGM2gUEj4JWHuxJw&amp;s=19" target="_blank" rel="noopener">3wh2t阅读法</a>，我觉得总结的很好，这里介绍下。</p>
+<p>2wh2t的意思是Why，Who，What，How，Think以及Todo。</p>
+<p>Why表示为什么阅读，也就是要带着目的去阅读，当你带着目的去阅读的时候才会促进你思考，漫无目的的阅读其实就是在浪费时间。</p>
+<p>Who表示是谁，这本书是谁写的，以及书中介绍了哪些人物。这个点我理解不是必需的，但是如果你知道这些，比如作者写这本书的上下文，能够帮助更好得理解书本中的内容。</p>
+<p>What表示书写的是什么，你要搞清楚书中写的是什么，比如前面说到的通过费曼学习法来帮助自己记住书中的观点。</p>
+<p>How则表示怎么做，作者是怎么教你做的。</p>
+<p>最后2个t，一个表示Think(思考)，一个表示Todo(行动)。读完这本书给你带来的思考是什么？每个人的阅历都是不同的，你肯定有你自己不一样的思考，而这个思考才是真正属于你自己的东西。另一个表示行动，行动才是最重要的，没有付诸行动的想法不过是你脑中的一个概念而已。</p>
+<p>另外，上面的一些想法和之前读过的《麦肯锡精英高效阅读法》很多观点不谋而合，推荐大家去阅读这边书。</p>
+<p>最后放一下按照2wh2t 方法总结的《麦肯锡精英高效阅读法》的思维导图，思维导图是Jiayuan制作的，我是觉得总结的很好，就放在这里了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic20230904192030.png" alt></p>
 ]]></content>
   </entry>
   <entry>
@@ -1543,155 +1644,6 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
-    <title>关于HashMap你需要知道的一些细节</title>
-    <url>/2020/05/21/some-knowledge-about-hashmap/</url>
-    <content><![CDATA[<blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483757&amp;idx=1&amp;sn=f8cf2e5f82b6cf0e64aab6febf7e7584&amp;chksm=fa237985cd54f0937f9c3c2d3df40b1136602b00d253d2104452ef72319bae6ca7ffcc4f1183&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">关于HashMap你需要知道的一些细节</a></p>
-</blockquote>
-<p>在官方文档中的描述：</p>
-<blockquote>
-<p>Hash table based implementation of the Map interface. This implementation provides all of the optional map operations, and permits null values and the null key. (The HashMap class is roughly equivalent to Hashtable, except that it is unsynchronized and permits nulls.) This class makes no guarantees as to the order of the map; in particular, it does not guarantee that the order will remain constant over time.</p>
-</blockquote>
-<a id="more"></a>
-<blockquote>
-<p>基于Map接口的哈希表的实现。此实现提供所有可选的映射操作，并允许空值和空键。（HashMap类大致等同于HashTable，只是它不同步并且允许空值。）这个类不保证映射的顺序；特别是，它不保证顺序会随着时间的推移而保持不变。</p>
-</blockquote>
-<h3 id="两个重要的参数"><a href="#两个重要的参数" class="headerlink" title="两个重要的参数"></a>两个重要的参数</h3><p>在HashMap中有两个很重要的参数，容量(Capacity)和负载因子(Load factor)</p>
-<blockquote>
-<ul>
-<li>Initial capacity The capacity is the number of buckets in the hash table, The initial capacity is simply the capacity at the time the hash table is created.</li>
-<li>Load factor The load factor is a measure of how full the hash table is allowed to get before its capacity is automatically increased.</li>
-</ul>
-</blockquote>
-<p>简单的说，Capacity就是buckets的数目，Load factor就是buckets填满程度的最大比例。如果对迭代性能要求很高的话不要把capacity设置过大，也不要把load factor设置过小。当bucket填充的数目（即hashmap中元素的个数）大于capacity*load factor时就需要调整buckets的数目为当前的2倍。</p>
-<p>首先，我们来一起看看 HashMap 内部的结构，它可以看作是数组(Node[] table)和链表结 合组成的复合结构，数组被分为一个个桶(bucket)，通过哈希值决定了键值对在这个数组的寻址;哈希值相同的键值对，则以链表形式存储，你可以参考下面的示意图。这里需要注意的是，如果链表大小超过阈值(TREEIFY_THRESHOLD, 8)，图中的链表就会被改造为树形结构。</p>
-<p><img src="../img/Buckets.jpg" alt></p>
-<h3 id="put函数的实现"><a href="#put函数的实现" class="headerlink" title="put函数的实现"></a>put函数的实现</h3><p>接着来看 put 方法实现:</p>
-<p>put函数大致的思路为：</p>
-<ol>
-<li>对key的hashCode()做hash，然后再计算index;</li>
-<li>如果没碰撞直接放到bucket里；</li>
-<li>如果碰撞了，以链表的形式存在buckets后；</li>
-<li>如果碰撞导致链表过长(大于等于TREEIFY_THRESHOLD)，就把链表转换成红黑树；</li>
-<li>如果节点已经存在就替换old value(保证key的唯一性)</li>
-<li>如果bucket满了(超过load factor*current capacity)，就要resize。</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 对key的hashCode()做hash</span></span><br><span class="line">    <span class="keyword">return</span> putVal(hash(key), key, value, <span class="keyword">false</span>, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">final</span> V <span class="title">putVal</span><span class="params">(<span class="keyword">int</span> hash, K key, V value, <span class="keyword">boolean</span> onlyIfAbsent,</span></span></span><br><span class="line"><span class="function"><span class="params">               <span class="keyword">boolean</span> evict)</span> </span>&#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; <span class="keyword">int</span> n, i;</span><br><span class="line">    <span class="comment">// tab为空则创建</span></span><br><span class="line">    <span class="keyword">if</span> ((tab = table) == <span class="keyword">null</span> || (n = tab.length) == <span class="number">0</span>)</span><br><span class="line">        n = (tab = resize()).length;</span><br><span class="line">    <span class="comment">// 计算index，并对null做处理</span></span><br><span class="line">    <span class="keyword">if</span> ((p = tab[i = (n - <span class="number">1</span>) &amp; hash]) == <span class="keyword">null</span>)</span><br><span class="line">        tab[i] = newNode(hash, key, value, <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        Node&lt;K,V&gt; e; K k;</span><br><span class="line">        <span class="comment">// 节点存在</span></span><br><span class="line">        <span class="keyword">if</span> (p.hash == hash &amp;&amp;</span><br><span class="line">            ((k = p.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k))))</span><br><span class="line">            e = p;</span><br><span class="line">        <span class="comment">// 该链为树</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (p <span class="keyword">instanceof</span> TreeNode)</span><br><span class="line">            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(<span class="keyword">this</span>, tab, hash, key, value);</span><br><span class="line">        <span class="comment">// 该链为链表</span></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> binCount = <span class="number">0</span>; ; ++binCount) &#123;</span><br><span class="line">                <span class="keyword">if</span> ((e = p.next) == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    p.next = newNode(hash, key, value, <span class="keyword">null</span>);</span><br><span class="line">                    <span class="keyword">if</span> (binCount &gt;= TREEIFY_THRESHOLD - <span class="number">1</span>) <span class="comment">// -1 for 1st</span></span><br><span class="line">                        treeifyBin(tab, hash);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (e.hash == hash &amp;&amp;</span><br><span class="line">                    ((k = e.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k))))</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                p = e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 写入</span></span><br><span class="line">        <span class="keyword">if</span> (e != <span class="keyword">null</span>) &#123; <span class="comment">// existing mapping for key</span></span><br><span class="line">            V oldValue = e.value;</span><br><span class="line">            <span class="keyword">if</span> (!onlyIfAbsent || oldValue == <span class="keyword">null</span>)</span><br><span class="line">                e.value = value;</span><br><span class="line">            afterNodeAccess(e);</span><br><span class="line">            <span class="keyword">return</span> oldValue;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ++modCount;</span><br><span class="line">    <span class="comment">// 超过load factor*current capacity，resize</span></span><br><span class="line">    <span class="keyword">if</span> (++size &gt; threshold)</span><br><span class="line">        resize();</span><br><span class="line">    afterNodeInsertion(evict);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>从 putVal 方法最初的几行，我们就可以发现几个有意思的地方:</p>
-<ul>
-<li>如果表格是 null，resize 方法会负责初始化它，这从 tab = resize() 可以看出。</li>
-<li>resize 方法兼顾两个职责，创建初始存储表格，或者在容量不满足需求的时候，进行扩容 (resize)。</li>
-<li>在放置新的键值对的过程中，如果发生下面条件，就会发生扩容。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (++size &gt; threshold)</span><br><span class="line">resize();</span><br></pre></td></tr></table></figure>
-<ul>
-<li>具体键值对在哈希表中的位置(数组 index)取决于下面的位运算:</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">i = (n - <span class="number">1</span>) &amp; hash</span><br></pre></td></tr></table></figure>
-<p>仔细观察哈希值的源头，我们会发现，它并不是 key 本身的 hashCode，而是来自于 HashMap 内部的另外一个 hash 方法。注意，为什么这里需要将高位数据移位到低位进行异或运算呢?这是因为有些数据计算出的哈希值差异主要在高位，而 HashMap 里的哈希寻址是忽 略容量以上的高位的，那么这种处理就可以有效避免类似情况下的哈希碰撞。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object kye)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt;<span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>我前面提到的链表结构(这里叫 bin)，会在达到一定门限值时，发生树化，我稍后会分析 为什么 HashMap 需要对 bin 进行处理。</li>
-</ul>
-<p>可以看到，putVal 方法本身逻辑非常集中，从初始化、扩容到树化，全部都和它有关。</p>
-<p>进一步分析一下身兼多职的 resize 方法，很多朋友都反馈经常被面试官追问它的源码设计。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    </span><br><span class="line"><span class="keyword">final</span> Node&lt;K,V&gt;[] resize() &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> ((newCap = oldCap &lt;&lt; <span class="number">1</span>) &lt; MAXIMUM_CAPACIY &amp;&amp;</span><br><span class="line">                oldCap &gt;= DEFAULT_INITIAL_CAPAITY)</span><br><span class="line">        newThr = oldThr &lt;&lt; <span class="number">1</span>; <span class="comment">// double there</span></span><br><span class="line">       <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (oldThr &gt; <span class="number">0</span>) <span class="comment">// initial capacity was placed in threshold</span></span><br><span class="line">        newCap = oldThr;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// zero initial threshold signifies using defaultsfults newCap = DEFAULT_INITIAL_CAPAITY;</span></span><br><span class="line">        newThr = (<span class="keyword">int</span>)(DEFAULT_LOAD_ATOR* DEFAULT_INITIAL_CAPACITY;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (newThr ==<span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">float</span> ft = (<span class="keyword">float</span>)newCap * loadFator;</span><br><span class="line">        newThr = (newCap &lt; MAXIMUM_CAPACITY &amp;&amp; ft &lt; (<span class="keyword">float</span>)MAXIMUM_CAPACITY ?(<span class="keyword">int</span>)ft : Intege</span><br><span class="line">    &#125;</span><br><span class="line">    threshold = neThr;</span><br><span class="line">    Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])<span class="keyword">new</span> Node[newap]; table = n;</span><br><span class="line">    <span class="comment">// 移动到新的数组结构 e 数组结构 &#125;</span></span><br></pre></td></tr></table></figure>
-<p>依据 resize 源码，不考虑极端情况(容量理论最大极限由 MAXIMUM_CAPACITY 指定，数值 为 1&lt;&lt;30，也就是 2 的 30 次方)，我们可以归纳为:</p>
-<ul>
-<li>门限值等于(负载因子)x(容量)，如果构建 HashMap 的时候没有指定它们，那么就是依 据相应的默认常量值。</li>
-<li>门限通常是以倍数进行调整 (newThr = oldThr &lt;&lt; 1)，我前面提到，根据 putVal 中的逻 辑，当元素个数超过门限大小时，则调整 Map 大小。</li>
-<li>扩容后，需要将老的数组中的元素重新放置到新的数组，这是扩容的一个主要开销来源。</li>
-</ul>
-<h3 id="容量、负载因子"><a href="#容量、负载因子" class="headerlink" title="容量、负载因子"></a>容量、负载因子</h3><p>前面我们快速梳理了一下 HashMap 从创建到放入键值对的相关逻辑，现在思考一下，为什么 我们需要在乎容量和负载因子呢?</p>
-<p>这是因为容量和负载系数决定了可用的桶的数量，空桶太多会浪费空间，如果使用的太满则会严<br>重影响操作的性能。极端情况下，假设只有一个桶，那么它就退化成了链表，完全不能提供所谓<br>常数时间存储的性能。<br>既然容量和负载因子这么重要，我们在实践中应该如何选择呢?</p>
-<p>如果能够知道 HashMap 要存取的键值对数量，可以考虑预先设置合适的容量大小。具体数值 我们可以根据扩容发生的条件来做简单预估，根据前面的代码分析，我们知道它需要符合计算条件:</p>
-<p>负载因子 * 容量 &gt; 元素数量</p>
-<p>所以，预先设置的容量需要满足，大于“预估元素数量 / 负载因子”，同时它是 2 的幂数，结论已经非常清晰了。</p>
-<p>而对于负载因子，我建议:</p>
-<ul>
-<li><p>如果没有特别需求，不要轻易进行更改，因为 JDK 自身的默认负载因子是非常符合通用场景的需求的。</p>
-</li>
-<li><p>如果确实需要调整，建议不要设置超过 0.75 的数值，因为会显著增加冲突，降低 HashMap 的性能。</p>
-</li>
-<li>如果使用太小的负载因子，按照上面的公式，预设容量值也进行调整，否则可能会导致更加<br>频繁的扩容，增加无谓的开销，本身访问性能也会受影响。</li>
-</ul>
-<h3 id="树化改造"><a href="#树化改造" class="headerlink" title="树化改造"></a>树化改造</h3><p> 我们前面提到了树化改造，对应逻辑主要在 putVal 和 treeifyBin 中。</p>
- <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">treeifyBin</span><span class="params">(Node&lt;K,V&gt;[] tab, <span class="keyword">int</span> hash)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n, index; Node&lt;K,V&gt; e;</span><br><span class="line">    <span class="keyword">if</span> (tab == <span class="keyword">null</span> || (n = tab.length) &lt; MIN_TREEIFY_CAPACITY)</span><br><span class="line">        resize();</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> ((e = tab[index = (n - <span class="number">1</span>) &amp; hash]) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 树化改造逻辑 </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>上面是精简过的 treeifyBin 示意，综合这两个方法，树化改造的逻辑就非常清晰了，可以理解为，当 bin 的数量大于 TREEIFY_THRESHOLD 时:</p>
-<ul>
-<li>如果容量小于 MIN_TREEIFY_CAPACITY，只会进行简单的扩容。</li>
-<li>如果容量大于 MIN_TREEIFY_CAPACITY ，则会进行树化改造。 </li>
-</ul>
-<p>那么，为什么 HashMap 要树化呢?</p>
-<p>本质上这是个安全问题。因为在元素放置过程中，如果一个对象哈希冲突，都被放置到同一个桶<br>里，则会形成一个链表，我们知道链表查询是线性的，会严重影响存取的性能。</p>
-<h3 id="hash函数的实现"><a href="#hash函数的实现" class="headerlink" title="hash函数的实现"></a>hash函数的实现</h3><p>接着我们着重来看hash函数的实现：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object kye)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt;<span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>这段代码实际上称为“扰动函数”，Java 8的代码相对Java 7是做过简化的，但原理是不变的。</p>
-<p>我们都知道上面代码里的key.hashCode()函数调用的是key键值类型自带的哈希函数，返回int型散列值。</p>
-<p>理论上hashCode是一个int值，这个int值范围在-2147483648和2147483648之间，如果直接拿这个hashCode作为HashMap中数组的下标来访问的话，正常情况下是不会出现hash碰撞的。<br>但是这样的话会导致这个HashMap的数组长度比较长，长度大概为40亿，内存肯定是放不下的，所以这个时候需要把这个hashCode对数组长度取余，用得到的余数来访问数组下标。</p>
-<p>所以我们看到HashMap中get方法和put方法都有下面这样的代码：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">tab[(n - <span class="number">1</span>) &amp; hash]</span><br></pre></td></tr></table></figure></p>
-<p>(n-1)&amp;hash实际上相当于hash%n取余数，但&amp;计算速度更快。</p>
-<p>这里我们举个例子：<br>以初始长度为16为例，16-1=15。2进制表示是00000000 00000000 00001111。<br>我们把15和某hashCode值做“与”操作如下，结果就是截取了最低的四位值。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="number">10100101</span> <span class="number">11000100</span> <span class="number">00100101</span></span><br><span class="line">&amp;	<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00001111</span></span><br><span class="line">----------------------------------</span><br><span class="line">	<span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000101</span>    <span class="comment">//高位全部归零，只保留末四位</span></span><br></pre></td></tr></table></figure></p>
-<p>这样问题就来了，我们如果只是取低位的情况下，碰撞就会很严重。</p>
-<p>这时候“扰动函数”的价值就体现出来了，我们来看下面这张图片：<br><img src="../img/hashmap_hash.jpg" alt></p>
-<p>右位移16位，正好是32bit的一半，自己的高半区和低半区做异或，就是为了混合原始哈希码的高位和低位，以此来加大低位的随机性。而且混合后的低位掺杂了高位的部分特征，这样高位的信息也被变相保留下来。</p>
-<p>这样大多数的hashCode的分布已经很不错了，就算是发生了碰撞也用O(logn)的tree去做了。仅仅异或一下，既减少了系统的开销，也不会造成的因为高位没有参与下标的计算(table长度比较小时)，从而引起的碰撞。</p>
-<p>以上就是关于HashMap中hash函数设计的原理。</p>
-<h3 id="resize的实现原理"><a href="#resize的实现原理" class="headerlink" title="resize的实现原理"></a>resize的实现原理</h3><p>当put时，如果发现目前的bucket占用程度已经超过了Load Factor所希望的比例，那么就会发生resize。在resize的过程，简单的说就是把bucket扩充为2倍，之后重新计算index，把节点再放到新的bucket中。resize的注释是这样描述的：</p>
-<blockquote>
-<p>Initializes or doubles table size. If null, allocates in accord with initial capacity target held in field threshold. Otherwise, because we are using power-of-two expansion, the elements from each bin must either stay at same index, or move with a power of two offset in the new table.</p>
-</blockquote>
-<p>大致意思就是说，当超过限制的时候会resize，然而又因为我们使用的是2次幂的扩展(指长度扩为原来2倍)，所以，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。</p>
-<p><img src="../img/hashmap_resize.jpg" alt></p>
-<p>我们来上面这张图，n为table的长度，图（a）表示扩容前的key1和key2两种key确定索引位置的示例，图（b）表示扩容后key1和key2两种key确定索引位置的示例，其中hash1是key1对应的哈希值(也就是根据key1算出来的hashcode值)与高位与运算的结果。</p>
-<p>元素在重新计算hash之后，因为n变为2倍，那么n-1的mask范围在高位多1bit(红色)，因此新的index就会发生这样的变化：<br><img src="../img/hashmap_resize2.jpg" alt></p>
-<p> 这样我们resize的时候，不需要像JDK1.7的实现那样重新计算hash，只需要看看原来的hash值新增的那个bit是1还是0就好了，是0的话索引没变，是1的话索引变成“原索引+oldCap。</p>
-<p> 这个就是resize设计巧妙的地方，在扩容的时候，我们不需要重新去计算hash的值，元素的位置要么是在原位置，要么是在原位置再移动2次幂的位置。</p>
-<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><p> <a href="https://yikun.github.io/2015/04/01/Java-HashMap%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/" target="_blank" rel="noopener">Java HashMap工作原理及实现</a></p>
-<p><a href="https://www.zhihu.com/question/20733617" target="_blank" rel="noopener">HashMap 的 hash 方法原理</a></p>
-<p><a href="https://blog.csdn.net/u012961566/article/details/72963157" target="_blank" rel="noopener">HashMap的扩容机制</a></p>
-]]></content>
-      <categories>
-        <category>源码分析</category>
-      </categories>
-      <tags>
-        <tag>HashMap</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分享一些好用的 Chrome 插件</title>
-    <url>/2023/09/12/some-useful-chrome-extensions/</url>
-    <content><![CDATA[<p>分享一些我觉得比较好用的 Chrome 插件，算是珍藏多年的东西了😄。</p>
-<blockquote>
-<p>首先是关于浏览器 Tab 相关的插件。</p>
-</blockquote>
-<h3 id="Momentum"><a href="#Momentum" class="headerlink" title="Momentum"></a>Momentum</h3><p><a href="https://chrome.google.com/webstore/detail/momentum/laookkfknpbbblfpciffpaejjkokdgca" target="_blank" rel="noopener">Momentum</a> 非常好看的 New Tab Page 插件，主要是美化 New Tab 页面，喜欢这个插件的原因是每天会生成一张好看的图片，一版是世界各个地方的风景图，质量一般都很高，让你使用浏览器的时候心情舒畅。<br> <img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202309142034225.png" alt></p>
-<p> 除此之外，还有一些工具比如 TOOD 管理，显示最常访问的网站等功能，可以按需开启。</p>
-<h3 id="OneTab"><a href="#OneTab" class="headerlink" title="OneTab"></a>OneTab</h3><p><a href="https://chrome.google.com/webstore/detail/onetab/chphlpgkkbolifaimnlloiipkdnihall" target="_blank" rel="noopener">OneTab</a> 可以一键将浏览器的 Tab 收拢到第一个 Tab 下面，根据我自己的使用体验来说，大多数时候， OneTab 下面的页面重新再访问的不多，但是有时候遇到某些页面你发现很重要，需要回头，OneTab 的优势就体现出来了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202309142037348.png" alt></p>
-<h3 id="The-Great-Suspender"><a href="#The-Great-Suspender" class="headerlink" title="The Great Suspender"></a>The Great Suspender</h3><p><a href="https://chrome.google.com/webstore/detail/the-great-suspender-notra/ahkbmjhfoplmfkpncgoedjgkajkehcgo" target="_blank" rel="noopener">The Great Suspender</a> 可以将一些长时间没有使用的网页进行回收，但不会直接关闭，当你切回来的时候，点击一下页面即可重新加载，这样可以减少资源的占用。</p>
-<h3 id="Popup-Tab-Switcher"><a href="#Popup-Tab-Switcher" class="headerlink" title="Popup Tab Switcher"></a>Popup Tab Switcher</h3><p>有时候，我们想使用快捷键方便的切换到浏览器的另一个 Tab，而不是每次都要使用鼠标去点一下，使用快捷键可以切换最近的几个浏览器 Tab。<br>这个时候你就需要考虑这个插件了<a href="https://chrome.google.com/webstore/detail/popup-tab-switcher/cehdjppppegalmaffcdffkkpmoflfhkc" target="_blank" rel="noopener">Popup Tab Switcher</a>。<br>这个插件支持 Alt + Y 来切换最近的几个 TAB 。</p>
-<h3 id="Chrome同步助手"><a href="#Chrome同步助手" class="headerlink" title="Chrome同步助手"></a>Chrome同步助手</h3><p>在没有科学上网的情况下，无法使用 Chrome 的同步功能，这个插件主要是用来解决这个问题的。</p>
-<h3 id="Adblock-Plus"><a href="#Adblock-Plus" class="headerlink" title="Adblock Plus"></a>Adblock Plus</h3><p>屏蔽广告，不说了，好用。</p>
-<h3 id="crxMouse"><a href="#crxMouse" class="headerlink" title="crxMouse"></a>crxMouse</h3><p>浏览器手势，可以通过鼠标的滑动方向来进行浏览器页面的前进和后退，向上滚动，向下滚动等。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202309150959592.png" alt></p>
-<h3 id="FeHelper"><a href="#FeHelper" class="headerlink" title="FeHelper"></a>FeHelper</h3><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310091045664.png" alt><br>前端开发都知道的工具，里面有一些小的工具可以安装，里面有些比较常用的工具，如 JSON 格式化等。</p>
-<h3 id="Hypothesis"><a href="#Hypothesis" class="headerlink" title="Hypothesis"></a>Hypothesis</h3><p>网页标注工具，高亮、评论，并且配合 Obsidian 的<a href="https://github.com/weichenw/obsidian-hypothesis-plugin" target="_blank" rel="noopener">Hypothesis Obsidian同步插件</a>同步到 Obsidian 中去。</p>
-<p><a href="https://x.com/jasongaohui/status/1689256626342219776?s=20" target="_blank" rel="noopener">网页标注工具 Hypothesis</a></p>
-<p><img src="https://github.com/JasonGaoH/Images/raw/master/picpichypothesis.gif" alt></p>
-<h3 id="Octotree"><a href="#Octotree" class="headerlink" title="Octotree"></a>Octotree</h3><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310091956849.png" alt><br>GitHub 的代码浏览工具，可以支持在网页上类似文件管理器的方式看 Github 仓库的代码。GitHub 之前的版本是不支持以文件管理器的方式看代码的，那个时候这个工具算是神器了，现在 GitHub 已经支持这个功能了，所以用的不多了，但是也还没删除掉。</p>
-<h3 id="Grammarly"><a href="#Grammarly" class="headerlink" title="Grammarly"></a>Grammarly</h3><p><a href="https://app.grammarly.com/" target="_blank" rel="noopener">Grammarly</a></p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092000642.png" alt></p>
-<p>在浏览器里输入英文的时候会自动检查你的输入的英文是否正确，对于经常需要进行英文书写的兄弟很需要。<br>另外，最新的 Grammarly 也有Android 和 iOS 版本了。</p>
-<h3 id="Immersion-translator-沉浸式翻译"><a href="#Immersion-translator-沉浸式翻译" class="headerlink" title="Immersion translator 沉浸式翻译"></a>Immersion translator 沉浸式翻译</h3><p>主要功能是支持翻译整个网页，功能类似彩云小译，目前基础的翻译是免费的，而彩云小译用了几次之后再用就需要付费了。<br>这个体验下来，功能还是很强大的。</p>
-<p>下面这张图是使用该插件对 <a href="https://news.ycombinator.com/" target="_blank" rel="noopener">Hacker News</a> 整个网页的翻译，很强大。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092003370.png" alt></p>
-<h3 id="沙拉查词"><a href="#沙拉查词" class="headerlink" title="沙拉查词"></a>沙拉查词</h3><p>支持选中单词，自动显示 popup，点击即可进行翻译，另外下面的插件 Trancy 也有这个功能，但是功能相对比较简单，沙拉查词支持将生词保存下来，同时可以同步到 Anki 里面去。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092008054.png" alt></p>
-<p>下面这个是沙拉查词的设置页面，功能还是比较多的，很多东西支持配置，目前很多功能我还没有完全用到。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092013116.png" alt></p>
-<h3 id="Trancy-AI沉浸翻译和YouTube-Netflix双字幕"><a href="#Trancy-AI沉浸翻译和YouTube-Netflix双字幕" class="headerlink" title="Trancy AI沉浸翻译和YouTube/Netflix双字幕"></a>Trancy AI沉浸翻译和YouTube/Netflix双字幕</h3><p>Trancy主要是针对 Youtobe的字幕翻译，相对 CCViewer 体验会好一点，有多种展现形式，比如剧场模式和练习模式，可以使用这个来提升自己的英语能力。<br>下图则是使用 Trancy 翻译 Youtobe 英文视频的一个界面：<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092015639.png" alt></p>
-<h3 id="Voice-Control-for-ChatGPT"><a href="#Voice-Control-for-ChatGPT" class="headerlink" title="Voice Control for ChatGPT"></a>Voice Control for ChatGPT</h3><p>当你安装完这个插件，会在ChatGPT 底部生成一个录制音频的按钮，按住按钮你就可以和ChatGPT 进行对话了，可以使用它来练习英语口语。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic202310092020612.png" alt></p>
-<h3 id="篡改猴"><a href="#篡改猴" class="headerlink" title="篡改猴"></a>篡改猴</h3><p>大名鼎鼎的油猴，可以安装各种脚本，支持各种不同的功能。<br>脚本一般可以在这个平台进行安装，有很多比较使用的功能，<a href="https://greasyfork.org/zh-CN/scripts" target="_blank" rel="noopener">Greasy Fork</a>。<br>比较常用的如 网盘直链获取，全网VIP视频去广告，百度文库下载器等。</p>
-]]></content>
-  </entry>
-  <entry>
     <title>分享一些提升效率的工具</title>
     <url>/2023/09/06/some-efficient-tools-for-sharing-md/</url>
     <content><![CDATA[<p>作为一名程序员，每天都要与电脑打交道，一些小的工具，真的对于工作体验是有很大的提升。</p>
@@ -1755,10 +1707,39 @@ an action to be performed on a different thread than your own.
 ]]></content>
   </entry>
   <entry>
-    <title>knowledge-about-git</title>
-    <url>/2023/09/14/knowledge-about-git/</url>
-    <content><![CDATA[<p>我发现，很多人工作了很久，对于 Git 的使用还不是很熟练，这篇文章讲讲我所理解的 Git，以及我平时用的比较多的 Git 命令。</p>
-<p>可以使用 <a href="https://github.com/chriswalz/bit" target="_blank" rel="noopener">bit</a>工具。</p>
+    <title>Mac上你一定要装的效率神器</title>
+    <url>/2022/05/06/awsome-tools-in-mac/</url>
+    <content><![CDATA[<p>今天想介绍一下Mac上的效率神器 — Alfred。</p>
+<p>其实关于Alfred的介绍有很多，但我还是忍不住想介绍一下这个工具，个人感觉它真的是Mac上一个特别好用的提升效率的工具了。</p>
+ <a id="more"></a>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_1.jpg" alt></p>
+<p>Alfred 和Mac自带的Spotlight都属于同一类工具，但是比Spotlight 功能却要强大很多，下面会慢慢介绍它的强大之处。</p>
+<p>Alfred 默认是使用Alt+空格键触发的，这里你也可以按照你的习惯修改启动的默认快捷键。</p>
+<h3 id="基础功能中我觉得比较好用的"><a href="#基础功能中我觉得比较好用的" class="headerlink" title="基础功能中我觉得比较好用的"></a>基础功能中我觉得比较好用的</h3><h4 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h4><p>在唤起Alfred之后，输入’ 符号或者按下空格就可以进行文件搜索，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_2.jpg" alt></p>
+<p>文件搜索配合下面Alfred中封装的一些通用操作对于文件的操作会特别方便。</p>
+<p>在搜索到我们需要的文件时，这个时候只需要按下→键就可以列出一些通用的操作列表，如下所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_3.jpg" alt></p>
+<p>Alfred 中封装了很多对于文件的操作，可以看到图中有很多，常用的比如打开，在Finder中打开，在当前位置打开终端，拷贝文件路径等等，真的是非常方便。</p>
+<h4 id="网页搜索"><a href="#网页搜索" class="headerlink" title="网页搜索"></a>网页搜索</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_4.jpg" alt></p>
+<p>这个里面支持的搜索就很多了，我这边比较常用的就是Google和youtobe搜索了，通过在Alfred中输入google和youtobe就可以触发相应的搜索功能了，你只需要输入相应的关键字就可以了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_5.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_6.jpg" alt></p>
+<h4 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_7.jpeg" alt></p>
+<p>Alfred 能够记录剪贴板历史，有时候我们需要查看之前剪贴板中的内容，这个功能用的相对不多，但是关键时刻还是特别管用的。</p>
+<h4 id="Snippets-摘要功能"><a href="#Snippets-摘要功能" class="headerlink" title="Snippets(摘要功能)"></a>Snippets(摘要功能)</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_8.jpeg" alt></p>
+<p>Snippets 的功能类似TextExpander ，就是使用剪短字符来扩展大段的文字，对于一些比较模式化的文本，我们经常要输入，但是因为很长，输入很费时，如果你将这些文本存在某个地方还要花时间去搜索，这个时候，就可以通过配置Snippet来实现这个功能。其实mac系统自带的也有类似的功能，就是系统自带的Text Replacement，如下图所示，比如输入msd可以提示帮你补全”马上到！”的文本。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_13.jpeg" alt></p>
+<h4 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h4><p>通过键盘输入相关的命令控制Mac的睡眠，启动等等，另外还可以通过输入hide来隐藏某个软件，输入quit来关闭某个软件，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_14.jpg" alt><br>这个功能用的不多，更多的是要对电脑进行息屏等操作的时候比较方便，不需要记一些快捷键，也不需要使用鼠标去进行点击，相对鼠标，键盘肯定是效率要高不少的。</p>
+<h3 id="高级功能workflow"><a href="#高级功能workflow" class="headerlink" title="高级功能workflow"></a>高级功能workflow</h3><p>workflow是Alfred高级功能，是需要付费才能用的，我觉得这个是 Alfred 最牛逼的地方了，网上有很多好用的Workflow，因为有了自定义Workflow的功能，所以，只要你想，你可以将日常中几乎所有模板化的流程设计成你自己的workflow。</p>
+<p>我用的比较多的workflow有以下几个。</p>
+<p><a href="https://github.com/wensonsmith/YoudaoTranslator" target="_blank" rel="noopener">有道翻译</a>，输入yd即可进行单词的翻译，另外需要注意的是有道的翻译需要注册有道智云的账号，在workflow里设置你的应用id和密钥才可以使用</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_9.png" alt></p>
+<p><a href="https://github.com/cj1128/alfred-qrcode-workflow" target="_blank" rel="noopener">二维码生成</a>，输入qr 再输入文本回车即可以将目标文本生成二维码，我在平时开发中经常需要构造一个二维码进行扫码调试，这个workflow让生成二维码的效率大大提高。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_10.jpeg" alt></p>
+<p><a href="https://github.com/sballin/alfred-search-notes-app" target="_blank" rel="noopener">搜索备忘录里的一些文本</a>，输入nb则可以搜索进行文本内容的搜索，输入nt进行hashtag的搜索。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_11.png" alt></p>
 ]]></content>
   </entry>
 </search>
