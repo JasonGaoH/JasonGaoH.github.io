@@ -1,6 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Feed流上的优化实践.md</title>
+    <url>/2020/08/06/Optimization-Practices-on-Feeds/</url>
+    <content><![CDATA[<p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
+ <a id="more"></a>
+<p>这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。</p>
+<p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png" alt></p>
+<h3 id="关于优化"><a href="#关于优化" class="headerlink" title="关于优化"></a>关于优化</h3><p>优化整体可以分为两大类，软优化和硬优化。那么什么是软优化呢？软优化并不会改变某段代码的执行效率，而是通过调整这段代码的执行时机，来优化整体代码的运行性能。软优化里由分为三大类，分别为预加载，异步加载和懒加载。</p>
+<h4 id="软优化"><a href="#软优化" class="headerlink" title="软优化"></a>软优化</h4><ul>
+<li>预加载<br>这几种加载方式都很好理解，改变的都是执行时机，预加载就是提前加载，把一些重要的数据提前加载好，等到合适的时机，就可以直接展示给用户，而不是在这个合适的时机才去加载数据，这种方式给用户地感觉是加载变快了。</li>
+<li>异步加载<br>而异步加载在Android中则很常见了，移动应用中有主线程的概念，主线程需要实时地对用户的操作予以反馈，这种反馈要非常及时，否则就会让用户觉得卡顿。因此，主线程的工作不宜有耗时操作，而且对于一些执行比较慢的代码，而且不需要同步执行的代码，我们可以考虑将它放到异步线程去执行。</li>
+<li>懒加载<br>最后就是懒加载了，懒加载就是把一些不是需要立即展示的东西往后放，因为我们的手机性能，内存是有限的，有些功能用户不是需要马上看到，则可以考虑在后续的某个适当的时机执行加载。</li>
+</ul>
+<h4 id="硬优化"><a href="#硬优化" class="headerlink" title="硬优化"></a>硬优化</h4><p>接下来说说硬优化，硬优化这个东西就比较偏细节了。一段逻辑，我们用两层循环实现，功能肯定是OK的，但是如果在实现功能的情况下，我们用一层循环就可以解决了，这样不就提高了这段代码的运行效率了。这种方式的优化就是硬优化了，关于硬优化往往没有具体的方法，很多都是各种见仁见智，通过调整代码的逻辑来提高运行效率都可以称为硬优化。</p>
+<h4 id="Feed流上的问题发现和解决"><a href="#Feed流上的问题发现和解决" class="headerlink" title="Feed流上的问题发现和解决"></a>Feed流上的问题发现和解决</h4><p>很多人会说，上面说了这么多软优化和硬优化，有什么用呢？别急，我们慢慢来说。上面说的算是一种对于优化的指导思想吧，下次我们遇到类似的问题可以从这几个维度来进行分析。</p>
+<p>我们要做优化，首先肯定是要发现问题，也就是对症下药。</p>
+<p>我之前主要处理的是Feed流的卡顿优化，所以我基本上都是通过Android Studio的Profiler工具来查看问题，现在Profiler的体验相对之前功能算是更加强大了，我每次都是使用Profiler来尝试抓一下Feed流滑动时的代码执行情况。<br>然后一个一个查看滑动过程中我们的耗时是在哪些地方。</p>
+<h5 id="通过Profiler发现的问题"><a href="#通过Profiler发现的问题" class="headerlink" title="通过Profiler发现的问题"></a>通过Profiler发现的问题</h5><p>通过Profiler发现了以下几点问题：</p>
+<ol>
+<li>发现有一些比较耗时的方法，比如图文笔记上的滤镜的回收方法比较耗时，针对这样的可以考虑做这个release操作放到异步里面去；</li>
+<li>另外也发现一些业务的打点会在OnBindViewHolder中调用的很频繁，虽然点位数据的发送是在异步线程里，但是在发送数据之前会有数据的拼装操作，多少会有些性能损耗，而且打点这一类数据完全可以放到异步线程中去，因为这种打点并不需要很高的实时性；</li>
+<li>对于一些跨进程的操作，比如从Context中拿Service获取WiFi状态，这种在onBind中回调是非常不好的，所以针对这个我们只需要构造一个广播来监听WIFI状态变化即可，然后每次只需要拿那个记录好的网络状态变量即可</li>
+<li>还有关于视频笔记的处理，我们需要根据RecyclerView滑动过程中当前item中的视频start，stop和prepare做相应的调整，正常情况下，当RecyclerView处于滑动状态是不应该去prepare和start的，而且也不应该创建播放器实例和Texture View的；</li>
+<li>最后，通过Profiler我们还发现TextView的setText是很耗时的，当我们复杂多行文本的情况时，TextView去setText的时候需要进行复杂的测量，在测量完之后还需要绘制，所以针对这个场景可以考虑使用StaticLayout对Feed流中的文本作预渲染，关于StaticLayout的教程网上也有不少，后面有时间我也会抽空写下关于这块的实践。</li>
+</ol>
+<p>上面都是通过Profiler来发现的一些问题。</p>
+<h5 id="View层级"><a href="#View层级" class="headerlink" title="View层级"></a>View层级</h5><p>另外还有一些算是基础的优化吧。因为View的层级随着Feed流的业务变得越来越深，我们需要进可能地减少View的层级，同时也尽量减少View的个数，可以考虑使用ConstraintLayout，但是ConstraintLayout这个东西要慎用，对于一些迭代比较快的业务场景，使用ConstraintLayout会增加我们的维护成本，而且会有一些比较坑的问题。</p>
+<p>关于View层级的缩减基本没啥可讲的，尽量用merge和ViewStub，这个就是根据实际情况去消除一些不必要的层级。</p>
+<h5 id="RecyclerView缓存的利用"><a href="#RecyclerView缓存的利用" class="headerlink" title="RecyclerView缓存的利用"></a>RecyclerView缓存的利用</h5><p>最后，我们也尝试了从RecyclerView缓存的角度来解决这个问题，RecyclerView默认会有四级缓存的概念，正常情况下，当我们的RecyclerView的卡片撑满屏幕的时候，我们进入该页面的时候，我们的RecyclerView会先创建ViewHolder，然后再bind这个ViewHolder，然后当我们向下滑动的时候，会再次创建一个ViewHolder，接着再执行Bind操作，只有当我们的RecycledView Pool的池子满了之后才不会继续创建ViewHolder，往后的滑动RecyclerViwe就只会执行bind操作了，这个时候我们发现这个OnCreateViewHolder需要从xml里去解析view，并且创建这个ViewHolder，这个创建对于我们的滑动是会有性能损耗，其实还是因为我们的这个卡片太复杂了。</p>
+<p>所以，我们可以考虑提前创建一些ViewHolder，放到ViewHolder的池子里去，这样我们在滑动的时候，就不需要先Create再Bind了。</p>
+<p>提前创建ViewHolder，在主线程Idle的状态下提前创建ViewHolder放到RecycledViewPool中，这个pool的size默认是5。<br>   <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">recyclerView.setRecycledViewPool(RecyclerView.RecycledViewPool().apply &#123;</span><br><span class="line">	LightExecutor.postIdle(Runnable &#123;</span><br><span class="line">		repeat(<span class="number">5</span>) &#123;</span><br><span class="line">			<span class="comment">//RecycledViewPool 默认size为5个，RecyclerView内部会有判断，如果满了不会create</span></span><br><span class="line">			<span class="comment">//注意这里取得是typePool的倒数第一个和第二个位置，需要保证注册的时候视频卡片和笔记在最后两个位置</span></span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">1</span>))</span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">2</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><p>在做完这些优化之后，在Feed流上的卡顿就有很大改善了，另外，对于业务侧的指标也有一定的数据提升。</p>
+<h4 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h4><p>对于这块业务的性能监控可以实施起来，这样有利于我们尽早发现卡顿问题，另外，对于一些优化的点其实还可以继续深挖，比如前创建ViewHolder是否可以使用AsyncLayoutInflator进行inflate，还有针对文本的预渲染可以考虑抽成组件形式，方便其他业务使用。</p>
+<p>感谢您的阅读，如果觉得我的文章对你有帮助，请帮忙点赞，有问题可以评论留言。</p>
+]]></content>
+      <tags>
+        <tag>性能优化 RecyclerView缓存</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RoamResearch,一款帮助我们更好思考的笔记工具</title>
+    <url>/2022/03/19/RoamResearch-a-tool-which-can-help-us-think-better/</url>
+    <content><![CDATA[<h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>上一次发公众号文章是 2020 年的 8 月 29 号，马上都快两年了，很久没更新了，真是太惭愧了。那些没取关的朋友们算是真爱了吧，或者是因为忘记在某个角落还关注着这个沉寂的没有提供什么价值的公众号，如果是因为后者，那可以考虑取关了 😂😂，咳~，开个玩笑。</p>
+<p>虽然不应该给自己找理由，但是没有怎么更新的原因的确是因为太忙了，工作上的节奏也比之前更快了，生活上，因为去年小孩出生了，从去年 5 月份到现在，工作之外的大部分时间都是陪小孩去了，很少会有自己可以自由支配的时间。</p>
+<p>最近这段时间想了很久，还是觉得要将之前的公众号捡起来，继续写点东西。先立个 flag，每周更新一篇，内容涉及平时的技术总结、阅读思考以及一些提升效率的技巧吧。</p>
+<a id="more"></a>
+<h3 id="什么是Roam-Research"><a href="#什么是Roam-Research" class="headerlink" title="什么是Roam Research"></a>什么是Roam Research</h3><p>今天主要来介绍一下<code>Roam Reseach</code>这个工具吧。之前还在小红书的时候就使用过一个月，后面因为需要付费就没有继续用了，今年年初的时候看到关于<code>Roam Research</code>的推特，没忍住花钱买了一年的会员，目前用了一段时间整体感觉还可以，下面分享一下自己的使用经验。</p>
+<p>在分享我自己的使用经验之前，首先来介绍下<code>Roam Reseach</code>是什么？简单来说，它就是一个笔记工具，和传统的笔记工具如<code>Evernote</code>、<code>有道云笔记</code>相比，它有什么不一样呢？传统的这类笔记工具他往往是线性的，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picyoudao_note.jpg" alt></p>
+<p><code>Roam Reseach</code>（下面都简称 Roam）的官方网站是<a href="https://roamresearch.com/" target="_blank" rel="noopener">Roam官网</a>，作者是<a href="https://twitter.com/Conaw" target="_blank" rel="noopener">Conaw</a>,目前有Web、Mac以及Windows版本，新用户可以试用一个月，后面就需要收费了，另外有免费的替代软件Obsidian和Logseq，这两个基本都是借鉴的 <code>Roam</code>的思想。</p>
+<p>而<code>Roam</code>则是网状的，结构上有点类似于我们的神经元。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picshenjingyuan.jpg" alt></p>
+<p>我们在使用传统笔记工具时，很多时候都是先建立一个分类，可能该分类下面还有一个小的分类，最后才是我们笔记的具体内容。而 Roam 则不是，比如笔记 A 讨论了 C 这个主题，笔记 B 也讨论了 C 这个主题，这样 A 和 B 就一起关联到 C 这个主题下面，注意这里的顺序，是先有 A 和 B，才有了 C 这个分类，这其实是一种自底向上的方法，程序员们对于这个方法应该不陌生，我们很多时候程序设计都会采用这种方法，由局部到整体逐步完善。</p>
+<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_graph.jpg" alt><br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_network.jpeg" alt></p>
+<p>那么<code>Roam</code>是如何实现这种网状结构的呢？主要是靠它的双向链表的能力。<code>Roam</code>使用[[]]来实现双向链表，所有被[[]] 包起来的内容会自动生成一个 page，而在这个 page 里又可以使用[[]]继续构造新的 page，这样，这两个 page 之间就构成了一个双向链表，由很多个这种双向链表组合起来，整体就形成了一个网状的结构。</p>
+<p><code>Roam</code>每天会自动生成一个以当前日期为标题的 page。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_daily_page.jpg" alt></p>
+<p>比如我在今天自动生成的 page 的 Daily Log 下面关联了<code>Roam</code><br>而从<code>Roam Reseach</code>点进去则是下面这样的，</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_research_page.jpg" alt></p>
+<p>这里列出了所有链接到当前的内容，表示下面这些节点都是与 Roam Research 相关。</p>
+<p>而点击右侧的[Open Graph View] 则可以从图结构上更直观地看到当前节点关联的内容。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_single_graph.jpg" alt></p>
+<p>另外，Roam 还提供块的引用，使用(())可以实现，被(()) 包含的内容可以称之为块，这个块可以是其他 Page 里面某一句文本或一个片段，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_block_ref.jpg" alt></p>
+<p>图片中 1 所指示的部分就被两个地方引用到，2 处所显示的数字则是当前内容被引用的次数，通过点击 2 处可以实现折叠和展开这部分引用的内容。</p>
+<p>另外，Roam 还提供一些快捷的命令，通过输入/即可显示。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_command.jpg" alt></p>
+<p>对于图片，可以直接将剪贴板中的图片进行上传，对于Twitter和YouTube也是可以解析出来的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_twitter.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_youtobe.jpg" alt></p>
+<p>当我们了解了以上一些技巧之后就日常使用就没有什么问题了。</p>
+<h3 id="使用经验"><a href="#使用经验" class="headerlink" title="使用经验"></a>使用经验</h3><p>接下来，介绍一下平时我自己的一些使用技巧。</p>
+<p>在每天自动生成的 page 下面，我一般会创建 Daily Log，MIT3，Tasks，Daily Reading 以及 Thinking 这 6 个节点。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_tips.jpg" alt></p>
+<p><code>Daily Log</code> 主要是记录下每天的工作记录，主要是记录自己每天的时间花在哪里，从而提升工作效率，而不是每天浑浑噩噩不知道每天干了些啥。</p>
+<p>这个方法主要来自这篇文章，<a href="https://betterhumans.pub/replace-your-to-do-list-with-interstitial-journaling-to-increase-productivity-4e43109d15ef" target="_blank" rel="noopener">Replace Your To-Do List With Interstitial Journaling To Increase Productivity</a>，主要思想是：通过记录日志来替代使用 TODO List，当你从一个工作切换到另一个工作的时候做下记录，写几句话描述一下上一个任务做了啥，以及下一个任务准备做啥，尽量描述清楚，而不是用几个简单的词语来描述。</p>
+<p>原因是因为我们人的大脑是不能多线程工作的，我们需要在做当前工作的时候保持足够的专注度来提高我们整体的效率，所以我们需要在当前工作之前把上一个工作梳理下，并放空我们的大脑，让我们的大脑休息一下。</p>
+<p><code>MIT3</code> 记录每天最重要的 3 件事，每天将这个里面的事情完成那么这一天就算是目标达成了。</p>
+<p><code>Tasks</code> 记录每天的一些任务，很多时候同时会有多个事情过来，如果不记录下来则很容易忘。</p>
+<p><code>Daily Reading</code> 则是记录每天的一些阅读记录，包括博客，文章和书籍。</p>
+<p><code>Thinking</code> 则是记录每天的一些思考，有的可能是灵光一闪的想法。</p>
+<p>上面就是一些 Roam 的一些实践的经验，介绍到这里，可能有人会问，我上面介绍的这些和是否使用 Roam 关系并不大啊，这些使用系统默认带的备忘录都是可以实现的啊？</p>
+<p>嗯，这个，也不是没有道理的，重要的其实是方法，工具更多的只是辅助。</p>
+<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><p>最后，再来介绍一种使用 Roam 来记笔记的最佳实践。Roam 与其说是一个工具，倒不如说是一种思想。其实 Roam 的这种设计理念是来自德国的社会学家和系统理论家 —— 尼克拉斯 · 卢曼（Niklas Luhmann），方法名叫 Zettelkasten，卢曼使用这套方法，积累了 90000 个知识卡片，一生中写了 60 本书和其他大量出版物。</p>
+<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picslip_box.jpg" alt></p>
+<p>Zettelkasten 是由许多单独的笔记组成，其中包括想法和其他简短的信息，这些信息一般是在平时学习或者思考时记下的。这些笔记可以分层编号，以便在适当的地方插入新的笔记，并包含元数据，使记录者能够将笔记相互关联。</p>
+<p>从这个基础上，就慢慢衍生出了类似 Roam 这类的软件。在<a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>这篇文章中就详细介绍了由 Zettelkasten 扩展出来的一种记笔记方法，写得很详细，大家有兴趣可以看看原文。</p>
+<p>我目前主要使用以下几种类型的笔记：<br><code>Fleeting Notes</code> 记录一些临时的想法，看书过程中的一些注解等。</p>
+<p><code>Bibliographical Notes</code> 主要是在阅读过程中的一些划线部分的摘抄，我主要是从微信读书或者 Kindle 中导出。</p>
+<p><code>Literature Notes</code> 是用自己的话记录下阅读过的文献笔记，不能复制、粘贴，这样能迫使自己增强对于原文的理解。</p>
+<p><code>Permanent Notes</code>则是将当前的笔记和自己之前的笔记进行关联，从而输出一个自己的全新的理解的内容，这个部分更多的是和自己之前的知识体系进行融合。</p>
+<p>通过 <code>Roam</code> 就比较容易实现上面的这些，关键在链接，只有将新的知识融合进自己已有的知识体系，我们才算是真正掌握。</p>
+<p>我现在会写很多 Literature Notes，主要是帮助自己去吸收理解一些知识，很多东西你以为你掌握了，但是让你用一句话说出来都不行那就不是真的掌握。不要害怕写的不对或者写的没有文采，这些都不重要，重要的是你的思考过程，写作本质上可以帮助更好地进行思考。</p>
+<p>每个人的知识体系都是不一样的，所以我们每个人对于知识的理解也是不一样的，不要去复述别人的理解，而是要有你自己的理解，表达自己的观点，不一定对，但是得有自己的思考，这样我们的知识体系才能不断生长，不断扩张，自身才能得到成长。</p>
+<hr>
+]]></content>
+  </entry>
+  <entry>
     <title>快到年底的年中总结</title>
     <url>/2020/08/06/Mid-year-review/</url>
     <content><![CDATA[<p>今天聊聊技术以外的话题。</p>
@@ -43,43 +140,71 @@
 ]]></content>
   </entry>
   <entry>
-    <title>Feed流上的优化实践.md</title>
-    <url>/2020/08/06/Optimization-Practices-on-Feeds/</url>
-    <content><![CDATA[<p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
- <a id="more"></a>
-<p>这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。</p>
-<p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png" alt></p>
-<h3 id="关于优化"><a href="#关于优化" class="headerlink" title="关于优化"></a>关于优化</h3><p>优化整体可以分为两大类，软优化和硬优化。那么什么是软优化呢？软优化并不会改变某段代码的执行效率，而是通过调整这段代码的执行时机，来优化整体代码的运行性能。软优化里由分为三大类，分别为预加载，异步加载和懒加载。</p>
-<h4 id="软优化"><a href="#软优化" class="headerlink" title="软优化"></a>软优化</h4><ul>
-<li>预加载<br>这几种加载方式都很好理解，改变的都是执行时机，预加载就是提前加载，把一些重要的数据提前加载好，等到合适的时机，就可以直接展示给用户，而不是在这个合适的时机才去加载数据，这种方式给用户地感觉是加载变快了。</li>
-<li>异步加载<br>而异步加载在Android中则很常见了，移动应用中有主线程的概念，主线程需要实时地对用户的操作予以反馈，这种反馈要非常及时，否则就会让用户觉得卡顿。因此，主线程的工作不宜有耗时操作，而且对于一些执行比较慢的代码，而且不需要同步执行的代码，我们可以考虑将它放到异步线程去执行。</li>
-<li>懒加载<br>最后就是懒加载了，懒加载就是把一些不是需要立即展示的东西往后放，因为我们的手机性能，内存是有限的，有些功能用户不是需要马上看到，则可以考虑在后续的某个适当的时机执行加载。</li>
+    <title>分享一些有价值的博客</title>
+    <url>/2022/04/09/Share-some-valuable-blogs./</url>
+    <content><![CDATA[<p>这周的文章延迟了。</p>
+<p>最近比较忙，清明节都在家里加班。</p>
+<a id="more"></a>
+<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
+<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
+<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
+<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
+<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
+<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
+<p>这个是我feedly的截图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG102.jpeg" alt></p>
+<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
+<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
+<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
+<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
+<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
+<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
+<p>还有一些英文的博客：</p>
+<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
+<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
+<ul>
+<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
+</li>
+<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
+</li>
+<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
+</li>
 </ul>
-<h4 id="硬优化"><a href="#硬优化" class="headerlink" title="硬优化"></a>硬优化</h4><p>接下来说说硬优化，硬优化这个东西就比较偏细节了。一段逻辑，我们用两层循环实现，功能肯定是OK的，但是如果在实现功能的情况下，我们用一层循环就可以解决了，这样不就提高了这段代码的运行效率了。这种方式的优化就是硬优化了，关于硬优化往往没有具体的方法，很多都是各种见仁见智，通过调整代码的逻辑来提高运行效率都可以称为硬优化。</p>
-<h4 id="Feed流上的问题发现和解决"><a href="#Feed流上的问题发现和解决" class="headerlink" title="Feed流上的问题发现和解决"></a>Feed流上的问题发现和解决</h4><p>很多人会说，上面说了这么多软优化和硬优化，有什么用呢？别急，我们慢慢来说。上面说的算是一种对于优化的指导思想吧，下次我们遇到类似的问题可以从这几个维度来进行分析。</p>
-<p>我们要做优化，首先肯定是要发现问题，也就是对症下药。</p>
-<p>我之前主要处理的是Feed流的卡顿优化，所以我基本上都是通过Android Studio的Profiler工具来查看问题，现在Profiler的体验相对之前功能算是更加强大了，我每次都是使用Profiler来尝试抓一下Feed流滑动时的代码执行情况。<br>然后一个一个查看滑动过程中我们的耗时是在哪些地方。</p>
-<h5 id="通过Profiler发现的问题"><a href="#通过Profiler发现的问题" class="headerlink" title="通过Profiler发现的问题"></a>通过Profiler发现的问题</h5><p>通过Profiler发现了以下几点问题：</p>
-<ol>
-<li>发现有一些比较耗时的方法，比如图文笔记上的滤镜的回收方法比较耗时，针对这样的可以考虑做这个release操作放到异步里面去；</li>
-<li>另外也发现一些业务的打点会在OnBindViewHolder中调用的很频繁，虽然点位数据的发送是在异步线程里，但是在发送数据之前会有数据的拼装操作，多少会有些性能损耗，而且打点这一类数据完全可以放到异步线程中去，因为这种打点并不需要很高的实时性；</li>
-<li>对于一些跨进程的操作，比如从Context中拿Service获取WiFi状态，这种在onBind中回调是非常不好的，所以针对这个我们只需要构造一个广播来监听WIFI状态变化即可，然后每次只需要拿那个记录好的网络状态变量即可</li>
-<li>还有关于视频笔记的处理，我们需要根据RecyclerView滑动过程中当前item中的视频start，stop和prepare做相应的调整，正常情况下，当RecyclerView处于滑动状态是不应该去prepare和start的，而且也不应该创建播放器实例和Texture View的；</li>
-<li>最后，通过Profiler我们还发现TextView的setText是很耗时的，当我们复杂多行文本的情况时，TextView去setText的时候需要进行复杂的测量，在测量完之后还需要绘制，所以针对这个场景可以考虑使用StaticLayout对Feed流中的文本作预渲染，关于StaticLayout的教程网上也有不少，后面有时间我也会抽空写下关于这块的实践。</li>
-</ol>
-<p>上面都是通过Profiler来发现的一些问题。</p>
-<h5 id="View层级"><a href="#View层级" class="headerlink" title="View层级"></a>View层级</h5><p>另外还有一些算是基础的优化吧。因为View的层级随着Feed流的业务变得越来越深，我们需要进可能地减少View的层级，同时也尽量减少View的个数，可以考虑使用ConstraintLayout，但是ConstraintLayout这个东西要慎用，对于一些迭代比较快的业务场景，使用ConstraintLayout会增加我们的维护成本，而且会有一些比较坑的问题。</p>
-<p>关于View层级的缩减基本没啥可讲的，尽量用merge和ViewStub，这个就是根据实际情况去消除一些不必要的层级。</p>
-<h5 id="RecyclerView缓存的利用"><a href="#RecyclerView缓存的利用" class="headerlink" title="RecyclerView缓存的利用"></a>RecyclerView缓存的利用</h5><p>最后，我们也尝试了从RecyclerView缓存的角度来解决这个问题，RecyclerView默认会有四级缓存的概念，正常情况下，当我们的RecyclerView的卡片撑满屏幕的时候，我们进入该页面的时候，我们的RecyclerView会先创建ViewHolder，然后再bind这个ViewHolder，然后当我们向下滑动的时候，会再次创建一个ViewHolder，接着再执行Bind操作，只有当我们的RecycledView Pool的池子满了之后才不会继续创建ViewHolder，往后的滑动RecyclerViwe就只会执行bind操作了，这个时候我们发现这个OnCreateViewHolder需要从xml里去解析view，并且创建这个ViewHolder，这个创建对于我们的滑动是会有性能损耗，其实还是因为我们的这个卡片太复杂了。</p>
-<p>所以，我们可以考虑提前创建一些ViewHolder，放到ViewHolder的池子里去，这样我们在滑动的时候，就不需要先Create再Bind了。</p>
-<p>提前创建ViewHolder，在主线程Idle的状态下提前创建ViewHolder放到RecycledViewPool中，这个pool的size默认是5。<br>   <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">recyclerView.setRecycledViewPool(RecyclerView.RecycledViewPool().apply &#123;</span><br><span class="line">	LightExecutor.postIdle(Runnable &#123;</span><br><span class="line">		repeat(<span class="number">5</span>) &#123;</span><br><span class="line">			<span class="comment">//RecycledViewPool 默认size为5个，RecyclerView内部会有判断，如果满了不会create</span></span><br><span class="line">			<span class="comment">//注意这里取得是typePool的倒数第一个和第二个位置，需要保证注册的时候视频卡片和笔记在最后两个位置</span></span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">1</span>))</span><br><span class="line">			putRecycledView(mAdapter.createViewHolder(followFeedRecyclerView, mAdapter.typePool.size -<span class="number">2</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
-<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><p>在做完这些优化之后，在Feed流上的卡顿就有很大改善了，另外，对于业务侧的指标也有一定的数据提升。</p>
-<h4 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h4><p>对于这块业务的性能监控可以实施起来，这样有利于我们尽早发现卡顿问题，另外，对于一些优化的点其实还可以继续深挖，比如前创建ViewHolder是否可以使用AsyncLayoutInflator进行inflate，还有针对文本的预渲染可以考虑抽成组件形式，方便其他业务使用。</p>
-<p>感谢您的阅读，如果觉得我的文章对你有帮助，请帮忙点赞，有问题可以评论留言。</p>
+<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
+<p>下面放一些目前的阅读笔记吧。</p>
+<p>挣钱不是一件事情，而是一种技巧。</p>
+<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
+<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
+<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
+<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
+<p>销售技巧是一种形式的独特知识。</p>
+<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
+<p>Sales skills </p>
+<p>Musical talents, with the ability to pick up any instrument </p>
+<p>An obsessive personality: you dive into things and remember them quickly </p>
+<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
+<p>Playing a lot of games, you understand game theory pretty well </p>
+<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
+<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
+<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
+<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
+<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
+<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
+<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
+<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
+<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
+<p>跟随你的好奇心去做事，而不是追寻热点。</p>
+<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
+<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
+<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
+<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
+<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
+<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
+<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
+<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
+<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
+<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
 ]]></content>
-      <tags>
-        <tag>性能优化 RecyclerView缓存</tag>
-      </tags>
   </entry>
   <entry>
     <title>你可能需要这份大厂面经</title>
@@ -394,6 +519,83 @@
       </tags>
   </entry>
   <entry>
+    <title>解决CoordinatorLayout的动画抖动以及回弹问题</title>
+    <url>/2020/05/21/adressing-CoordinatorLayout&#39;s-animation-jitter-and-rebound-issues/</url>
+    <content><![CDATA[<p>在使用CoordinatorLayout来实现Android中的一种吸顶的时候，遇到了两个CoordinatorLayout的滑动问题，这里做下记录。</p>
+<p>这里使用CoordinatorLayout实现的是一个tab吸顶的效果，类似淘宝，京东首页的一个效果。<br>头部区域展示各种类型banner卡片，中间是类似TabLayout的可点击tab，下面是feed卡片，可以一直下拉加载，并且feed卡片区域使用ViewPager可以支持左右横滑切换tab，另外，就是tab滚动到顶部之后会有个吸顶的效果。</p>
+ <a id="more"></a>
+<p>我们在项目中也要实现的效果，一开始我的想法是使用嵌套RecycleView的形式来实现，因为我去调研了下京东和淘宝的首页布局都是这么实现的，京东和淘宝首页实现方式和下面的图类似，外部的整个RecycleView嵌套ViewPager，ViewPager中再有多个RecycleView，这个实现起来稍微有点麻烦，难点是要处理好外部的RecycleView和ViewPager中内部RecycleView的滑动事件传递，这里我们只是简单介绍下，后面我会专门来介绍类似这样的嵌套RecycleView如何实现。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested_recycler_view.png" alt="image"></p>
+<p>接下来是如何采用其他方便的方式来实现类似需求？我想到了CoordinatorLayout，CoordinatorLayout在处理吸顶是有一套已经成熟的方案的。</p>
+<p>网上关于CoordinatorLayout的使用有很多不错的文章，这里就不介绍如何使用，关于CoordinatorLayout和Behavior我推荐看看这篇文章<a href="https://blog.csdn.net/briblue/article/details/73076458" target="_blank" rel="noopener">针对 CoordinatorLayout 及 Behavior 的一次细节较真</a></p>
+<p>而我们这篇文章主要是讲使用CoordinatorLayout中遇到的问题，问题如何解决以及CoordinatorLayout为什么会有这样的问题。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout.png" alt="image"></p>
+<p>实现这个大概是像上面这样类似的布局结构，来看下布局文件。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</span><br><span class="line">    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;</span><br><span class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</span><br><span class="line">    android:layout_width=&quot;match_parent&quot;</span><br><span class="line">    android:layout_height=&quot;match_parent&quot;</span><br><span class="line">    tools:context=&quot;.MainActivity&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;android.support.design.widget.AppBarLayout</span><br><span class="line">        app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">        android:layout_width=&quot;match_parent&quot;</span><br><span class="line">        android:layout_height=&quot;wrap_content&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;android.support.design.widget.CollapsingToolbarLayout</span><br><span class="line">            app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">            app:scrimVisibleHeightTrigger=&quot;45dp&quot;</span><br><span class="line">            android:layout_width=&quot;match_parent&quot;</span><br><span class="line">            android:layout_height=&quot;wrap_content&quot;&gt;</span><br><span class="line"></span><br><span class="line">            &lt;ImageView</span><br><span class="line">                android:background=&quot;@drawable/header&quot;</span><br><span class="line">                app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">                android:layout_width=&quot;match_parent&quot;</span><br><span class="line">                android:layout_height=&quot;450dp&quot; /&gt;</span><br><span class="line"></span><br><span class="line">        &lt;/android.support.design.widget.CollapsingToolbarLayout&gt;</span><br><span class="line"></span><br><span class="line">        &lt;android.support.design.widget.TabLayout</span><br><span class="line">            android:id=&quot;@+id/tabs&quot;</span><br><span class="line">            app:layout_collapseMode=&quot;pin&quot;</span><br><span class="line">            app:tabMode=&quot;scrollable&quot;</span><br><span class="line">            android:layout_width=&quot;match_parent&quot;</span><br><span class="line">            android:layout_height=&quot;wrap_content&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/android.support.design.widget.AppBarLayout&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &lt;android.support.v4.view.ViewPager</span><br><span class="line">        android:id=&quot;@+id/view_pager&quot;</span><br><span class="line">        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</span><br><span class="line">        android:layout_width=&quot;match_parent&quot;</span><br><span class="line">        android:layout_height=&quot;match_parent&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;/android.support.design.widget.CoordinatorLayout&gt;</span><br></pre></td></tr></table></figure>
+<p>这样的布局，接着填充数据基本上就能实现tab吸顶效果，feed卡片区采用RecycleView实现，可以一直下拉，并且能够支持左右横滑，基本实现了类似京东，淘宝首页的一个效果。</p>
+<p>但是在使用这种方式来实现发现两个很明显的问题。</p>
+<h4 id="第一，抖动问题"><a href="#第一，抖动问题" class="headerlink" title="第一，抖动问题"></a>第一，抖动问题</h4><p>该问题场景描述：我们触摸AppBarLayout使AppBarLayout整体向上滑动，，即手指上滑，当AppBarLayout fling的同时，我们触摸下部ViewPager中的RecycleView区域，使RecycleView区域整体向下滑动，即手指下滑，这个时候会发现一个明显页面动画现象，这个问题几乎是必现。</p>
+<p>来看下gif效果：<img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_resize_1.gif" alt="image"></p>
+<p>接下来我们来看问题的原因，其实这个要搞清楚原因需要对CoordinatorLayout的工作机制有个比较清晰的理解，然而CoordinatorLayout这里牵扯到嵌套滚动以及Behavior这些，</p>
+<p>我们这里尝试简单地介绍下CoordinatorLayout的工作机制。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinatorLayout_analysis.png" alt="image"></p>
+<ul>
+<li>CoordinatorLayout实现NestedScrollingParent2接口，用于处理与滑动子View的联动交互，实际上交由Behavior进行处理。</li>
+<li>AppBarLayout中默认使用了AppBarLayout.Behavior，主要功能是接收CoordinatorLayout传输过来的滑动事件，并且相对应的进行处理，如RecycleView往上滑动到头时候，继续滑动移动AppBarLayout到头。</li>
+<li>RecycleView实现了NestedScrollingChild2接口，用于传输给CoordinatorLayout，并且消费CoordinatorLayout不消费的触摸事件，其中还是使用了AppBarLayout.ScrollingViewBehavior，功能是进行监听AppBarLayout的位移变化，从而进行相对应的变化，最明显的例子就是AppBarLayout上移过程中，RecycleView一起上移。</li>
+</ul>
+<h4 id="CoordinatorLayout中Behavior"><a href="#CoordinatorLayout中Behavior" class="headerlink" title="CoordinatorLayout中Behavior"></a>CoordinatorLayout中Behavior</h4><p>其实CoordinatorLayout就是通过Behavior这个机制来协调各个子View的滚动。比如我们来看CoordinatorLayout的onStartNestedScroll方法，这个其实是NestedScrollingParent2中的方法。</p>
+<p>当CoordinatorLayout子view的调用NestedScrollingChild2的方法startNestedScroll时,会调用到该方法<br>该方法决定了当前控件是否能接收到其内部View（并非是直接子View）滑动时的参数。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//CoordinatorLayout中的onStartNestedScroll方法：</span><br><span class="line"> @Override</span><br><span class="line">    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) &#123;</span><br><span class="line">        return onStartNestedScroll(child, target, nestedScrollAxes, ViewCompat.TYPE_TOUCH);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onStartNestedScroll(View child, View target, int axes, int type) &#123;</span><br><span class="line">        boolean handled = false;</span><br><span class="line"></span><br><span class="line">        final int childCount = getChildCount();</span><br><span class="line">        for (int i = 0; i &lt; childCount; i++) &#123;</span><br><span class="line">            final View view = getChildAt(i);</span><br><span class="line">            if (view.getVisibility() == View.GONE) &#123;</span><br><span class="line">                // If it&apos;s GONE, don&apos;t dispatch</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            final LayoutParams lp = (LayoutParams) view.getLayoutParams();</span><br><span class="line">            final Behavior viewBehavior = lp.getBehavior();</span><br><span class="line">            if (viewBehavior != null) &#123;</span><br><span class="line">                final boolean accepted = viewBehavior.onStartNestedScroll(this, view, child,</span><br><span class="line">                        target, axes, type);</span><br><span class="line">                handled |= accepted;</span><br><span class="line">                lp.setNestedScrollAccepted(type, accepted);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lp.setNestedScrollAccepted(type, false);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return handled;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>CoordinatorLayout中的onStartNestedScroll方法基本都会调用到每个子View的Behavior中相应的方法中去。</p>
+<p>关于Nested嵌套滚动机制可以看看下面这篇博客。</p>
+<p><a href="https://blog.csdn.net/aishang5wpj/article/details/78873343" target="_blank" rel="noopener">事件分发和NestedScrolling</a></p>
+<p>嵌套滚动机制NestedScrollingParent2和NestedScrollingChild2的各个回调方法调用流程如下图所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested.jpeg" alt="image"></p>
+<p>上图列出来手指从按下到抬起时的整个流程，当然这些都是在子View的onTouchEvent()中完成的，所以父View一定不能拦截子View的事件，否则这套机制就失效了。</p>
+<p>除此之外，箭头的左边分别都是NestedScrollingChild2中的各种方法，右边则是NestedScrollingParent2对应的方法。使用时，一般是子View通过dispatchXXX()来通知父View，然后父View通过onXXX()来进行回应。</p>
+<p>方法调用的先后时机也有区别，对应到上图中，图越往下，调用的时机越晚。</p>
+<h4 id="AppBarLayout中的Behavior"><a href="#AppBarLayout中的Behavior" class="headerlink" title="AppBarLayout中的Behavior"></a>AppBarLayout中的Behavior</h4><p>接着我们来看看AppBarLayout中的Behavior，ApprBarLayout的默认Behavior就是AppBarLayout.Behavior这个类，而AppBarLayout.Behavior继承自HeaderBehavior，HeaderBehavior又继承自ViewOffsetBehavior，这里先总结一下两个类的作用。</p>
+<ul>
+<li>ViewOffsetBehavior：该Behavior主要运用于View的移动，从名字就可以看出来，该类中提供了上下移动，左右移动的方法。</li>
+<li>HeaderBehavior：该类主要用于View处理触摸事件以及触摸后的fling事件。</li>
+</ul>
+<p>由于上面两个类功能的实现，使得AppBarLayout.Behavior具有了同时移动本身以及处理触摸事件的功能。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public boolean onTouchEvent(CoordinatorLayout parent, V child, MotionEvent ev) &#123;</span><br><span class="line">       ...</span><br><span class="line">        switch (ev.getActionMasked()) &#123;</span><br><span class="line">            ...</span><br><span class="line">            case MotionEvent.ACTION_MOVE: &#123;</span><br><span class="line">                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);</span><br><span class="line">                if (activePointerIndex == -1) &#123;</span><br><span class="line">                    return false;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                final int y = (int) ev.getY(activePointerIndex);</span><br><span class="line">                int dy = mLastMotionY - y;</span><br><span class="line"></span><br><span class="line">                if (!mIsBeingDragged &amp;&amp; Math.abs(dy) &gt; mTouchSlop) &#123;</span><br><span class="line">                    mIsBeingDragged = true;</span><br><span class="line">                    if (dy &gt; 0) &#123;</span><br><span class="line">                        dy -= mTouchSlop;</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        dy += mTouchSlop;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                if (mIsBeingDragged) &#123;</span><br><span class="line">                    mLastMotionY = y;</span><br><span class="line">                    // We&apos;re being dragged so scroll the ABL</span><br><span class="line">                    scroll(parent, child, dy, getMaxDragOffset(child), 0);</span><br><span class="line">                &#125;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            case MotionEvent.ACTION_UP:</span><br><span class="line">                if (mVelocityTracker != null) &#123;</span><br><span class="line">                    mVelocityTracker.addMovement(ev);</span><br><span class="line">                    mVelocityTracker.computeCurrentVelocity(1000);</span><br><span class="line">                    float yvel = mVelocityTracker.getYVelocity(mActivePointerId);</span><br><span class="line">                    fling(parent, child, -getScrollRangeForDragFling(child), 0, yvel);</span><br><span class="line">                &#125;</span><br><span class="line">         ...</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>我们来看onTouchEvent的方法，主要逻辑还是在ACTION_MOVE中，可以看到在滑动过程中调用了scroll(…)方法，scroll(…)方法在HeaderBehavior中进行实现，最终调用到了额setHeaderTopBottomOffset(…)方法，该方法在AppBarLayout.Behavior中进行了重写，所以，我们直接看AppBarLayout.Behavior中的源码即可：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">   //newOffeset传入了dy，也就是我们手指移动距离上一次移动的距离，</span><br><span class="line">   //minOffset等于AppBarLayout的负的height，maxOffset等于0。</span><br><span class="line">        int setHeaderTopBottomOffset(CoordinatorLayout coordinatorLayout,</span><br><span class="line">                AppBarLayout appBarLayout, int newOffset, int minOffset, int maxOffset) &#123;</span><br><span class="line">            final int curOffset = getTopBottomOffsetForScrollingSibling();//获取当前的滑动Offset</span><br><span class="line">            int consumed = 0;</span><br><span class="line">			//AppBarLayout滑动的距离如果超出了minOffset或者maxOffset，则直接返回0</span><br><span class="line">            if (minOffset != 0 &amp;&amp; curOffset &gt;= minOffset &amp;&amp; curOffset &lt;= maxOffset) &#123;</span><br><span class="line">               //矫正newOffset，使其minOffset&lt;=newOffset&lt;=maxOffset</span><br><span class="line">                newOffset = MathUtils.clamp(newOffset, minOffset, maxOffset);</span><br><span class="line">				//由于默认没设置Interpolator，所以interpolatedOffset=newOffset;</span><br><span class="line">                if (curOffset != newOffset) &#123;</span><br><span class="line">                    final int interpolatedOffset = appBarLayout.hasChildWithInterpolator()</span><br><span class="line">                            ? interpolateOffset(appBarLayout, newOffset)</span><br><span class="line">                            : newOffset;</span><br><span class="line">					//调用ViewOffsetBehvaior的方法setTopAndBottomOffset(...)，最终通过</span><br><span class="line">					//ViewCompat.offsetTopAndBottom()移动AppBarLayout</span><br><span class="line">                    final boolean offsetChanged = setTopAndBottomOffset(interpolatedOffset);</span><br><span class="line"></span><br><span class="line">                    //记录下消费了多少的dy。</span><br><span class="line">                    consumed = curOffset - newOffset;</span><br><span class="line">                   //没设置Interpolator的情况， mOffsetDelta永远=0</span><br><span class="line">                    mOffsetDelta = newOffset - interpolatedOffset;</span><br><span class="line">					....</span><br><span class="line">                     //分发回调OnOffsetChangedListener.onOffsetChanged(...)</span><br><span class="line">                    appBarLayout.dispatchOffsetUpdates(getTopAndBottomOffset());</span><br><span class="line"></span><br><span class="line">                  </span><br><span class="line">                    updateAppBarLayoutDrawableState(coordinatorLayout, appBarLayout, newOffset,</span><br><span class="line">                            newOffset &lt; curOffset ? -1 : 1, false);</span><br><span class="line">                &#125;</span><br><span class="line">           ...</span><br><span class="line">            return consumed;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>AppBarLayout中移动主要就是这部分逻辑了，通过setTopAndBottomOffset()来达到了移动我们的AppBarLayout，那么这里AppBarLayout就可以跟着手上下移动了。</p>
+<h4 id="RecycleView中的Behavior"><a href="#RecycleView中的Behavior" class="headerlink" title="RecycleView中的Behavior"></a>RecycleView中的Behavior</h4><p>那么接下来我们看看RecycleView在CoordinatorLayout中如何是移动的？</p>
+<p>上面讲了AppBarLayout是如何通过Behavior来移动的，我们在上面布局文件中指定了ViewPager的Behavior。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</span><br></pre></td></tr></table></figure>
+<p>这个”appbar_scrolling_view_behavior”其实就是ScrollingViewBehavior，ScrollingViewBehavior也继承自ViewOffsetBehavior，我们在上下移动AppBarLayout的时候，下面的RecycleView也是需要跟着移动的，它上下移动就是靠这个来ScrollingViewBehavior来实现的。</p>
+<p>在阅读ScrollingViewBehavior源码中发现其实现了如下方法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) &#123;</span><br><span class="line">    // We depend on any AppBarLayouts</span><br><span class="line">    return dependency instanceof AppBarLayout;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public boolean onDependentViewChanged(CoordinatorLayout parent, View child,</span><br><span class="line">        View dependency) &#123;</span><br><span class="line">    offsetChildAsNeeded(parent, child, dependency);</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样我们这个RecycleView依赖于AppBarLayout，在AppBarLayout移动的过程中，RecycleView会随着AppBarLayout的移动回调onDependentViewChanged(…)方法，进而调用offsetChildAsNeeded(parent, child, dependency)。</p>
+<p>用这么多篇幅主要讲了CoordinatorLayout如何协调AppBarLayout和RecycleView来上下滚动的，接着回到刚开始我们要讨论那个动画抖动问题。</p>
+<p>其实造成这个的原因主要是AppBarLayout的fling操作和RecycleView联动造成的问题。</p>
+<p>在AppBarLayout的Behavior中的onTouchEvent()事件中处理了fling事件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public boolean onTouchEvent(CoordinatorLayout parent, V child, MotionEvent ev) &#123;</span><br><span class="line">    ...</span><br><span class="line">    case MotionEvent.ACTION_UP:</span><br><span class="line">        if (mVelocityTracker != null) &#123;</span><br><span class="line">            mVelocityTracker.addMovement(ev);</span><br><span class="line">            mVelocityTracker.computeCurrentVelocity(1000);</span><br><span class="line">            float yvel = mVelocityTracker.getYVelocity(mActivePointerId);</span><br><span class="line">            fling(parent, child, -getScrollRangeForDragFling(child), 0, yvel);</span><br><span class="line">        &#125;</span><br><span class="line">    ...</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在fling的方法中使用OverScroller来模拟进行fling操作，最终会调到setHeaderTopBottomOffset(…)来使AppBarLayout进行fling的滑动操作。</p>
+<p>在绝大部分滑动逻辑中，这样处理是正确的，但是如果在AppBarLayout在fling的时候主动滑动RecyclerView，那么就会造成动画抖动的问题了。</p>
+<p>在当前情况下，RecyclerView滑动到头了，那么就会把未消费的事件通过NestedScrollingChild2交付由CoordinatorLayout(实现了NestedScrollingParent2)处理，parent又最终交付由AppBarLayout.Behavior进行处理的，其中调用的方法如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void onNestedScroll(CoordinatorLayout coordinatorLayout, AppBarLayout child,</span><br><span class="line">        View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed,</span><br><span class="line">        int type) &#123;</span><br><span class="line">    if (dyUnconsumed &lt; 0) &#123;</span><br><span class="line">        // If the scrolling view is scrolling down but not consuming, it&apos;s probably be at</span><br><span class="line">        // the top of it&apos;s content</span><br><span class="line">        scroll(coordinatorLayout, child, dyUnconsumed,</span><br><span class="line">                -child.getDownNestedScrollRange(), 0);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里的scroll方法最终会调用setHeaderTopBottomOffset(…)，由于两次分别触摸在AppBarLayout和RecyclerView的方向不一致，导致了最终的抖动的效果。</p>
+<p>解决方式也很简单,只要在CoordinatorLayout的onInterceptedTouchEvent()中停止AppBarLayout的fling操作就可以了，直接操作的对象就是AppBarLayout中的Behavior，该Behavior继承自HeaderBehavior，而fling操作由OverScroller产生，所以自定义一个FixedBehavior：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public class FixedBehavior extends AppBarLayout.Behavior &#123;</span><br><span class="line">    private OverScroller mOverScroller;</span><br><span class="line"></span><br><span class="line">    public FixedBehavior() &#123;</span><br><span class="line">        super();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public FixedBehavior(Context context, AttributeSet attrs) &#123;</span><br><span class="line">        super(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onAttachedToLayoutParams(@NonNull CoordinatorLayout.LayoutParams params) &#123;</span><br><span class="line">        super.onAttachedToLayoutParams(params);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onDetachedFromLayoutParams() &#123;</span><br><span class="line">        super.onDetachedFromLayoutParams();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onTouchEvent(CoordinatorLayout parent, AppBarLayout child, MotionEvent ev) &#123;</span><br><span class="line">        if (ev.getAction() == MotionEvent.ACTION_UP) &#123;</span><br><span class="line">            reflectOverScroller();</span><br><span class="line">        &#125;</span><br><span class="line">        return super.onTouchEvent(parent, child, ev);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     *</span><br><span class="line">     */</span><br><span class="line">    public void stopFling() &#123;</span><br><span class="line">        if (mOverScroller != null) &#123;</span><br><span class="line">            mOverScroller.abortAnimation();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 解决AppbarLayout在fling的时候，再主动滑动RecyclerView导致的动画错误的问题</span><br><span class="line">     */</span><br><span class="line">    private void reflectOverScroller() &#123;</span><br><span class="line">        if (mOverScroller == null) &#123;</span><br><span class="line">            Field field = null;</span><br><span class="line">            try &#123;</span><br><span class="line">                field = getClass().getSuperclass()</span><br><span class="line">                        .getSuperclass().getDeclaredField(&quot;mScroller&quot;);</span><br><span class="line">                field.setAccessible(true);</span><br><span class="line">                Object object = field.get(this);</span><br><span class="line">                mOverScroller = (OverScroller) object;</span><br><span class="line">            &#125; catch (NoSuchFieldException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; catch (IllegalAccessException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后在重写CoordinatorLayout，暴露一个接口：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public class CustomCoordinatorLayout extends CoordinatorLayout &#123;</span><br><span class="line">    private OnInterceptTouchListener mListener;</span><br><span class="line"></span><br><span class="line">    public void setOnInterceptTouchListener(OnInterceptTouchListener listener) &#123;</span><br><span class="line">        mListener = listener;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context) &#123;</span><br><span class="line">        super(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context, AttributeSet attrs) &#123;</span><br><span class="line">        super(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context, AttributeSet attrs, int defStyleAttr) &#123;</span><br><span class="line">        super(context, attrs, defStyleAttr);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onInterceptTouchEvent(MotionEvent ev) &#123;</span><br><span class="line">        if (mListener != null) &#123;</span><br><span class="line">            mListener.onIntercept();</span><br><span class="line">        &#125;</span><br><span class="line">        return super.onInterceptTouchEvent(ev);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public interface OnInterceptTouchListener &#123;</span><br><span class="line">        void onIntercept();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接着在接口中处理滑动问题即可：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">coordinatorLayout.setOnInterceptTouchListener &#123;</span><br><span class="line">    //RecyclerView滑动的时候禁止AppBarLayout的滑动</span><br><span class="line">    if (customBehavior != null) &#123;</span><br><span class="line">        customBehavior!!.stopFling()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="第二，回弹问题"><a href="#第二，回弹问题" class="headerlink" title="第二，回弹问题"></a>第二，回弹问题</h4><p>问题场景描述，我们反复上下滑动AppBarLayout的时候，可以看到AppBarLayout在滑出屏幕外之后又反弹回去了，而且当你滑动的加速度很大的时候，这个反弹的幅度也会跟着变大。</p>
+<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_resize_2.gif" alt="image"></p>
+<p>这个问题造成的原因是因为在手指向上滑动后造成RecyclerView的fling操作执行，具体的代码在RecyclerView内部类ViewFlinger中。</p>
+<p>我使用Android Studio中的Profiler抓取了一下当出现反弹问题的时候出现的方法调用堆栈如下所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_bugs_method_call.jpg" alt="image"></p>
+<p>发现RecyclerView中ViewFlinger调用后，接着触发了HeaderBehavior中的FlingRunnable。而ViewFling中会调用dispatchNestedScroll(…)方法，RecyclerView作为CoordinatorLayout的子View，它通过嵌套滚动的机制又会调用到CoordinatorLayout中的onNestedScroll，这里主要就是通过AppBarLayout的Behavior中的方法setHeaderTopBottomOffset来实现AppBarLayout的滚动，后面会发现多次setHeaderTopBottomOffset的调用，其实目前看到这里，并不太确定造成这个问题的具体原因是啥，感觉上是因为RecyclerView的滑动和CoordinatorLayout的滑动冲突导致了反弹效果的出现。</p>
+<p>于是尝试了下面的解决方法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">coordinatorLayout.setOnInterceptTouchListener &#123;</span><br><span class="line">    mRecyclerView.stopScroll()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>试了这个方法发现果然有效。</p>
+<p>另外，我在写demo的时候发现，这个问题在support-27是存在的，在support-28 Google已经修复过了。</p>
+<p>我尝试过看看support-28里面的都有哪些改动，想看看Google是如何修复的。看了下Google的release note并没有提及，如果从Google的commit history来看实在页看不出来啥，暂时也没有个具体的原因。</p>
+<p>后面可以将support-27和support-28的source下载下来，然后使用Beyond Compare来看看具体的diff改动是在哪。</p>
+]]></content>
+      <tags>
+        <tag>UI</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>深入分析AsyncTask</title>
     <url>/2019/03/23/analys-of-AsyncTask/</url>
     <content><![CDATA[<ol>
@@ -482,81 +684,108 @@
       </tags>
   </entry>
   <entry>
-    <title>解决CoordinatorLayout的动画抖动以及回弹问题</title>
-    <url>/2020/05/21/adressing-CoordinatorLayout&#39;s-animation-jitter-and-rebound-issues/</url>
-    <content><![CDATA[<p>在使用CoordinatorLayout来实现Android中的一种吸顶的时候，遇到了两个CoordinatorLayout的滑动问题，这里做下记录。</p>
-<p>这里使用CoordinatorLayout实现的是一个tab吸顶的效果，类似淘宝，京东首页的一个效果。<br>头部区域展示各种类型banner卡片，中间是类似TabLayout的可点击tab，下面是feed卡片，可以一直下拉加载，并且feed卡片区域使用ViewPager可以支持左右横滑切换tab，另外，就是tab滚动到顶部之后会有个吸顶的效果。</p>
+    <title>Mac上你一定要装的效率神器</title>
+    <url>/2022/05/06/awsome-tools-in-mac/</url>
+    <content><![CDATA[<p>今天想介绍一下Mac上的效率神器 — Alfred。</p>
+<p>其实关于Alfred的介绍有很多，但我还是忍不住想介绍一下这个工具，个人感觉它真的是Mac上一个特别好用的提升效率的工具了。</p>
  <a id="more"></a>
-<p>我们在项目中也要实现的效果，一开始我的想法是使用嵌套RecycleView的形式来实现，因为我去调研了下京东和淘宝的首页布局都是这么实现的，京东和淘宝首页实现方式和下面的图类似，外部的整个RecycleView嵌套ViewPager，ViewPager中再有多个RecycleView，这个实现起来稍微有点麻烦，难点是要处理好外部的RecycleView和ViewPager中内部RecycleView的滑动事件传递，这里我们只是简单介绍下，后面我会专门来介绍类似这样的嵌套RecycleView如何实现。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested_recycler_view.png" alt="image"></p>
-<p>接下来是如何采用其他方便的方式来实现类似需求？我想到了CoordinatorLayout，CoordinatorLayout在处理吸顶是有一套已经成熟的方案的。</p>
-<p>网上关于CoordinatorLayout的使用有很多不错的文章，这里就不介绍如何使用，关于CoordinatorLayout和Behavior我推荐看看这篇文章<a href="https://blog.csdn.net/briblue/article/details/73076458" target="_blank" rel="noopener">针对 CoordinatorLayout 及 Behavior 的一次细节较真</a></p>
-<p>而我们这篇文章主要是讲使用CoordinatorLayout中遇到的问题，问题如何解决以及CoordinatorLayout为什么会有这样的问题。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/CoordinatorLayout.png" alt="image"></p>
-<p>实现这个大概是像上面这样类似的布局结构，来看下布局文件。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</span><br><span class="line">    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;</span><br><span class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</span><br><span class="line">    android:layout_width=&quot;match_parent&quot;</span><br><span class="line">    android:layout_height=&quot;match_parent&quot;</span><br><span class="line">    tools:context=&quot;.MainActivity&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;android.support.design.widget.AppBarLayout</span><br><span class="line">        app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">        android:layout_width=&quot;match_parent&quot;</span><br><span class="line">        android:layout_height=&quot;wrap_content&quot;&gt;</span><br><span class="line"></span><br><span class="line">        &lt;android.support.design.widget.CollapsingToolbarLayout</span><br><span class="line">            app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">            app:scrimVisibleHeightTrigger=&quot;45dp&quot;</span><br><span class="line">            android:layout_width=&quot;match_parent&quot;</span><br><span class="line">            android:layout_height=&quot;wrap_content&quot;&gt;</span><br><span class="line"></span><br><span class="line">            &lt;ImageView</span><br><span class="line">                android:background=&quot;@drawable/header&quot;</span><br><span class="line">                app:layout_scrollFlags=&quot;scroll&quot;</span><br><span class="line">                android:layout_width=&quot;match_parent&quot;</span><br><span class="line">                android:layout_height=&quot;450dp&quot; /&gt;</span><br><span class="line"></span><br><span class="line">        &lt;/android.support.design.widget.CollapsingToolbarLayout&gt;</span><br><span class="line"></span><br><span class="line">        &lt;android.support.design.widget.TabLayout</span><br><span class="line">            android:id=&quot;@+id/tabs&quot;</span><br><span class="line">            app:layout_collapseMode=&quot;pin&quot;</span><br><span class="line">            app:tabMode=&quot;scrollable&quot;</span><br><span class="line">            android:layout_width=&quot;match_parent&quot;</span><br><span class="line">            android:layout_height=&quot;wrap_content&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/android.support.design.widget.AppBarLayout&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &lt;android.support.v4.view.ViewPager</span><br><span class="line">        android:id=&quot;@+id/view_pager&quot;</span><br><span class="line">        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</span><br><span class="line">        android:layout_width=&quot;match_parent&quot;</span><br><span class="line">        android:layout_height=&quot;match_parent&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;/android.support.design.widget.CoordinatorLayout&gt;</span><br></pre></td></tr></table></figure>
-<p>这样的布局，接着填充数据基本上就能实现tab吸顶效果，feed卡片区采用RecycleView实现，可以一直下拉，并且能够支持左右横滑，基本实现了类似京东，淘宝首页的一个效果。</p>
-<p>但是在使用这种方式来实现发现两个很明显的问题。</p>
-<h4 id="第一，抖动问题"><a href="#第一，抖动问题" class="headerlink" title="第一，抖动问题"></a>第一，抖动问题</h4><p>该问题场景描述：我们触摸AppBarLayout使AppBarLayout整体向上滑动，，即手指上滑，当AppBarLayout fling的同时，我们触摸下部ViewPager中的RecycleView区域，使RecycleView区域整体向下滑动，即手指下滑，这个时候会发现一个明显页面动画现象，这个问题几乎是必现。</p>
-<p>来看下gif效果：<img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_resize_1.gif" alt="image"></p>
-<p>接下来我们来看问题的原因，其实这个要搞清楚原因需要对CoordinatorLayout的工作机制有个比较清晰的理解，然而CoordinatorLayout这里牵扯到嵌套滚动以及Behavior这些，</p>
-<p>我们这里尝试简单地介绍下CoordinatorLayout的工作机制。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinatorLayout_analysis.png" alt="image"></p>
-<ul>
-<li>CoordinatorLayout实现NestedScrollingParent2接口，用于处理与滑动子View的联动交互，实际上交由Behavior进行处理。</li>
-<li>AppBarLayout中默认使用了AppBarLayout.Behavior，主要功能是接收CoordinatorLayout传输过来的滑动事件，并且相对应的进行处理，如RecycleView往上滑动到头时候，继续滑动移动AppBarLayout到头。</li>
-<li>RecycleView实现了NestedScrollingChild2接口，用于传输给CoordinatorLayout，并且消费CoordinatorLayout不消费的触摸事件，其中还是使用了AppBarLayout.ScrollingViewBehavior，功能是进行监听AppBarLayout的位移变化，从而进行相对应的变化，最明显的例子就是AppBarLayout上移过程中，RecycleView一起上移。</li>
-</ul>
-<h4 id="CoordinatorLayout中Behavior"><a href="#CoordinatorLayout中Behavior" class="headerlink" title="CoordinatorLayout中Behavior"></a>CoordinatorLayout中Behavior</h4><p>其实CoordinatorLayout就是通过Behavior这个机制来协调各个子View的滚动。比如我们来看CoordinatorLayout的onStartNestedScroll方法，这个其实是NestedScrollingParent2中的方法。</p>
-<p>当CoordinatorLayout子view的调用NestedScrollingChild2的方法startNestedScroll时,会调用到该方法<br>该方法决定了当前控件是否能接收到其内部View（并非是直接子View）滑动时的参数。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//CoordinatorLayout中的onStartNestedScroll方法：</span><br><span class="line"> @Override</span><br><span class="line">    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) &#123;</span><br><span class="line">        return onStartNestedScroll(child, target, nestedScrollAxes, ViewCompat.TYPE_TOUCH);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onStartNestedScroll(View child, View target, int axes, int type) &#123;</span><br><span class="line">        boolean handled = false;</span><br><span class="line"></span><br><span class="line">        final int childCount = getChildCount();</span><br><span class="line">        for (int i = 0; i &lt; childCount; i++) &#123;</span><br><span class="line">            final View view = getChildAt(i);</span><br><span class="line">            if (view.getVisibility() == View.GONE) &#123;</span><br><span class="line">                // If it&apos;s GONE, don&apos;t dispatch</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            final LayoutParams lp = (LayoutParams) view.getLayoutParams();</span><br><span class="line">            final Behavior viewBehavior = lp.getBehavior();</span><br><span class="line">            if (viewBehavior != null) &#123;</span><br><span class="line">                final boolean accepted = viewBehavior.onStartNestedScroll(this, view, child,</span><br><span class="line">                        target, axes, type);</span><br><span class="line">                handled |= accepted;</span><br><span class="line">                lp.setNestedScrollAccepted(type, accepted);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lp.setNestedScrollAccepted(type, false);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return handled;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>CoordinatorLayout中的onStartNestedScroll方法基本都会调用到每个子View的Behavior中相应的方法中去。</p>
-<p>关于Nested嵌套滚动机制可以看看下面这篇博客。</p>
-<p><a href="https://blog.csdn.net/aishang5wpj/article/details/78873343" target="_blank" rel="noopener">事件分发和NestedScrolling</a></p>
-<p>嵌套滚动机制NestedScrollingParent2和NestedScrollingChild2的各个回调方法调用流程如下图所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/nested.jpeg" alt="image"></p>
-<p>上图列出来手指从按下到抬起时的整个流程，当然这些都是在子View的onTouchEvent()中完成的，所以父View一定不能拦截子View的事件，否则这套机制就失效了。</p>
-<p>除此之外，箭头的左边分别都是NestedScrollingChild2中的各种方法，右边则是NestedScrollingParent2对应的方法。使用时，一般是子View通过dispatchXXX()来通知父View，然后父View通过onXXX()来进行回应。</p>
-<p>方法调用的先后时机也有区别，对应到上图中，图越往下，调用的时机越晚。</p>
-<h4 id="AppBarLayout中的Behavior"><a href="#AppBarLayout中的Behavior" class="headerlink" title="AppBarLayout中的Behavior"></a>AppBarLayout中的Behavior</h4><p>接着我们来看看AppBarLayout中的Behavior，ApprBarLayout的默认Behavior就是AppBarLayout.Behavior这个类，而AppBarLayout.Behavior继承自HeaderBehavior，HeaderBehavior又继承自ViewOffsetBehavior，这里先总结一下两个类的作用。</p>
-<ul>
-<li>ViewOffsetBehavior：该Behavior主要运用于View的移动，从名字就可以看出来，该类中提供了上下移动，左右移动的方法。</li>
-<li>HeaderBehavior：该类主要用于View处理触摸事件以及触摸后的fling事件。</li>
-</ul>
-<p>由于上面两个类功能的实现，使得AppBarLayout.Behavior具有了同时移动本身以及处理触摸事件的功能。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public boolean onTouchEvent(CoordinatorLayout parent, V child, MotionEvent ev) &#123;</span><br><span class="line">       ...</span><br><span class="line">        switch (ev.getActionMasked()) &#123;</span><br><span class="line">            ...</span><br><span class="line">            case MotionEvent.ACTION_MOVE: &#123;</span><br><span class="line">                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);</span><br><span class="line">                if (activePointerIndex == -1) &#123;</span><br><span class="line">                    return false;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                final int y = (int) ev.getY(activePointerIndex);</span><br><span class="line">                int dy = mLastMotionY - y;</span><br><span class="line"></span><br><span class="line">                if (!mIsBeingDragged &amp;&amp; Math.abs(dy) &gt; mTouchSlop) &#123;</span><br><span class="line">                    mIsBeingDragged = true;</span><br><span class="line">                    if (dy &gt; 0) &#123;</span><br><span class="line">                        dy -= mTouchSlop;</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        dy += mTouchSlop;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                if (mIsBeingDragged) &#123;</span><br><span class="line">                    mLastMotionY = y;</span><br><span class="line">                    // We&apos;re being dragged so scroll the ABL</span><br><span class="line">                    scroll(parent, child, dy, getMaxDragOffset(child), 0);</span><br><span class="line">                &#125;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            case MotionEvent.ACTION_UP:</span><br><span class="line">                if (mVelocityTracker != null) &#123;</span><br><span class="line">                    mVelocityTracker.addMovement(ev);</span><br><span class="line">                    mVelocityTracker.computeCurrentVelocity(1000);</span><br><span class="line">                    float yvel = mVelocityTracker.getYVelocity(mActivePointerId);</span><br><span class="line">                    fling(parent, child, -getScrollRangeForDragFling(child), 0, yvel);</span><br><span class="line">                &#125;</span><br><span class="line">         ...</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>我们来看onTouchEvent的方法，主要逻辑还是在ACTION_MOVE中，可以看到在滑动过程中调用了scroll(…)方法，scroll(…)方法在HeaderBehavior中进行实现，最终调用到了额setHeaderTopBottomOffset(…)方法，该方法在AppBarLayout.Behavior中进行了重写，所以，我们直接看AppBarLayout.Behavior中的源码即可：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">   //newOffeset传入了dy，也就是我们手指移动距离上一次移动的距离，</span><br><span class="line">   //minOffset等于AppBarLayout的负的height，maxOffset等于0。</span><br><span class="line">        int setHeaderTopBottomOffset(CoordinatorLayout coordinatorLayout,</span><br><span class="line">                AppBarLayout appBarLayout, int newOffset, int minOffset, int maxOffset) &#123;</span><br><span class="line">            final int curOffset = getTopBottomOffsetForScrollingSibling();//获取当前的滑动Offset</span><br><span class="line">            int consumed = 0;</span><br><span class="line">			//AppBarLayout滑动的距离如果超出了minOffset或者maxOffset，则直接返回0</span><br><span class="line">            if (minOffset != 0 &amp;&amp; curOffset &gt;= minOffset &amp;&amp; curOffset &lt;= maxOffset) &#123;</span><br><span class="line">               //矫正newOffset，使其minOffset&lt;=newOffset&lt;=maxOffset</span><br><span class="line">                newOffset = MathUtils.clamp(newOffset, minOffset, maxOffset);</span><br><span class="line">				//由于默认没设置Interpolator，所以interpolatedOffset=newOffset;</span><br><span class="line">                if (curOffset != newOffset) &#123;</span><br><span class="line">                    final int interpolatedOffset = appBarLayout.hasChildWithInterpolator()</span><br><span class="line">                            ? interpolateOffset(appBarLayout, newOffset)</span><br><span class="line">                            : newOffset;</span><br><span class="line">					//调用ViewOffsetBehvaior的方法setTopAndBottomOffset(...)，最终通过</span><br><span class="line">					//ViewCompat.offsetTopAndBottom()移动AppBarLayout</span><br><span class="line">                    final boolean offsetChanged = setTopAndBottomOffset(interpolatedOffset);</span><br><span class="line"></span><br><span class="line">                    //记录下消费了多少的dy。</span><br><span class="line">                    consumed = curOffset - newOffset;</span><br><span class="line">                   //没设置Interpolator的情况， mOffsetDelta永远=0</span><br><span class="line">                    mOffsetDelta = newOffset - interpolatedOffset;</span><br><span class="line">					....</span><br><span class="line">                     //分发回调OnOffsetChangedListener.onOffsetChanged(...)</span><br><span class="line">                    appBarLayout.dispatchOffsetUpdates(getTopAndBottomOffset());</span><br><span class="line"></span><br><span class="line">                  </span><br><span class="line">                    updateAppBarLayoutDrawableState(coordinatorLayout, appBarLayout, newOffset,</span><br><span class="line">                            newOffset &lt; curOffset ? -1 : 1, false);</span><br><span class="line">                &#125;</span><br><span class="line">           ...</span><br><span class="line">            return consumed;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
-<p>AppBarLayout中移动主要就是这部分逻辑了，通过setTopAndBottomOffset()来达到了移动我们的AppBarLayout，那么这里AppBarLayout就可以跟着手上下移动了。</p>
-<h4 id="RecycleView中的Behavior"><a href="#RecycleView中的Behavior" class="headerlink" title="RecycleView中的Behavior"></a>RecycleView中的Behavior</h4><p>那么接下来我们看看RecycleView在CoordinatorLayout中如何是移动的？</p>
-<p>上面讲了AppBarLayout是如何通过Behavior来移动的，我们在上面布局文件中指定了ViewPager的Behavior。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</span><br></pre></td></tr></table></figure>
-<p>这个”appbar_scrolling_view_behavior”其实就是ScrollingViewBehavior，ScrollingViewBehavior也继承自ViewOffsetBehavior，我们在上下移动AppBarLayout的时候，下面的RecycleView也是需要跟着移动的，它上下移动就是靠这个来ScrollingViewBehavior来实现的。</p>
-<p>在阅读ScrollingViewBehavior源码中发现其实现了如下方法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) &#123;</span><br><span class="line">    // We depend on any AppBarLayouts</span><br><span class="line">    return dependency instanceof AppBarLayout;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public boolean onDependentViewChanged(CoordinatorLayout parent, View child,</span><br><span class="line">        View dependency) &#123;</span><br><span class="line">    offsetChildAsNeeded(parent, child, dependency);</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>这样我们这个RecycleView依赖于AppBarLayout，在AppBarLayout移动的过程中，RecycleView会随着AppBarLayout的移动回调onDependentViewChanged(…)方法，进而调用offsetChildAsNeeded(parent, child, dependency)。</p>
-<p>用这么多篇幅主要讲了CoordinatorLayout如何协调AppBarLayout和RecycleView来上下滚动的，接着回到刚开始我们要讨论那个动画抖动问题。</p>
-<p>其实造成这个的原因主要是AppBarLayout的fling操作和RecycleView联动造成的问题。</p>
-<p>在AppBarLayout的Behavior中的onTouchEvent()事件中处理了fling事件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public boolean onTouchEvent(CoordinatorLayout parent, V child, MotionEvent ev) &#123;</span><br><span class="line">    ...</span><br><span class="line">    case MotionEvent.ACTION_UP:</span><br><span class="line">        if (mVelocityTracker != null) &#123;</span><br><span class="line">            mVelocityTracker.addMovement(ev);</span><br><span class="line">            mVelocityTracker.computeCurrentVelocity(1000);</span><br><span class="line">            float yvel = mVelocityTracker.getYVelocity(mActivePointerId);</span><br><span class="line">            fling(parent, child, -getScrollRangeForDragFling(child), 0, yvel);</span><br><span class="line">        &#125;</span><br><span class="line">    ...</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>在fling的方法中使用OverScroller来模拟进行fling操作，最终会调到setHeaderTopBottomOffset(…)来使AppBarLayout进行fling的滑动操作。</p>
-<p>在绝大部分滑动逻辑中，这样处理是正确的，但是如果在AppBarLayout在fling的时候主动滑动RecyclerView，那么就会造成动画抖动的问题了。</p>
-<p>在当前情况下，RecyclerView滑动到头了，那么就会把未消费的事件通过NestedScrollingChild2交付由CoordinatorLayout(实现了NestedScrollingParent2)处理，parent又最终交付由AppBarLayout.Behavior进行处理的，其中调用的方法如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void onNestedScroll(CoordinatorLayout coordinatorLayout, AppBarLayout child,</span><br><span class="line">        View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed,</span><br><span class="line">        int type) &#123;</span><br><span class="line">    if (dyUnconsumed &lt; 0) &#123;</span><br><span class="line">        // If the scrolling view is scrolling down but not consuming, it&apos;s probably be at</span><br><span class="line">        // the top of it&apos;s content</span><br><span class="line">        scroll(coordinatorLayout, child, dyUnconsumed,</span><br><span class="line">                -child.getDownNestedScrollRange(), 0);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>这里的scroll方法最终会调用setHeaderTopBottomOffset(…)，由于两次分别触摸在AppBarLayout和RecyclerView的方向不一致，导致了最终的抖动的效果。</p>
-<p>解决方式也很简单,只要在CoordinatorLayout的onInterceptedTouchEvent()中停止AppBarLayout的fling操作就可以了，直接操作的对象就是AppBarLayout中的Behavior，该Behavior继承自HeaderBehavior，而fling操作由OverScroller产生，所以自定义一个FixedBehavior：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public class FixedBehavior extends AppBarLayout.Behavior &#123;</span><br><span class="line">    private OverScroller mOverScroller;</span><br><span class="line"></span><br><span class="line">    public FixedBehavior() &#123;</span><br><span class="line">        super();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public FixedBehavior(Context context, AttributeSet attrs) &#123;</span><br><span class="line">        super(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onAttachedToLayoutParams(@NonNull CoordinatorLayout.LayoutParams params) &#123;</span><br><span class="line">        super.onAttachedToLayoutParams(params);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onDetachedFromLayoutParams() &#123;</span><br><span class="line">        super.onDetachedFromLayoutParams();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onTouchEvent(CoordinatorLayout parent, AppBarLayout child, MotionEvent ev) &#123;</span><br><span class="line">        if (ev.getAction() == MotionEvent.ACTION_UP) &#123;</span><br><span class="line">            reflectOverScroller();</span><br><span class="line">        &#125;</span><br><span class="line">        return super.onTouchEvent(parent, child, ev);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     *</span><br><span class="line">     */</span><br><span class="line">    public void stopFling() &#123;</span><br><span class="line">        if (mOverScroller != null) &#123;</span><br><span class="line">            mOverScroller.abortAnimation();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 解决AppbarLayout在fling的时候，再主动滑动RecyclerView导致的动画错误的问题</span><br><span class="line">     */</span><br><span class="line">    private void reflectOverScroller() &#123;</span><br><span class="line">        if (mOverScroller == null) &#123;</span><br><span class="line">            Field field = null;</span><br><span class="line">            try &#123;</span><br><span class="line">                field = getClass().getSuperclass()</span><br><span class="line">                        .getSuperclass().getDeclaredField(&quot;mScroller&quot;);</span><br><span class="line">                field.setAccessible(true);</span><br><span class="line">                Object object = field.get(this);</span><br><span class="line">                mOverScroller = (OverScroller) object;</span><br><span class="line">            &#125; catch (NoSuchFieldException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; catch (IllegalAccessException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>然后在重写CoordinatorLayout，暴露一个接口：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public class CustomCoordinatorLayout extends CoordinatorLayout &#123;</span><br><span class="line">    private OnInterceptTouchListener mListener;</span><br><span class="line"></span><br><span class="line">    public void setOnInterceptTouchListener(OnInterceptTouchListener listener) &#123;</span><br><span class="line">        mListener = listener;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context) &#123;</span><br><span class="line">        super(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context, AttributeSet attrs) &#123;</span><br><span class="line">        super(context, attrs);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public CustomCoordinatorLayout(Context context, AttributeSet attrs, int defStyleAttr) &#123;</span><br><span class="line">        super(context, attrs, defStyleAttr);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onInterceptTouchEvent(MotionEvent ev) &#123;</span><br><span class="line">        if (mListener != null) &#123;</span><br><span class="line">            mListener.onIntercept();</span><br><span class="line">        &#125;</span><br><span class="line">        return super.onInterceptTouchEvent(ev);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public interface OnInterceptTouchListener &#123;</span><br><span class="line">        void onIntercept();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>接着在接口中处理滑动问题即可：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">coordinatorLayout.setOnInterceptTouchListener &#123;</span><br><span class="line">    //RecyclerView滑动的时候禁止AppBarLayout的滑动</span><br><span class="line">    if (customBehavior != null) &#123;</span><br><span class="line">        customBehavior!!.stopFling()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="第二，回弹问题"><a href="#第二，回弹问题" class="headerlink" title="第二，回弹问题"></a>第二，回弹问题</h4><p>问题场景描述，我们反复上下滑动AppBarLayout的时候，可以看到AppBarLayout在滑出屏幕外之后又反弹回去了，而且当你滑动的加速度很大的时候，这个反弹的幅度也会跟着变大。</p>
-<p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_resize_2.gif" alt="image"></p>
-<p>这个问题造成的原因是因为在手指向上滑动后造成RecyclerView的fling操作执行，具体的代码在RecyclerView内部类ViewFlinger中。</p>
-<p>我使用Android Studio中的Profiler抓取了一下当出现反弹问题的时候出现的方法调用堆栈如下所示：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinator_bugs_method_call.jpg" alt="image"></p>
-<p>发现RecyclerView中ViewFlinger调用后，接着触发了HeaderBehavior中的FlingRunnable。而ViewFling中会调用dispatchNestedScroll(…)方法，RecyclerView作为CoordinatorLayout的子View，它通过嵌套滚动的机制又会调用到CoordinatorLayout中的onNestedScroll，这里主要就是通过AppBarLayout的Behavior中的方法setHeaderTopBottomOffset来实现AppBarLayout的滚动，后面会发现多次setHeaderTopBottomOffset的调用，其实目前看到这里，并不太确定造成这个问题的具体原因是啥，感觉上是因为RecyclerView的滑动和CoordinatorLayout的滑动冲突导致了反弹效果的出现。</p>
-<p>于是尝试了下面的解决方法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">coordinatorLayout.setOnInterceptTouchListener &#123;</span><br><span class="line">    mRecyclerView.stopScroll()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>试了这个方法发现果然有效。</p>
-<p>另外，我在写demo的时候发现，这个问题在support-27是存在的，在support-28 Google已经修复过了。</p>
-<p>我尝试过看看support-28里面的都有哪些改动，想看看Google是如何修复的。看了下Google的release note并没有提及，如果从Google的commit history来看实在页看不出来啥，暂时也没有个具体的原因。</p>
-<p>后面可以将support-27和support-28的source下载下来，然后使用Beyond Compare来看看具体的diff改动是在哪。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_1.jpg" alt></p>
+<p>Alfred 和Mac自带的Spotlight都属于同一类工具，但是比Spotlight 功能却要强大很多，下面会慢慢介绍它的强大之处。</p>
+<p>Alfred 默认是使用Alt+空格键触发的，这里你也可以按照你的习惯修改启动的默认快捷键。</p>
+<h3 id="基础功能中我觉得比较好用的"><a href="#基础功能中我觉得比较好用的" class="headerlink" title="基础功能中我觉得比较好用的"></a>基础功能中我觉得比较好用的</h3><h4 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h4><p>在唤起Alfred之后，输入’ 符号或者按下空格就可以进行文件搜索，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_2.jpg" alt></p>
+<p>文件搜索配合下面Alfred中封装的一些通用操作对于文件的操作会特别方便。</p>
+<p>在搜索到我们需要的文件时，这个时候只需要按下→键就可以列出一些通用的操作列表，如下所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_3.jpg" alt></p>
+<p>Alfred 中封装了很多对于文件的操作，可以看到图中有很多，常用的比如打开，在Finder中打开，在当前位置打开终端，拷贝文件路径等等，真的是非常方便。</p>
+<h4 id="网页搜索"><a href="#网页搜索" class="headerlink" title="网页搜索"></a>网页搜索</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_4.jpg" alt></p>
+<p>这个里面支持的搜索就很多了，我这边比较常用的就是Google和youtobe搜索了，通过在Alfred中输入google和youtobe就可以触发相应的搜索功能了，你只需要输入相应的关键字就可以了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_5.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_6.jpg" alt></p>
+<h4 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_7.jpeg" alt></p>
+<p>Alfred 能够记录剪贴板历史，有时候我们需要查看之前剪贴板中的内容，这个功能用的相对不多，但是关键时刻还是特别管用的。</p>
+<h4 id="Snippets-摘要功能"><a href="#Snippets-摘要功能" class="headerlink" title="Snippets(摘要功能)"></a>Snippets(摘要功能)</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_8.jpeg" alt></p>
+<p>Snippets 的功能类似TextExpander ，就是使用剪短字符来扩展大段的文字，对于一些比较模式化的文本，我们经常要输入，但是因为很长，输入很费时，如果你将这些文本存在某个地方还要花时间去搜索，这个时候，就可以通过配置Snippet来实现这个功能。其实mac系统自带的也有类似的功能，就是系统自带的Text Replacement，如下图所示，比如输入msd可以提示帮你补全”马上到！”的文本。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_13.jpeg" alt></p>
+<h4 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h4><p>通过键盘输入相关的命令控制Mac的睡眠，启动等等，另外还可以通过输入hide来隐藏某个软件，输入quit来关闭某个软件，如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_14.jpg" alt><br>这个功能用的不多，更多的是要对电脑进行息屏等操作的时候比较方便，不需要记一些快捷键，也不需要使用鼠标去进行点击，相对鼠标，键盘肯定是效率要高不少的。</p>
+<h3 id="高级功能workflow"><a href="#高级功能workflow" class="headerlink" title="高级功能workflow"></a>高级功能workflow</h3><p>workflow是Alfred高级功能，是需要付费才能用的，我觉得这个是 Alfred 最牛逼的地方了，网上有很多好用的Workflow，因为有了自定义Workflow的功能，所以，只要你想，你可以将日常中几乎所有模板化的流程设计成你自己的workflow。</p>
+<p>我用的比较多的workflow有以下几个。</p>
+<p><a href="https://github.com/wensonsmith/YoudaoTranslator" target="_blank" rel="noopener">有道翻译</a>，输入yd即可进行单词的翻译，另外需要注意的是有道的翻译需要注册有道智云的账号，在workflow里设置你的应用id和密钥才可以使用</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_9.png" alt></p>
+<p><a href="https://github.com/cj1128/alfred-qrcode-workflow" target="_blank" rel="noopener">二维码生成</a>，输入qr 再输入文本回车即可以将目标文本生成二维码，我在平时开发中经常需要构造一个二维码进行扫码调试，这个workflow让生成二维码的效率大大提高。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_10.jpeg" alt></p>
+<p><a href="https://github.com/sballin/alfred-search-notes-app" target="_blank" rel="noopener">搜索备忘录里的一些文本</a>，输入nb则可以搜索进行文本内容的搜索，输入nt进行hashtag的搜索。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_11.png" alt></p>
 ]]></content>
-      <tags>
-        <tag>UI</tag>
-      </tags>
+  </entry>
+  <entry>
+    <title>孟加拉出差之旅</title>
+    <url>/2023/10/13/bussiness-trip-to-BD/</url>
+    <content><![CDATA[<p>前段时间，去孟加拉出差了一趟。</p>
+<p>长这么大，第一次出国，这篇文章记录下一些见闻和感受。</p>
+<h3 id="出差前"><a href="#出差前" class="headerlink" title="出差前"></a>出差前</h3><p>之前我对孟加拉的印象就是孟加拉虎了，其他我了解的不多，地图上和缅甸是挨着的，另外之前偶尔在B 站上刷到的视频，只知道这个地方比较落后。一开始说要出差去那边，我内心其实是拒绝的，当身边人知道我要去孟加拉的时候，都说让我保护好自己，毕竟最近缅北的诈骗在国内引起了很大的关注。</p>
+<p>整个出差旅程为期5天，往返都是从昆明转机的。</p>
+<p>在飞往达卡（孟加拉首都）的飞机上，就能闻到属于这个国家的特有的那种香味，好像这个地方喜欢喷这种香水，在那边超市逛的时候就发现有个服务员在货架旁狂喷香水。</p>
+<h3 id="到达达卡办签证"><a href="#到达达卡办签证" class="headerlink" title="到达达卡办签证"></a>到达达卡办签证</h3><p>快到达卡机场的时候，特地在飞机上面拍了一张照。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230917_152421.jpg" alt></p>
+<p>可以看到，房子分布还是比较密集的，给人的感觉是比较乱，不会像国内一些城市那样比较整齐一点。</p>
+<p>到了达卡机场，整体感觉机场应该不大，相应的机场的设施还是比较差的，相较于国内来说，从机场的卫生间就能看出来，表现就是没有那么干净以及冲水设备也比较差。</p>
+<p>接下来就是办签证了，到了办签证的地方有个哥们帮忙，比如交钱要准备什么，办签证要准备什么，他让我们在办签证这里排队，他帮我们交钱。</p>
+<p>排队的时候拍了一张照，当时拍照的时候还被工作人员发现了，他告诉我不要拍照。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230917_140824.jpg" alt></p>
+<p>排队了排了好一会，才将签证办好，不得不说他们这个效率还是很低的。</p>
+<p>办完签证后，我们在旁边用人民币换了一些当地的货币，塔卡，汇率是1:15，400块人民币换了6000 塔卡。<br>其实正常情况下可以不用换的，如果有Visa的信用卡的话，超市或者饭店基本上都可以刷卡。</p>
+<p>接着出机场，机场门口有好多办手机卡的地方，然后正好用换的钱买了一个当地的卡，具体多少钱有点忘记了，反正记得不贵，说是 4.5 G，装上了看了一下，网速也还可以。</p>
+<h3 id="在路上"><a href="#在路上" class="headerlink" title="在路上"></a>在路上</h3><p>机场离酒店有八九公里的样子，公司有个人开车来接我们几个人的，在路上拍了个照。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picwx_camera_1694942859631.jpg" alt></p>
+<p>可以看到路上的车还是挺多的，这边都是右陀车，因为之前属于英联邦管辖过，这些都继承过来了。另外一个特点就是，没有红绿灯，街上各种车，汽车，三轮车，摩托车到处都是，表现就是交通会比较拥挤，遇到路口就是谁厉害谁先过。</p>
+<p>酒店的名字叫 Amari 查了一下一晚上要一百多美金，还是比较贵的，但酒店相对国内的酒店就性价比很低了，国内这个价位可以住特别好的酒店了。<br>在酒店休息了一下，就出来吃饭了，特地下了个 Uber 来打车，打车一般也要等好久，而且他们的车牌号貌似用的不是阿拉伯数字，有点看不懂，和司机电话沟通了好一会。</p>
+<p>下面这是在路上拍的一些照片，有些建筑感觉造的还是可以的，不过也可以理解，毕竟是首都。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230917_175952.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230917_172544.jpg" alt></p>
+<p>看下面这张图，可以看到街上有好多这种人力的三轮车，真的很多，之前从同事那边了解到，这种车一般只需要50塔卡就可以，如果换算成人民币就是3块多点，算是挺便宜的了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230917_174147.jpg" alt></p>
+<p>终于坐上 Uber的车了，结果因为堵车给我们绕了一个大圈，好像是车多，没有地方可以掉头😢</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picwx_camera_1694951294059.jpg" alt></p>
+<p>当天晚上吃的是Steakout，算是当地的一个西餐馆，我们去的时候没啥人，没有拍饭馆的照片，我们几个人点餐的时候和服务员沟通了好久，另外，就是等了好久才上菜，简单拍了一下我点的牛排。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230917_190520.jpg" alt></p>
+<p>我主要点了一个牛排，蘑菇以及土豆，主要我们几个对他们也不是很了解，也不知道什么好吃，我们一行人吃完都觉得一般吧，勉强填报肚子，主要上菜太慢了，等了一个多小时。</p>
+<p>吃完饭，准备走回酒店，地图上显示十多分钟左右，感觉和打的时间差不多，而且打的还要等好久。</p>
+<p>随手拍了一下路上的广告牌：<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230917_200737.jpg" alt></p>
+<h3 id="办公区域"><a href="#办公区域" class="headerlink" title="办公区域"></a>办公区域</h3><p>后面几天大致的活动范围都是在公司和酒店附近了，公司离酒店没多远，就过个河的距离。</p>
+<p>早上是8点多到公司，下午4点多有的人就下班了，也有一部分人是6点左右下班，但是6点之后基本上公司都没有人了。</p>
+<p>下班的时候拍了一下他们的办公环境照片，感觉还可以，环境挺好的:<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230921_173714.jpg" alt></p>
+<p>和当地技术的同学也一起拍了个照：<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_2798.HEIC.JPG.jpg" alt></p>
+<p>在公司楼上拍了几张外面的风景照片：<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230918_074330.jpg" alt><br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230918_135559.jpg" alt></p>
+<p>这个视角来看，整体看起来还是可以的，有水有楼有树。</p>
+<h3 id="吃饭"><a href="#吃饭" class="headerlink" title="吃饭"></a>吃饭</h3><p>下面这张图是公司的员工餐，算是local food了，卖相看着不行，但是吃起来还可以，我自己感觉有点辣，主要是鱼和鸡肉加了一些土豆。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230919_131107.jpg" alt></p>
+<p>另外吃的一个local food就是下面这个了，是业务带我们出去吃的，算是一个比较有名local food 餐厅了，这里只拍了一部分，吃起来味道还可以，主要比想象中好吃。<br>对于街边的小吃，听当地同事的意思是尽量别吃，外地人不适应的话很容易生病，所以我们基本都是去饭馆，也没有选择点外卖。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230920_141718.jpg" alt></p>
+<p>其他去吃的应该都不是当地的食物了，简单放几张图，感受一下。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230918_195354.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230918_130922.jpg" alt><br>不得不说这个汉堡的肉是真厚，吃的时候油都滴下来了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230919_190424.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230920_193453.jpg" alt></p>
+<p>下面这张是其中一个餐馆里面，环境看起来还可以，印象中这家的饭菜也挺好吃的。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picwx_camera_1695301848640.jpg" alt></p>
+<p>咖啡馆：<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230921_184816.jpg" alt></p>
+<h2 id="坐人力三轮车"><a href="#坐人力三轮车" class="headerlink" title="坐人力三轮车"></a>坐人力三轮车</h2><p>出差那周周四晚上，吃完晚饭，碰上下大雨，等了好久还是没有停的迹象。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picwx_camera_1695307922550.jpg" alt></p>
+<p>用Uber打车打了好久没等到，我们几个人决定坐三轮车回酒店。</p>
+<p>我和另外一个同事一起坐同一辆车，坐车上的时候拍了两张照片。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230921_212352.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230921_212640.jpg" alt></p>
+<p>这个骑三轮车的哥们就穿了个反光背心，也不打伞，就这样冒雨给我们送到了酒店，路上碰到一个陡坡，骑不上去，他是下来把三轮车推上去的。</p>
+<p>那个时候就觉得生活真是不容易啊，他们每天都在干这个工作，而且收入还特别低，正常情况下一趟50 塔卡左右，换成人民币3块多点。</p>
+<p>后面下车的时候，收车费的时候他要收200 塔卡，看着他也不容易，又是下大雨，我们也没说啥，200就200吧，换成人民币的话也没有多少钱。</p>
+<h3 id="逛商场"><a href="#逛商场" class="headerlink" title="逛商场"></a>逛商场</h3><p>周五当地同事是居家办公，因为他们下午一般需要做祷告，基本上都不来办公室。</p>
+<p>于是，我们周五上午就去旁边的超市和商场逛了会。</p>
+<p>下面是商场里的卖珍珠的地方，从当地同事那里了解到，珍珠算是当地的特产，看着也没有很贵，就分别给我老婆，我妈和丈母娘买了一个，每个大概200人民币左右。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picIMG_20230922_100826.jpg" alt></p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picwx_camera_1695356773270.jpg" alt></p>
+<p>然后在超市里买了一些当地的零食，给儿子买了一个三轮车玩具，看起来这个三轮车玩具在国内不是很常见，会特别一点，没想到回到家才发现上面写的是 Made in China。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picwx_camera_1695354441874.jpg" alt></p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>整个出差旅程下来，大部分都是在公司和酒店这两个范围活动，远一点就是中午或者晚上去吃饭的时候了，其他的地方也没有怎么逛。</p>
+<p>对于孟加拉当地的情况还是了解的比较有限，也没有时间出去逛，因为都是工作日时间，这应该算是达卡生活的一小部分吧。</p>
+]]></content>
   </entry>
   <entry>
     <title>ConcurrentHashMap是如何保证线程安全的</title>
@@ -622,64 +851,6 @@
       <tags>
         <tag>ConcurrentHashMap</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>RoamResearch,一款帮助我们更好思考的笔记工具</title>
-    <url>/2022/03/19/RoamResearch-a-tool-which-can-help-us-think-better/</url>
-    <content><![CDATA[<h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>上一次发公众号文章是 2020 年的 8 月 29 号，马上都快两年了，很久没更新了，真是太惭愧了。那些没取关的朋友们算是真爱了吧，或者是因为忘记在某个角落还关注着这个沉寂的没有提供什么价值的公众号，如果是因为后者，那可以考虑取关了 😂😂，咳~，开个玩笑。</p>
-<p>虽然不应该给自己找理由，但是没有怎么更新的原因的确是因为太忙了，工作上的节奏也比之前更快了，生活上，因为去年小孩出生了，从去年 5 月份到现在，工作之外的大部分时间都是陪小孩去了，很少会有自己可以自由支配的时间。</p>
-<p>最近这段时间想了很久，还是觉得要将之前的公众号捡起来，继续写点东西。先立个 flag，每周更新一篇，内容涉及平时的技术总结、阅读思考以及一些提升效率的技巧吧。</p>
-<a id="more"></a>
-<h3 id="什么是Roam-Research"><a href="#什么是Roam-Research" class="headerlink" title="什么是Roam Research"></a>什么是Roam Research</h3><p>今天主要来介绍一下<code>Roam Reseach</code>这个工具吧。之前还在小红书的时候就使用过一个月，后面因为需要付费就没有继续用了，今年年初的时候看到关于<code>Roam Research</code>的推特，没忍住花钱买了一年的会员，目前用了一段时间整体感觉还可以，下面分享一下自己的使用经验。</p>
-<p>在分享我自己的使用经验之前，首先来介绍下<code>Roam Reseach</code>是什么？简单来说，它就是一个笔记工具，和传统的笔记工具如<code>Evernote</code>、<code>有道云笔记</code>相比，它有什么不一样呢？传统的这类笔记工具他往往是线性的，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picyoudao_note.jpg" alt></p>
-<p><code>Roam Reseach</code>（下面都简称 Roam）的官方网站是<a href="https://roamresearch.com/" target="_blank" rel="noopener">Roam官网</a>，作者是<a href="https://twitter.com/Conaw" target="_blank" rel="noopener">Conaw</a>,目前有Web、Mac以及Windows版本，新用户可以试用一个月，后面就需要收费了，另外有免费的替代软件Obsidian和Logseq，这两个基本都是借鉴的 <code>Roam</code>的思想。</p>
-<p>而<code>Roam</code>则是网状的，结构上有点类似于我们的神经元。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picshenjingyuan.jpg" alt></p>
-<p>我们在使用传统笔记工具时，很多时候都是先建立一个分类，可能该分类下面还有一个小的分类，最后才是我们笔记的具体内容。而 Roam 则不是，比如笔记 A 讨论了 C 这个主题，笔记 B 也讨论了 C 这个主题，这样 A 和 B 就一起关联到 C 这个主题下面，注意这里的顺序，是先有 A 和 B，才有了 C 这个分类，这其实是一种自底向上的方法，程序员们对于这个方法应该不陌生，我们很多时候程序设计都会采用这种方法，由局部到整体逐步完善。</p>
-<p>下面是 Roam 的知识网状图，看到这个图，有没有感觉很酷。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_graph.jpg" alt><br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_network.jpeg" alt></p>
-<p>那么<code>Roam</code>是如何实现这种网状结构的呢？主要是靠它的双向链表的能力。<code>Roam</code>使用[[]]来实现双向链表，所有被[[]] 包起来的内容会自动生成一个 page，而在这个 page 里又可以使用[[]]继续构造新的 page，这样，这两个 page 之间就构成了一个双向链表，由很多个这种双向链表组合起来，整体就形成了一个网状的结构。</p>
-<p><code>Roam</code>每天会自动生成一个以当前日期为标题的 page。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_daily_page.jpg" alt></p>
-<p>比如我在今天自动生成的 page 的 Daily Log 下面关联了<code>Roam</code><br>而从<code>Roam Reseach</code>点进去则是下面这样的，</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_research_page.jpg" alt></p>
-<p>这里列出了所有链接到当前的内容，表示下面这些节点都是与 Roam Research 相关。</p>
-<p>而点击右侧的[Open Graph View] 则可以从图结构上更直观地看到当前节点关联的内容。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_single_graph.jpg" alt></p>
-<p>另外，Roam 还提供块的引用，使用(())可以实现，被(()) 包含的内容可以称之为块，这个块可以是其他 Page 里面某一句文本或一个片段，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_block_ref.jpg" alt></p>
-<p>图片中 1 所指示的部分就被两个地方引用到，2 处所显示的数字则是当前内容被引用的次数，通过点击 2 处可以实现折叠和展开这部分引用的内容。</p>
-<p>另外，Roam 还提供一些快捷的命令，通过输入/即可显示。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_command.jpg" alt></p>
-<p>对于图片，可以直接将剪贴板中的图片进行上传，对于Twitter和YouTube也是可以解析出来的。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_twitter.jpg" alt></p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_youtobe.jpg" alt></p>
-<p>当我们了解了以上一些技巧之后就日常使用就没有什么问题了。</p>
-<h3 id="使用经验"><a href="#使用经验" class="headerlink" title="使用经验"></a>使用经验</h3><p>接下来，介绍一下平时我自己的一些使用技巧。</p>
-<p>在每天自动生成的 page 下面，我一般会创建 Daily Log，MIT3，Tasks，Daily Reading 以及 Thinking 这 6 个节点。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picroam_tips.jpg" alt></p>
-<p><code>Daily Log</code> 主要是记录下每天的工作记录，主要是记录自己每天的时间花在哪里，从而提升工作效率，而不是每天浑浑噩噩不知道每天干了些啥。</p>
-<p>这个方法主要来自这篇文章，<a href="https://betterhumans.pub/replace-your-to-do-list-with-interstitial-journaling-to-increase-productivity-4e43109d15ef" target="_blank" rel="noopener">Replace Your To-Do List With Interstitial Journaling To Increase Productivity</a>，主要思想是：通过记录日志来替代使用 TODO List，当你从一个工作切换到另一个工作的时候做下记录，写几句话描述一下上一个任务做了啥，以及下一个任务准备做啥，尽量描述清楚，而不是用几个简单的词语来描述。</p>
-<p>原因是因为我们人的大脑是不能多线程工作的，我们需要在做当前工作的时候保持足够的专注度来提高我们整体的效率，所以我们需要在当前工作之前把上一个工作梳理下，并放空我们的大脑，让我们的大脑休息一下。</p>
-<p><code>MIT3</code> 记录每天最重要的 3 件事，每天将这个里面的事情完成那么这一天就算是目标达成了。</p>
-<p><code>Tasks</code> 记录每天的一些任务，很多时候同时会有多个事情过来，如果不记录下来则很容易忘。</p>
-<p><code>Daily Reading</code> 则是记录每天的一些阅读记录，包括博客，文章和书籍。</p>
-<p><code>Thinking</code> 则是记录每天的一些思考，有的可能是灵光一闪的想法。</p>
-<p>上面就是一些 Roam 的一些实践的经验，介绍到这里，可能有人会问，我上面介绍的这些和是否使用 Roam 关系并不大啊，这些使用系统默认带的备忘录都是可以实现的啊？</p>
-<p>嗯，这个，也不是没有道理的，重要的其实是方法，工具更多的只是辅助。</p>
-<h3 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h3><p>最后，再来介绍一种使用 Roam 来记笔记的最佳实践。Roam 与其说是一个工具，倒不如说是一种思想。其实 Roam 的这种设计理念是来自德国的社会学家和系统理论家 —— 尼克拉斯 · 卢曼（Niklas Luhmann），方法名叫 Zettelkasten，卢曼使用这套方法，积累了 90000 个知识卡片，一生中写了 60 本书和其他大量出版物。</p>
-<p>那么什么是 Zettelkasten？Zettelkasten 其实是德语，翻译成英文就是 slip-box，就是卡片盒子。<br><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picslip_box.jpg" alt></p>
-<p>Zettelkasten 是由许多单独的笔记组成，其中包括想法和其他简短的信息，这些信息一般是在平时学习或者思考时记下的。这些笔记可以分层编号，以便在适当的地方插入新的笔记，并包含元数据，使记录者能够将笔记相互关联。</p>
-<p>从这个基础上，就慢慢衍生出了类似 Roam 这类的软件。在<a href="https://www.lesswrong.com/posts/T382CLwAjsy3fmecf/how-to-take-smart-notes-ahrens-2017" target="_blank" rel="noopener">How to take smart notes</a>这篇文章中就详细介绍了由 Zettelkasten 扩展出来的一种记笔记方法，写得很详细，大家有兴趣可以看看原文。</p>
-<p>我目前主要使用以下几种类型的笔记：<br><code>Fleeting Notes</code> 记录一些临时的想法，看书过程中的一些注解等。</p>
-<p><code>Bibliographical Notes</code> 主要是在阅读过程中的一些划线部分的摘抄，我主要是从微信读书或者 Kindle 中导出。</p>
-<p><code>Literature Notes</code> 是用自己的话记录下阅读过的文献笔记，不能复制、粘贴，这样能迫使自己增强对于原文的理解。</p>
-<p><code>Permanent Notes</code>则是将当前的笔记和自己之前的笔记进行关联，从而输出一个自己的全新的理解的内容，这个部分更多的是和自己之前的知识体系进行融合。</p>
-<p>通过 <code>Roam</code> 就比较容易实现上面的这些，关键在链接，只有将新的知识融合进自己已有的知识体系，我们才算是真正掌握。</p>
-<p>我现在会写很多 Literature Notes，主要是帮助自己去吸收理解一些知识，很多东西你以为你掌握了，但是让你用一句话说出来都不行那就不是真的掌握。不要害怕写的不对或者写的没有文采，这些都不重要，重要的是你的思考过程，写作本质上可以帮助更好地进行思考。</p>
-<p>每个人的知识体系都是不一样的，所以我们每个人对于知识的理解也是不一样的，不要去复述别人的理解，而是要有你自己的理解，表达自己的观点，不一定对，但是得有自己的思考，这样我们的知识体系才能不断生长，不断扩张，自身才能得到成长。</p>
-<hr>
-]]></content>
   </entry>
   <entry>
     <title>从源码角度剖析Handler机制</title>
@@ -753,73 +924,6 @@ an action to be performed on a different thread than your own.
       <tags>
         <tag>Android</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>分享一些有价值的博客</title>
-    <url>/2022/04/09/Share-some-valuable-blogs./</url>
-    <content><![CDATA[<p>这周的文章延迟了。</p>
-<p>最近比较忙，清明节都在家里加班。</p>
-<a id="more"></a>
-<p>一直没想好这篇文章写啥，之前想着讲讲Alfred或者Anki的使用，发现自己目前还用的比较初级，加上这些工具大家多少都知道一点，这里就先不展开讲了。</p>
-<p>在这个互联网时代，尤其在这个推荐算法盛行的时代，人们接受到的知识或者信息基本都是算法推给你的，这些可能是你感兴趣的，也可能是算法想投喂给你的，但是这些是不是真的有价值其实是有很大争议的，太多人困在这种”信息茧房”中。</p>
-<p>这个时候需要我们跳出来，尝试跳出这个算法的圈。这也是为什么我现在基本不刷抖音，B站最近也不怎么刷了。</p>
-<p>但是我不否认，这些平台上其实有很多质量很高的内容，但是很多时候我们接收到的都是一些比较吸引注意力质量并不高的内容，这些就像一个黑洞，会把你很多时间吸进去，很多人会发现刷着抖音刷着刷着时间就过去了，但这种很即时满足感会让你很容易沉迷其中。</p>
-<p>首先，获取知识最好的渠道还是书本，这里的知识不是那些简单的信息，而是那些能启发你影响你提升你的知识。而书本是最好的载体，我理解没有之一，几乎人类所有的知识，智慧都可以被累积到书本中。</p>
-<p>另外，一些写的比较好的博客也是很好的信息知识来源。我最近开始重新启用RSS来订阅那些个人认为质量比较高的博客，使用的软件是feedly和RSSHub，这里推荐一下我觉得质量很高的博客好了。</p>
-<p>这个是我feedly的截图：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picWechatIMG102.jpeg" alt></p>
-<p><a href="http://blog.jiayuanzhang.com/" target="_blank" rel="noopener">Jiayuan Thoughts</a> 这位博主是Tik Tok的一名软件开发工程师，他的博客好久没更新了，最近他好像开始写Newsletter了，他之前的这些博客每次看我都感觉自己有新的收获，很多文章很值得阅读。</p>
-<p><a href="https://geekplux.com/posts" target="_blank" rel="noopener">geekplux</a> 也是一名程序员，现在应该在香港工作，之前主要是看他的Newsletter了解到他的，文章质量很高，涉及的领域也很广。</p>
-<p><a href="https://happyxiao.com/" target="_blank" rel="noopener">happyxiao</a> 最早是在B站上看他的Notion的教程关注他的，看着他的Twitter粉丝一路涨起来，感觉是一个很好的模范，从他的文章里的确收获很多。</p>
-<p><a href="http://mindhacks.cn/" target="_blank" rel="noopener">刘未鹏</a> 思维改变生活，他的文章值得反复阅读。</p>
-<p><a href="https://daimajia.com/" target="_blank" rel="noopener">代码家</a> 代码家本来是一名Android程序员，Android早期的时候他在GitHub写了很多知名的Android开发库，后来转行去做投资人，他的经历还是挺有意思的，文章值得一读。</p>
-<p><a href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener">阮一峰的网络日志</a> 阮一峰大家应该都知道的，很早就听过，最近看了他每周发出来的博客才发现他的文章质量还是挺高的，怪不得那么出名。</p>
-<p>还有一些英文的博客：</p>
-<p>比如Tim Ferriss博客：<a href="https://tim.blog/" target="_blank" rel="noopener">Tim Ferriss</a>，他的播客The Ferriss Show很出名，采访过很多大佬，这些大佬遍布各个领域，比如Facebook的扎克伯格，以及上篇文章分享的Naval等很多名人，他有一本书叫《巨人的工具》是将他采访的这些记录整理出了一本书，微信读书里可以看。</p>
-<p><a href="https://fs.blog/blog/" target="_blank" rel="noopener">Farnam Street Blog</a> 这个里面的内容很丰富，比如下面这两篇：</p>
-<ul>
-<li><p><a href="https://fs.blog/reading/" target="_blank" rel="noopener">如何更好地阅读</a></p>
-</li>
-<li><p><a href="https://fs.blog/learning/" target="_blank" rel="noopener">学得更快记得更多</a></p>
-</li>
-<li><p><a href="https://fs.blog/mental-models/" target="_blank" rel="noopener">100个思维模型</a></p>
-</li>
-</ul>
-<p>这周大部分业余都在看《The Almanack of Naval Ravikant》，因为上一篇文章有同学提问说到了这边书。书的内容主要整理自Naval的手抄，推特以及和Naval的谈话，分为两个模块，一个是关于财富，另一个主题则是幸福。这本书对于理解Naval的《How to get rich without getting lucky》很有帮助。</p>
-<p>下面放一些目前的阅读笔记吧。</p>
-<p>挣钱不是一件事情，而是一种技巧。</p>
-<p>把你自己打造成产品。其实就是Naval说的你要使用杠杆，承担责任，学习独特知识，将这3者结合，通过不断努力，你就会变得富有。</p>
-<p>If you’re looking toward the long-term goal of getting wealthy, you should ask yourself, “Is this authentic to me? Is it myself that I am projecting?” And then, “Am I productizing it? Am I scaling it? Am I scaling with labor or with capital or with code or with media?”</p>
-<p>找到那些你能提供的不一样的东西，这个可能需要花费几十年。</p>
-<p>钱是一种社会信用，它更够让你借用别人的时间。</p>
-<p>销售技巧是一种形式的独特知识。</p>
-<p>哪些东西可以被称为独特知识？这里自己英文理解有限，直接截原文了。</p>
-<p>Sales skills </p>
-<p>Musical talents, with the ability to pick up any instrument </p>
-<p>An obsessive personality: you dive into things and remember them quickly </p>
-<p>Love for science fiction: you were into reading sci-fi, which means you absorb a lot of knowledge very quickly </p>
-<p>Playing a lot of games, you understand game theory pretty well </p>
-<p>Gossiping, digging into your friend network. That might make you into a very interesting journalist.</p>
-<p>每个人都是不一样的，要尝试去找到你擅长的事情，你不需要成为任何人，你要成为你自己。</p>
-<p>要去打好基础，打好基础比学习更深入的知识更重要。</p>
-<p>复利的形式有很多种，资本的复利只是最普通的一种。另外还有生意关系的复利，那些大公司的CEO就是因为他们构建起来的关系才让他们坐到那个位置，大家相信他，他肯定是因为做了很多成绩才让人们对他如此信任。</p>
-<p>影响力的复利，影响力有很多范围，在公司的影响力，线下影响力，在网络上的影响力，即线上影响力。这个东西也是需要你长期去构建维护的，你只有持续不断的维护并构建这些东西，人们才会注意到你。</p>
-<p>如果你找到了正确的事和正确的人，就加大你的投资力度。</p>
-<p>拥有产权很重要，通过出卖自己的时间永远都不会变得富有。如果你创业开公司的话，你可以通过买股票成为一名小股东都是拥有产权的一种方式。</p>
-<p>为自己的利益做事是有意义的。你在挣钱的同时，你也在最好你自己的工作，这是很合乎常理的。</p>
-<p>Naval说他获得财富最多的时候是在他工作最不努力，对未来担心最少的时候。他纯粹的是觉得好玩去做事情。他告诉别人，他退休了，而不是在工作，这个时候，他才有时间做他认为最有价值的事情。</p>
-<p>跟随你的好奇心去做事，而不是追寻热点。</p>
-<p>杠杆的形式，人力，资本以及互联网时代的新式杠杆。</p>
-<p>书本，媒体，电影以及代码都是新式的杠杆。</p>
-<p>Coding, writing books, recording podcasts, tweeting, YouTubing—these kinds of things are permissionless.</p>
-<p>好的工程师只需要写少量的正确的代码，创建少量正确的应用，就能够为公司创造很大的价值。</p>
-<p>Learn to sell, learn to build. If you can do both, you will be unstoppable.</p>
-<p>build的内容可以有很多种，设计，开发，制造，服务等等，有很多种定义。</p>
-<p>另外，这里的sell 也是一个很宽泛的概念，不仅只是卖东西给顾客，还可以是营销，沟通，招聘，筹集资金，激励别人。</p>
-<p>Naval围绕房子举了一个例子，房屋维修人员→一般承包商(为房东工作)→房地产开发商→房地产基金管理者(开发商需要找他们借钱)。</p>
-<p>房屋维修人员这类人基本没有杠杆，因为没有Specific Knowledge很容易被替代，它们就是从雇佣他的老板那里拿钱。<br>承包商这里相对房屋维修人员又更上了一个层次，他们的杠杆就是那些为他工作的人，他们需要承担一些责任，并且他们有一些 Specific Knowledge，比如如何管理他们雇佣的这些人，如何处理当地的规章制度等。<br>再上一层就是房地产开发商，房地产开发商就是买入一些财产，土地，雇佣一些承包商，将这些财产转化成价值更高的东西。开发商需要承担更多的风险，承担更多的责任，他们有着更多的杠杆，同时也需要更多的Specific Knowledge。<br>比如他们需要知道怎么筹集资金，知道城市规划，知道房地产的发展方向等等。这比之前要难很多。最后就是房地产资本管理者，这些人拥有很强大的资本杠杆，他们需要和很多开发商打交道。</p>
-<p>目前就记了这么多，强烈建议大家去下载看下，目前中午版还没出来，不过我看网上说中信出版社的马上要出来了。</p>
-]]></content>
   </entry>
   <entry>
     <title>关于TabLayout的indicator宽度的一次探索</title>
@@ -1069,42 +1173,6 @@ an action to be performed on a different thread than your own.
       </tags>
   </entry>
   <entry>
-    <title>Mac上你一定要装的效率神器</title>
-    <url>/2022/05/06/awsome-tools-in-mac/</url>
-    <content><![CDATA[<p>今天想介绍一下Mac上的效率神器 — Alfred。</p>
-<p>其实关于Alfred的介绍有很多，但我还是忍不住想介绍一下这个工具，个人感觉它真的是Mac上一个特别好用的提升效率的工具了。</p>
- <a id="more"></a>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_1.jpg" alt></p>
-<p>Alfred 和Mac自带的Spotlight都属于同一类工具，但是比Spotlight 功能却要强大很多，下面会慢慢介绍它的强大之处。</p>
-<p>Alfred 默认是使用Alt+空格键触发的，这里你也可以按照你的习惯修改启动的默认快捷键。</p>
-<h3 id="基础功能中我觉得比较好用的"><a href="#基础功能中我觉得比较好用的" class="headerlink" title="基础功能中我觉得比较好用的"></a>基础功能中我觉得比较好用的</h3><h4 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h4><p>在唤起Alfred之后，输入’ 符号或者按下空格就可以进行文件搜索，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_2.jpg" alt></p>
-<p>文件搜索配合下面Alfred中封装的一些通用操作对于文件的操作会特别方便。</p>
-<p>在搜索到我们需要的文件时，这个时候只需要按下→键就可以列出一些通用的操作列表，如下所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_3.jpg" alt></p>
-<p>Alfred 中封装了很多对于文件的操作，可以看到图中有很多，常用的比如打开，在Finder中打开，在当前位置打开终端，拷贝文件路径等等，真的是非常方便。</p>
-<h4 id="网页搜索"><a href="#网页搜索" class="headerlink" title="网页搜索"></a>网页搜索</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_4.jpg" alt></p>
-<p>这个里面支持的搜索就很多了，我这边比较常用的就是Google和youtobe搜索了，通过在Alfred中输入google和youtobe就可以触发相应的搜索功能了，你只需要输入相应的关键字就可以了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_5.jpg" alt></p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_6.jpg" alt></p>
-<h4 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_7.jpeg" alt></p>
-<p>Alfred 能够记录剪贴板历史，有时候我们需要查看之前剪贴板中的内容，这个功能用的相对不多，但是关键时刻还是特别管用的。</p>
-<h4 id="Snippets-摘要功能"><a href="#Snippets-摘要功能" class="headerlink" title="Snippets(摘要功能)"></a>Snippets(摘要功能)</h4><p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_8.jpeg" alt></p>
-<p>Snippets 的功能类似TextExpander ，就是使用剪短字符来扩展大段的文字，对于一些比较模式化的文本，我们经常要输入，但是因为很长，输入很费时，如果你将这些文本存在某个地方还要花时间去搜索，这个时候，就可以通过配置Snippet来实现这个功能。其实mac系统自带的也有类似的功能，就是系统自带的Text Replacement，如下图所示，比如输入msd可以提示帮你补全”马上到！”的文本。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_13.jpeg" alt></p>
-<h4 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h4><p>通过键盘输入相关的命令控制Mac的睡眠，启动等等，另外还可以通过输入hide来隐藏某个软件，输入quit来关闭某个软件，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_14.jpg" alt><br>这个功能用的不多，更多的是要对电脑进行息屏等操作的时候比较方便，不需要记一些快捷键，也不需要使用鼠标去进行点击，相对鼠标，键盘肯定是效率要高不少的。</p>
-<h3 id="高级功能workflow"><a href="#高级功能workflow" class="headerlink" title="高级功能workflow"></a>高级功能workflow</h3><p>workflow是Alfred高级功能，是需要付费才能用的，我觉得这个是 Alfred 最牛逼的地方了，网上有很多好用的Workflow，因为有了自定义Workflow的功能，所以，只要你想，你可以将日常中几乎所有模板化的流程设计成你自己的workflow。</p>
-<p>我用的比较多的workflow有以下几个。</p>
-<p><a href="https://github.com/wensonsmith/YoudaoTranslator" target="_blank" rel="noopener">有道翻译</a>，输入yd即可进行单词的翻译，另外需要注意的是有道的翻译需要注册有道智云的账号，在workflow里设置你的应用id和密钥才可以使用</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_9.png" alt></p>
-<p><a href="https://github.com/cj1128/alfred-qrcode-workflow" target="_blank" rel="noopener">二维码生成</a>，输入qr 再输入文本回车即可以将目标文本生成二维码，我在平时开发中经常需要构造一个二维码进行扫码调试，这个workflow让生成二维码的效率大大提高。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_10.jpeg" alt></p>
-<p><a href="https://github.com/sballin/alfred-search-notes-app" target="_blank" rel="noopener">搜索备忘录里的一些文本</a>，输入nb则可以搜索进行文本内容的搜索，输入nt进行hashtag的搜索。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picalfred_11.png" alt></p>
-]]></content>
-  </entry>
-  <entry>
     <title>深入解析volatile关键字</title>
     <url>/2020/05/21/how-volatile-works/</url>
     <content><![CDATA[<blockquote>
@@ -1249,42 +1317,6 @@ an action to be performed on a different thread than your own.
 <p>另外，上面的一些想法和之前读过的《麦肯锡精英高效阅读法》很多观点不谋而合，推荐大家去阅读这边书。</p>
 <p>最后放一下按照2wh2t 方法总结的《麦肯锡精英高效阅读法》的思维导图，思维导图是Jiayuan制作的，我是觉得总结的很好，就放在这里了。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/pic20230904192030.png" alt></p>
-]]></content>
-  </entry>
-  <entry>
-    <title>认知觉醒,开启自我改变的原动力</title>
-    <url>/2022/03/25/how-to-improve-yourself/</url>
-    <content><![CDATA[<p>上一篇<a href="https://jasongaoh.github.io/2022/03/19/RoamResearch-%E4%B8%80%E6%AC%BE%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E6%9B%B4%E5%A5%BD%E6%80%9D%E8%80%83%E7%9A%84%E7%AC%94%E8%AE%B0%E5%B7%A5%E5%85%B7/" target="_blank" rel="noopener">RoamResearch,一款帮助我们更好思考的笔记工具</a>文章里提到要每周写一篇文章，类似最近比较流行的<code>Newsletter</code> 模式，公开地提出来也算是让大家监督我，从而让我可以坚持下去。<br> <a id="more"></a></p>
-<p>从写文章这件事往前看，主要是这阵子我做的比较大的一个改变是：有时间就看书，把平时休闲娱乐的时候都用来阅读，因为阅读量的提高，所以也想着写点什么，主要是自己在看完书后的一些总结与思考，而因为有输出的诉求，从而又让自己得加大输入，这样形成一个比较良性的循环。</p>
-<p>这段时间看了不少书，其实还是有不少收获的，今天主要讲讲这段时间让我感觉触动最大的书《认知觉醒》吧，这边书最早是在小创作的视频号里看到的，当时就好奇去微信读书里看了下，书中很多观点让我有种醍醐灌顶的感觉，后面我应该还会看第二遍的。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi1.jpeg" alt></p>
-<h2 id="什么是认知觉醒"><a href="#什么是认知觉醒" class="headerlink" title="什么是认知觉醒"></a>什么是认知觉醒</h2><p>人的大脑等级上分有 3 个部分：本能脑、情绪脑和理智脑。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi2.jpeg" alt></p>
-<p>本能脑源自爬行动物，可以类比成蜥蜴脑，主要是让爬行动物对环境快速做出本能反应，遇到危险就逃跑，遇到猎物就捕食，情绪脑源自哺乳动物，可以类比成猴子脑，情绪可以让哺乳动物趋利避害，更好地在恶劣的环境生存，而理智脑则源自灵长类动物，主管认知。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi3.jpeg" alt></p>
-<p>本能脑和情绪脑相对理智脑发展时间很长，在大多数情况下占主导地位，我们在生活中做的大部分决策往往源于本能和情绪，而非理智。</p>
-<p>本能脑和情绪脑在亿万年来以来，是被生存压力塑造而成的，所以它们天性就是目光短浅，即时满足，喜欢呆在舒适区，而理智脑的思考是需要耗费大量能量的，所以人天性就有懒性，不喜欢思考。</p>
-<p>这些所谓的天性在远古的时候是我们得以生存的巨大优势，而到了现在社会则成了我们成长过程中的巨大阻碍，所谓的认知觉醒就是让理智脑变强从而克服我们天性的过程。</p>
-<h3 id="道理都懂，但就是做不到"><a href="#道理都懂，但就是做不到" class="headerlink" title="道理都懂，但就是做不到"></a>道理都懂，但就是做不到</h3><p>在电影《后会无期》中有一句台词，“听过很多道理，依然过不好这一生”，这个是为什么呢？因为大部分知道这些道理，但是就是不去行动。如果没有按照道理去践行，那肯定是一无所获，毕竟”纸上得来终觉浅，绝知此事要躬行”。你有很多想法，但是你不去行动，所有的道理在没有去实践之前都是一个概念而已。</p>
-<p>凡执行力强的人都有一个习惯—立刻做。从手边能完成的简单事情开始，边做边调整，这样才容易达到最好的成功。</p>
-<p>Nike的广告词写得就挺好，<code>Just do it</code>，直观去做就好了，有想法，先开始，不是只将想法停留在脑海中。</p>
-<h3 id="如何坚持做那些短期内看不到效果的”无用之事”"><a href="#如何坚持做那些短期内看不到效果的”无用之事”" class="headerlink" title="如何坚持做那些短期内看不到效果的”无用之事”"></a>如何坚持做那些短期内看不到效果的”无用之事”</h3><p>大部分人坚持不下去是因为认知看不到那么远。因为人类的大脑喜欢确定性，不喜欢未知或不确定性。那些短期内看不到效果的事就有巨大的不确定性，所以很多人坚持不下去。</p>
-<p>一个方法是养成习惯，从《微习惯》一书中获得的启示。作者斯蒂芬·盖斯为了养成好习惯，要求自己每天只做一个俯卧撑、每天只读一页书、每天只写 50 个字，这种无负担的习惯养成法最终促使他拥有了良好的身材，养成了阅读习惯，还写出了自己的书。</p>
-<p>另外一个点事我们给自己设定目标的时候不宜太大，要学会将目标进行分解，分为一个一个的小目标，这样自己在完成每个目标的时候会有一个正向的反馈，同时也更能让自己有动力坚持下去。</p>
-<p>爱因斯坦说过，复利是世界第八大奇迹，不到必要的时候，别去打断它。那些短期内看不到效果的”无用之事”其实就遵循复利规律，你要相信它。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picfuli.webp" alt><br>复利的曲线图很好的描述了增长情况，在前期，增长都是比较缓慢的，到了某个值之后才会有很大增长。大部分人因为认知上看不到这个点，所以在那个值来临之前就放弃了。而这也正是那些能坚持下去的人的机会。</p>
-<h3 id="阅读是为了改变"><a href="#阅读是为了改变" class="headerlink" title="阅读是为了改变"></a>阅读是为了改变</h3><blockquote>
-<p>很多人以为一本书只要读完，读书的过程就结束了。事实上，阅读只是整个过程的开始，阅读之后的思考、思考之后的实践比阅读本身更加重要（这里主要指非虚构类书籍）。很多人的阅读仅停留在表面，读的时候觉得这里好有道理、那里好有道理，读完之后就不闻不问了，然后迅速转移到下一本书中，这种满足于录入的阅读造成的一个直接后果便是，一段时间之后再去翻这本书就好像之前没有看过一样，所有的痕迹都烟消云散了。真正读好一本书，往往需要花费数倍于阅读的时间去思考和实践，并输出自己的东西——可能是一篇文章，也可能是养成一个习惯——这个过程比阅读本身要费力得多。</p>
-</blockquote>
-<p>这里直接将原文的部分截取下来，我觉得这段话已经描述得很清楚了，阅读的核心是在之后的思考和实践。</p>
-<h3 id="关于写作"><a href="#关于写作" class="headerlink" title="关于写作"></a>关于写作</h3><p>知道并不表示真正理解，而是写出来，用自己的话将某个知识写出来，要让其他人都能看懂，这种才是真正的掌握。正如爱因斯坦说的，”如果你不能简单地解释它，你就不能很好地理解它”。</p>
-<blockquote>
-<p>真正希望通过写作建立影响力的人是不会完全被“稿酬”、“流量”等外部动机束缚的，他们往往是为自己的成长而写、为众人的需求而写、为长远的价值而写、为创造一个属于自己的世界而写。即使没有鲜花和掌声，他们也会坚持输出和成长，收获的反馈和奖励都只是意外和惊喜，不是必然和期待。这样的心态能让他们的笔尖持续释放力量，最终收获梦想，因为选择权始终在自己手上。</p>
-</blockquote>
-<p>上面这段关于写作的动机是从书中截取出来的。</p>
-<p>作家 CJ Chilvers 写了 35 年的 newsletter，他在它的 <a href="https://www.cjchilvers.com/blog/35-lessons-from-35-years-of-newsletter-publishing?utm_campaign=%E5%8F%AF%E4%B9%90&amp;utm_medium=email&amp;utm_source=Revue%20newsletter" target="_blank" rel="noopener">35 Lessons from 35 Years of Newsletter Publishing</a> 中写到，Deliver value, not word counts. Solve someone else’s problem — the bigger the better. It’s nice if it solves your problem too. 简单翻译下就是：传递价值，而不是字数。解决别人的问题，越大的问题越好。如果同时也能解决你的问题，就更好了。</p>
-<p>我觉得上面这两段话已经很好的写出了我想要表达的东西。我写的东西首先肯定是我自己觉得有用的，对于大家，可能有用，也可能没用，但是我尽量输出我自己觉得有价值的，暂时肯定不考虑流量的问题，更多的是提升自己的思考能力，提高自己的文字表达能力，如果对于大家在某些方面有些启发，那我觉得就算是成功的了。</p>
-<p>另外，这本书在关于潜意识、元认知等基本概念的解读上有着独到的见解，另外在学习力、情绪力、专注力等这些具体能力的提升上都有具体可行的方法。感兴趣的可以自己亲自去阅读看看，非常不错的一本书。</p>
 ]]></content>
   </entry>
   <entry>
@@ -1659,6 +1691,42 @@ an action to be performed on a different thread than your own.
 <p>通过别名的方式可以把一些比较长的命令配置成简单的别名，提升输入效率，下次再用的时候可以快速执行，比如打开代码工程主目录等。</p>
 <p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/pic202309081259184.png" alt></p>
 <h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>最近的博客换了个样式，感觉比之前的要舒服不少，主题来自于<a href="https://github.com/yanm1ng/hexo-theme-vexo" target="_blank" rel="noopener">hexo-theme-vexo</a>,现在这边工作相对之前的团队没有那么忙了，加上家里小朋友也慢慢大了点，自己的时间也相对充裕了一点，后面重新开始更新一些博客，内容各种都有吧。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>认知觉醒,开启自我改变的原动力</title>
+    <url>/2022/03/25/how-to-improve-yourself/</url>
+    <content><![CDATA[<p>上一篇<a href="https://jasongaoh.github.io/2022/03/19/RoamResearch-%E4%B8%80%E6%AC%BE%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E6%9B%B4%E5%A5%BD%E6%80%9D%E8%80%83%E7%9A%84%E7%AC%94%E8%AE%B0%E5%B7%A5%E5%85%B7/" target="_blank" rel="noopener">RoamResearch,一款帮助我们更好思考的笔记工具</a>文章里提到要每周写一篇文章，类似最近比较流行的<code>Newsletter</code> 模式，公开地提出来也算是让大家监督我，从而让我可以坚持下去。<br> <a id="more"></a></p>
+<p>从写文章这件事往前看，主要是这阵子我做的比较大的一个改变是：有时间就看书，把平时休闲娱乐的时候都用来阅读，因为阅读量的提高，所以也想着写点什么，主要是自己在看完书后的一些总结与思考，而因为有输出的诉求，从而又让自己得加大输入，这样形成一个比较良性的循环。</p>
+<p>这段时间看了不少书，其实还是有不少收获的，今天主要讲讲这段时间让我感觉触动最大的书《认知觉醒》吧，这边书最早是在小创作的视频号里看到的，当时就好奇去微信读书里看了下，书中很多观点让我有种醍醐灌顶的感觉，后面我应该还会看第二遍的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi1.jpeg" alt></p>
+<h2 id="什么是认知觉醒"><a href="#什么是认知觉醒" class="headerlink" title="什么是认知觉醒"></a>什么是认知觉醒</h2><p>人的大脑等级上分有 3 个部分：本能脑、情绪脑和理智脑。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi2.jpeg" alt></p>
+<p>本能脑源自爬行动物，可以类比成蜥蜴脑，主要是让爬行动物对环境快速做出本能反应，遇到危险就逃跑，遇到猎物就捕食，情绪脑源自哺乳动物，可以类比成猴子脑，情绪可以让哺乳动物趋利避害，更好地在恶劣的环境生存，而理智脑则源自灵长类动物，主管认知。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picrenzhi3.jpeg" alt></p>
+<p>本能脑和情绪脑相对理智脑发展时间很长，在大多数情况下占主导地位，我们在生活中做的大部分决策往往源于本能和情绪，而非理智。</p>
+<p>本能脑和情绪脑在亿万年来以来，是被生存压力塑造而成的，所以它们天性就是目光短浅，即时满足，喜欢呆在舒适区，而理智脑的思考是需要耗费大量能量的，所以人天性就有懒性，不喜欢思考。</p>
+<p>这些所谓的天性在远古的时候是我们得以生存的巨大优势，而到了现在社会则成了我们成长过程中的巨大阻碍，所谓的认知觉醒就是让理智脑变强从而克服我们天性的过程。</p>
+<h3 id="道理都懂，但就是做不到"><a href="#道理都懂，但就是做不到" class="headerlink" title="道理都懂，但就是做不到"></a>道理都懂，但就是做不到</h3><p>在电影《后会无期》中有一句台词，“听过很多道理，依然过不好这一生”，这个是为什么呢？因为大部分知道这些道理，但是就是不去行动。如果没有按照道理去践行，那肯定是一无所获，毕竟”纸上得来终觉浅，绝知此事要躬行”。你有很多想法，但是你不去行动，所有的道理在没有去实践之前都是一个概念而已。</p>
+<p>凡执行力强的人都有一个习惯—立刻做。从手边能完成的简单事情开始，边做边调整，这样才容易达到最好的成功。</p>
+<p>Nike的广告词写得就挺好，<code>Just do it</code>，直观去做就好了，有想法，先开始，不是只将想法停留在脑海中。</p>
+<h3 id="如何坚持做那些短期内看不到效果的”无用之事”"><a href="#如何坚持做那些短期内看不到效果的”无用之事”" class="headerlink" title="如何坚持做那些短期内看不到效果的”无用之事”"></a>如何坚持做那些短期内看不到效果的”无用之事”</h3><p>大部分人坚持不下去是因为认知看不到那么远。因为人类的大脑喜欢确定性，不喜欢未知或不确定性。那些短期内看不到效果的事就有巨大的不确定性，所以很多人坚持不下去。</p>
+<p>一个方法是养成习惯，从《微习惯》一书中获得的启示。作者斯蒂芬·盖斯为了养成好习惯，要求自己每天只做一个俯卧撑、每天只读一页书、每天只写 50 个字，这种无负担的习惯养成法最终促使他拥有了良好的身材，养成了阅读习惯，还写出了自己的书。</p>
+<p>另外一个点事我们给自己设定目标的时候不宜太大，要学会将目标进行分解，分为一个一个的小目标，这样自己在完成每个目标的时候会有一个正向的反馈，同时也更能让自己有动力坚持下去。</p>
+<p>爱因斯坦说过，复利是世界第八大奇迹，不到必要的时候，别去打断它。那些短期内看不到效果的”无用之事”其实就遵循复利规律，你要相信它。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/JasonGaoH/Images@master/picfuli.webp" alt><br>复利的曲线图很好的描述了增长情况，在前期，增长都是比较缓慢的，到了某个值之后才会有很大增长。大部分人因为认知上看不到这个点，所以在那个值来临之前就放弃了。而这也正是那些能坚持下去的人的机会。</p>
+<h3 id="阅读是为了改变"><a href="#阅读是为了改变" class="headerlink" title="阅读是为了改变"></a>阅读是为了改变</h3><blockquote>
+<p>很多人以为一本书只要读完，读书的过程就结束了。事实上，阅读只是整个过程的开始，阅读之后的思考、思考之后的实践比阅读本身更加重要（这里主要指非虚构类书籍）。很多人的阅读仅停留在表面，读的时候觉得这里好有道理、那里好有道理，读完之后就不闻不问了，然后迅速转移到下一本书中，这种满足于录入的阅读造成的一个直接后果便是，一段时间之后再去翻这本书就好像之前没有看过一样，所有的痕迹都烟消云散了。真正读好一本书，往往需要花费数倍于阅读的时间去思考和实践，并输出自己的东西——可能是一篇文章，也可能是养成一个习惯——这个过程比阅读本身要费力得多。</p>
+</blockquote>
+<p>这里直接将原文的部分截取下来，我觉得这段话已经描述得很清楚了，阅读的核心是在之后的思考和实践。</p>
+<h3 id="关于写作"><a href="#关于写作" class="headerlink" title="关于写作"></a>关于写作</h3><p>知道并不表示真正理解，而是写出来，用自己的话将某个知识写出来，要让其他人都能看懂，这种才是真正的掌握。正如爱因斯坦说的，”如果你不能简单地解释它，你就不能很好地理解它”。</p>
+<blockquote>
+<p>真正希望通过写作建立影响力的人是不会完全被“稿酬”、“流量”等外部动机束缚的，他们往往是为自己的成长而写、为众人的需求而写、为长远的价值而写、为创造一个属于自己的世界而写。即使没有鲜花和掌声，他们也会坚持输出和成长，收获的反馈和奖励都只是意外和惊喜，不是必然和期待。这样的心态能让他们的笔尖持续释放力量，最终收获梦想，因为选择权始终在自己手上。</p>
+</blockquote>
+<p>上面这段关于写作的动机是从书中截取出来的。</p>
+<p>作家 CJ Chilvers 写了 35 年的 newsletter，他在它的 <a href="https://www.cjchilvers.com/blog/35-lessons-from-35-years-of-newsletter-publishing?utm_campaign=%E5%8F%AF%E4%B9%90&amp;utm_medium=email&amp;utm_source=Revue%20newsletter" target="_blank" rel="noopener">35 Lessons from 35 Years of Newsletter Publishing</a> 中写到，Deliver value, not word counts. Solve someone else’s problem — the bigger the better. It’s nice if it solves your problem too. 简单翻译下就是：传递价值，而不是字数。解决别人的问题，越大的问题越好。如果同时也能解决你的问题，就更好了。</p>
+<p>我觉得上面这两段话已经很好的写出了我想要表达的东西。我写的东西首先肯定是我自己觉得有用的，对于大家，可能有用，也可能没用，但是我尽量输出我自己觉得有价值的，暂时肯定不考虑流量的问题，更多的是提升自己的思考能力，提高自己的文字表达能力，如果对于大家在某些方面有些启发，那我觉得就算是成功的了。</p>
+<p>另外，这本书在关于潜意识、元认知等基本概念的解读上有着独到的见解，另外在学习力、情绪力、专注力等这些具体能力的提升上都有具体可行的方法。感兴趣的可以自己亲自去阅读看看，非常不错的一本书。</p>
 ]]></content>
   </entry>
   <entry>
