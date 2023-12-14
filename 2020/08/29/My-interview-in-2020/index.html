@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head><meta name="generator" content="Hexo 3.8.0">
+  <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
@@ -15,13 +15,15 @@
   </title>
  
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
   
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
   
   
 
@@ -29,10 +31,10 @@
   
     <script src="js/local-search.js"></script>
   
-<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+<meta name="generator" content="Hexo 7.0.0"><link rel="alternate" href="/atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
 <div class="wechat-share">
-  <img src="/css/images/logo.png">
+  <img src="/css/images/logo.png" />
 </div>
   <body>
     <header class="header fixed-header">
@@ -147,7 +149,9 @@
                 <i class="fa fa-search"></i>
             </span>
             <div class="search-input-container">
-                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
             </div>
             <span class="popup-btn-close">
                 <i class="fa fa-times-circle"></i>
@@ -176,7 +180,8 @@
   <article class="post-article">
     <section class="markdown-content"><p>今年小红书这边发完年终奖之后，心里隐隐觉得要出去看看机会，因为在小红书这边已经呆了快三年了，对于一些技术，业务总觉得有点麻木了，内心里总觉得自己啥都会了，但是很多只是知道个皮毛。</p>
 <p>有句话是这么说的，一个人在一个地方待久了，内心里以为他所处的这个环境就是全世界，所以想着做些改变，不管结果如何，至少让自己走出舒适区，同时也想着能去大厂看看。</p>
-<a id="more"></a>
+<span id="more"></span>
+
 <p>其实大家也不能特别迷信大厂，认为加入大厂就没有后顾之忧了，只能说目前对我现在这个阶段来说，加入大厂刷一下自己的大厂背景这个对于自己当下来说还是有益的。</p>
 <p>一开始也是不确定到底要不要出去看机会，一个是因为疫情，另一个是内心里总觉得没有准备好，其实很多事情在你开始行动的时候就没有那么多顾虑了，就像很多人在学生时代考试时一样，永远都会觉得自己没有复习好，但勇敢地迈出第一步，后面基本就没啥可恐惧的了。</p>
 <p>自己这段时间主要就面试了三家公司吧，字节，腾讯和阿里，但经历的面试场次感觉有十来场了，有的对应的是同一公司的不同业务吧，字节面的两个业务部门都失败了，腾讯那边QQ音乐团队给了Offer，阿里这边也给了Offer，说实话，面试还是蛮累的，于是后面其他的公司也没有再尝试了。</p>
@@ -236,12 +241,16 @@
 <h2 id="腾讯"><a href="#腾讯" class="headerlink" title="腾讯"></a>腾讯</h2><p>后面有个猎头说是微信那边要招人，说是机会不错，于是我决定试试。当时想着就当增加增加面试经历吧。</p>
 <p>后面猎头推荐后，广州那边有个人打电话过来说是要进行电话面试。我当时其实关于算法这一块还是没怎么复习，于是这次微信的面试直接上来就是笔试，我记得是5道算法题，还有一个关于多线程的编程问题，要求45分钟内完成。</p>
 <p>大概的题目如下：</p>
-<p>题目1（算法）：给出n(n&gt;=1)，请把1,2,…,n，最小分成m组，使得每组内的数字都互质，求m值。例如n=7，可最小划分成3组，{1, 2, 3}, {4, 5}, {6, 7}<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">findmin</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>题目2（算法）：给定一个递增循环整数数组，从里面找出最小的元素，使用的算法越快越好。特别地，最小的元素可能出现在数组中间。比如：50, 52, 63, 90, 3, 8, 15, 44。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem2</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">findmin</span><span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//TODO</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>题目3（算法）：在二叉排序树上面找出第3大的节点。注意：不能把二叉树全量存储到另外的存储空间，比如存储到数组中，然后取出数组的第三个元素。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> value;</span><br><span class="line">    TreeNode left, right;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem3</span> </span>&#123;</span><br><span class="line">  <span class="function">TreeNode <span class="title">find</span><span class="params">(TreeNode root)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>题目1（算法）：给出n(n&gt;&#x3D;1)，请把1,2,…,n，最小分成m组，使得每组内的数字都互质，求m值。例如n&#x3D;7，可最小划分成3组，{1, 2, 3}, {4, 5}, {6, 7}</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">findmin</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>题目2（算法）：给定一个递增循环整数数组，从里面找出最小的元素，使用的算法越快越好。特别地，最小的元素可能出现在数组中间。比如：50, 52, 63, 90, 3, 8, 15, 44。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Problem2</span> &#123;</span><br><span class="line">  <span class="type">int</span> <span class="title function_">findmin</span><span class="params">(<span class="type">int</span>[] arr)</span> &#123;</span><br><span class="line">    <span class="comment">//TODO</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>题目3（算法）：在二叉排序树上面找出第3大的节点。注意：不能把二叉树全量存储到另外的存储空间，比如存储到数组中，然后取出数组的第三个元素。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TreeNode</span> &#123;</span><br><span class="line">    <span class="type">int</span> value;</span><br><span class="line">    TreeNode left, right;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Problem3</span> &#123;</span><br><span class="line">  TreeNode <span class="title function_">find</span><span class="params">(TreeNode root)</span> &#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>题目4（语法）：用Java语言实现System#arraycopy数组拷贝，注意：不能直接使用System.arraycopy</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Problem4</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">arraycopy</span><span class="params">(Object src, <span class="keyword">int</span> srcPos, Object dest, <span class="keyword">int</span> destPos, <span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>题目5（多线程）：阅读下面代码，在2线程环境下，设计一个方案，判断无限数据流(Stream)每个正整数是否素数，越快越好<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Stream</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">long</span> <span class="title">get</span><span class="params">()</span></span>; <span class="comment">// 获取下一个需判断的整数</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">boolean</span> result)</span></span>; <span class="comment">// 返回整数是否素数的结果</span></span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrimeNumber</span><span class="params">(<span class="keyword">long</span> num)</span> </span>&#123; <span class="comment">// 判断一个整数是否素数</span></span><br><span class="line">    <span class="keyword">if</span> (num &lt; <span class="number">2</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">2</span>, s = (<span class="keyword">long</span>) Math.sqrt(num); i &lt;= s; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (num % i == <span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> Stream <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> (Stream) Class.forName(<span class="string">"StreamImpl"</span>).newInstance(); <span class="comment">// 运行环境保证不会异常</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//比如：Stream=&#123;1,2,3,4,...&#125;, Result=&#123;false,true,true,false,...&#125;，注意输出顺序。</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Problem</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> Stream stream = Stream.getInstance();</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Problem instance = <span class="keyword">new</span> Problem();</span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread1();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">"thread1"</span>).start();</span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread2();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">"thread2"</span>).start();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">thread1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">thread2</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Problem4</span> &#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">arraycopy</span><span class="params">(Object src, <span class="type">int</span> srcPos, Object dest, <span class="type">int</span> destPos, <span class="type">int</span> length)</span> &#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>题目5（多线程）：阅读下面代码，在2线程环境下，设计一个方案，判断无限数据流(Stream)每个正整数是否素数，越快越好</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">Stream</span> &#123;</span><br><span class="line">  <span class="type">long</span> <span class="title function_">get</span><span class="params">()</span>; <span class="comment">// 获取下一个需判断的整数</span></span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">put</span><span class="params">(<span class="type">boolean</span> result)</span>; <span class="comment">// 返回整数是否素数的结果</span></span><br><span class="line">  <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">isPrimeNumber</span><span class="params">(<span class="type">long</span> num)</span> &#123; <span class="comment">// 判断一个整数是否素数</span></span><br><span class="line">    <span class="keyword">if</span> (num &lt; <span class="number">2</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">long</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">2</span>, s = (<span class="type">long</span>) Math.sqrt(num); i &lt;= s; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (num % i == <span class="number">0</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">static</span> Stream <span class="title function_">getInstance</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> (Stream) Class.forName(<span class="string">&quot;StreamImpl&quot;</span>).newInstance(); <span class="comment">// 运行环境保证不会异常</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//比如：Stream=&#123;1,2,3,4,...&#125;, Result=&#123;false,true,true,false,...&#125;，注意输出顺序。</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Problem</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="type">Stream</span> <span class="variable">stream</span> <span class="operator">=</span> Stream.getInstance();</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">    <span class="type">Problem</span> <span class="variable">instance</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Problem</span>();</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread1();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">&quot;thread1&quot;</span>).start();</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.thread2();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="string">&quot;thread2&quot;</span>).start();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">thread1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">thread2</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">    <span class="comment">// TODO 请完成实现部分</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>因为之前没准备，我当时连二叉搜索树是有序的这个概念都忘了，把二叉搜索树当做普通的二叉树去处理了，感觉当时在45分钟过后，面试官操着一口广东味的普通话来我和沟通的时候，让我当时有种直接挂断电话的冲动，总之，就感觉这次面试体验很不好，让我有种想去撞墙的冲动。</p>
 <p>也是从这个时候开始，开始意识到要好好准备算法，不然真的是没有继续面下去的必要。</p>
 <p>微信这边的面试基本没有后续了，答得这么差，有后续才怪咧。</p>
@@ -251,38 +260,66 @@
 <p>首先是手机QQ团队，一面面试官问的都是一些Java和Android 基础问题，但是问的比较多，基本上各个知识点都问到了一些。</p>
 <p>一面基本上问了下面一些问题：</p>
 <ul>
-<li>做过哪些内存优化</li>
-<li>内存抖动，如何定位内存抖动</li>
-<li>view移动用动画实现有哪些方式</li>
-<li>自己实现区域解码，decodeFileDescriptor</li>
-<li>scrollto 和 scrollby 的区别</li>
-<li>内存泄漏如何分析</li>
-<li>mvc，mvp和mvvm的区别</li>
-<li>mvvm的缺点是什么，mvvm为啥不用DataBinding，不用DataBinding怎么实现双向绑定</li>
-<li>leakcanary 的原理</li>
-<li>事件冲突如何自己解决</li>
-<li>RecyclerView和ListView的区别</li>
-<li>Service和IntentService的区别</li>
-<li>Service如何stop，bindService的方式如何stop</li>
-<li>aidl 的原理</li>
-<li>多进程通信方式</li>
-<li>自己实现过多进程吗</li>
-<li>HashMap的原理是什么</li>
-<li>红黑树的原理是什么</li>
-<li>Handler可以在多个线程里使用嘛，有几个消息队列，每个线程的消息是如何发到另一个线程的</li>
-<li>aidl 自己写如何实现</li>
-<li>用过哪些设计模式，设计模式</li>
+<li><p>做过哪些内存优化</p>
+</li>
+<li><p>内存抖动，如何定位内存抖动</p>
+</li>
+<li><p>view移动用动画实现有哪些方式</p>
+</li>
+<li><p>自己实现区域解码，decodeFileDescriptor</p>
+</li>
+<li><p>scrollto 和 scrollby 的区别</p>
+</li>
+<li><p>内存泄漏如何分析</p>
+</li>
+<li><p>mvc，mvp和mvvm的区别</p>
+</li>
+<li><p>mvvm的缺点是什么，mvvm为啥不用DataBinding，不用DataBinding怎么实现双向绑定</p>
+</li>
+<li><p>leakcanary 的原理</p>
+</li>
+<li><p>事件冲突如何自己解决</p>
+</li>
+<li><p>RecyclerView和ListView的区别</p>
+</li>
+<li><p>Service和IntentService的区别</p>
+</li>
+<li><p>Service如何stop，bindService的方式如何stop</p>
+</li>
+<li><p>aidl 的原理</p>
+</li>
+<li><p>多进程通信方式</p>
+</li>
+<li><p>自己实现过多进程吗</p>
+</li>
+<li><p>HashMap的原理是什么</p>
+</li>
+<li><p>红黑树的原理是什么</p>
+</li>
+<li><p>Handler可以在多个线程里使用嘛，有几个消息队列，每个线程的消息是如何发到另一个线程的</p>
+</li>
+<li><p>aidl 自己写如何实现</p>
+</li>
+<li><p>用过哪些设计模式，设计模式</p>
+</li>
 <li><p>工厂和抽象工厂的区别（因为上面我说在项目中实践过工厂设计模式，所以他就问了工厂和抽象工厂的区别）<br>手Q二面是视频面试，问的问题是比较抽象一点，感觉一般没有固定的答案。</p>
 </li>
 <li><p>如果不采用改变Bitmap config的这种方式，如何做Bitmap的内存优化</p>
 </li>
-<li>网络优化怎么做</li>
-<li>单元测试</li>
-<li>硬件加速的原理，硬件加速是如何工作的</li>
-<li>RecyclerView 滑动到item不可见后，这部分内存时是如何回收的</li>
-<li>卡顿检测怎么做，如何上报</li>
-<li>写个死锁的代码</li>
-<li>假如字符串中所有字符都不重复，如何输出字符串的所有组合。例如：abc，结果应是a,b,c,ab,ac,bc,abc。</li>
+<li><p>网络优化怎么做</p>
+</li>
+<li><p>单元测试</p>
+</li>
+<li><p>硬件加速的原理，硬件加速是如何工作的</p>
+</li>
+<li><p>RecyclerView 滑动到item不可见后，这部分内存时是如何回收的</p>
+</li>
+<li><p>卡顿检测怎么做，如何上报</p>
+</li>
+<li><p>写个死锁的代码</p>
+</li>
+<li><p>假如字符串中所有字符都不重复，如何输出字符串的所有组合。例如：abc，结果应是a,b,c,ab,ac,bc,abc。</p>
+</li>
 </ul>
 <p>二面答的问题基本没怎么答好，有的是自己不怎么涉及这些，有些则是对于某些理解不够深入。其实我觉得这次面试失败是因为这个几个问题没回答好，我能感觉到面试官有种不想继续聊下去的冲动了，后面则是象征性地出了一道算法题。</p>
 <p>接着收到了QQ音乐的面试邀请，这次面了好几轮，一开始是那边的HR给我打了个电话，基本就是聊为啥换工作，能不能去深圳这样，以及在小红书的工作内容等等。</p>
@@ -344,7 +381,12 @@
     
       <!-- Utterances START -->
       <div id="utterances"></div>
-      <script src="https://utteranc.es/client.js" repo="JasonGaoH/RepoForUtterances" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <script src="https://utteranc.es/client.js"
+        repo="JasonGaoH/RepoForUtterances"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
       <!-- Utterances END -->
     
   </article>
@@ -357,7 +399,7 @@
 
 <script>
   (function () {
-    var url = 'JasonGaoH.github.io/2020/08/29/My-interview-in-2020/';
+    var url = 'https://jasongaohui.top/2020/08/29/My-interview-in-2020/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -422,7 +464,7 @@
     
     
 
-    <br>
+    <br/>
     本站累计访问量<span id="busuanzi_value_site_pv"></span>,
     本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
@@ -439,11 +481,11 @@
     s.parentNode.insertBefore(o, s);
   }
 </script>
-<script>
+<!-- <script>
   async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
     FastClick.attach(document.body);
   })
-</script>
+</script> -->
 
 <script>
   var hasLine = 'true';
@@ -467,7 +509,9 @@
 </script>
 <!-- Baidu Tongji -->
 
+
 <script src="/js/script.js"></script>
+
 
   </body>
 </html>

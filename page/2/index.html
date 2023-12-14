@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head><meta name="generator" content="Hexo 3.8.0">
+  <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
@@ -15,13 +15,15 @@
   </title>
  
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
   
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
   
   
 
@@ -29,10 +31,10 @@
   
     <script src="js/local-search.js"></script>
   
-<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+<meta name="generator" content="Hexo 7.0.0"><link rel="alternate" href="/atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
 <div class="wechat-share">
-  <img src="/css/images/logo.png">
+  <img src="/css/images/logo.png" />
 </div>
   <body>
     <header class="header fixed-header">
@@ -147,7 +149,9 @@
                 <i class="fa fa-search"></i>
             </span>
             <div class="search-input-container">
-                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
             </div>
             <span class="popup-btn-close">
                 <i class="fa fa-times-circle"></i>
@@ -219,7 +223,7 @@
       <p class="article-date">August 6, 2020</p>
       
         
-  <a href="/tags#性能优化 RecyclerView缓存">
+  <a href="/tags#性能优化 RecyclerView缓存" >
     <span class="tag-code">性能优化 RecyclerView缓存</span>
   </a>
 
@@ -239,7 +243,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#volatile">
+  <a href="/tags#volatile" >
     <span class="tag-code">volatile</span>
   </a>
 
@@ -247,9 +251,9 @@
       <div class="article-summary">
         
           <blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483805&amp;idx=1&amp;sn=a6240f582ec81d047a59f206f8d5ba54&amp;chksm=fa237975cd54f063470a8eb7d68774c474ddab37cf88ff16ac873b47f0ac1b514b8be8254344&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">深入解析volatile关键字</a></p>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&mid=2247483805&idx=1&sn=a6240f582ec81d047a59f206f8d5ba54&chksm=fa237975cd54f063470a8eb7d68774c474ddab37cf88ff16ac873b47f0ac1b514b8be8254344&token=1938879438&lang=zh_CN#rd">深入解析volatile关键字</a></p>
 </blockquote>
-<p><code>volatile关键字</code>和<code>synchronized关键字</code>一样，在Java多线程开发中，是一道必须要跨越的槛。之前有篇文章已经分析过<code>synchronized关键字</code>的原理，<a href="https://blog.csdn.net/H_Gao/article/details/98593198" target="_blank" rel="noopener">synchronized关键字的原理</a>，这一次，我们来一步一步分析下<code>volatile关键字</code>的工作原理。</p>
+<p><code>volatile关键字</code>和<code>synchronized关键字</code>一样，在Java多线程开发中，是一道必须要跨越的槛。之前有篇文章已经分析过<code>synchronized关键字</code>的原理，<a href="https://blog.csdn.net/H_Gao/article/details/98593198">synchronized关键字的原理</a>，这一次，我们来一步一步分析下<code>volatile关键字</code>的工作原理。</p>
         
       </div>
       <a class="more" href="/2020/05/21/how-volatile-works/">Read more</a>
@@ -257,12 +261,12 @@
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2020/05/21/The-principle-of-the -synchronized-keyword/">synchronized关键字的原理</a>
+        <a href="/2020/05/21/The-principle-of-the%20-synchronized-keyword/">synchronized关键字的原理</a>
       </h2>
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#synchronized">
+  <a href="/tags#synchronized" >
     <span class="tag-code">synchronized</span>
   </a>
 
@@ -270,13 +274,13 @@
       <div class="article-summary">
         
           <blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483807&amp;idx=1&amp;sn=3bdf01201a329fe98a98c045f5387e1b&amp;chksm=fa237977cd54f061e46fee3727e51208c01931ef704a83526d0fe5e5a15eab386376927888ae&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">synchronized关键字的原理</a></p>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&mid=2247483807&idx=1&sn=3bdf01201a329fe98a98c045f5387e1b&chksm=fa237977cd54f061e46fee3727e51208c01931ef704a83526d0fe5e5a15eab386376927888ae&token=1938879438&lang=zh_CN#rd">synchronized关键字的原理</a></p>
 </blockquote>
 <h3 id="什么是synchronized"><a href="#什么是synchronized" class="headerlink" title="什么是synchronized"></a>什么是synchronized</h3><p>JDK官网对synchronized关键字有个比较权威的解释。</p>
 <p>Synchronized keyword enable a simple strategy for preventing thread interference and memory consistency errors: if an object is visible to more than one thread, all reads or writes to that object’s variables ard done through synchronized methods.</p>
         
       </div>
-      <a class="more" href="/2020/05/21/The-principle-of-the -synchronized-keyword/">Read more</a>
+      <a class="more" href="/2020/05/21/The-principle-of-the%20-synchronized-keyword/">Read more</a>
     </article>
   
     <article class="article-card">
@@ -286,7 +290,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#HashMap">
+  <a href="/tags#HashMap" >
     <span class="tag-code">HashMap</span>
   </a>
 
@@ -294,7 +298,7 @@
       <div class="article-summary">
         
           <blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483757&amp;idx=1&amp;sn=f8cf2e5f82b6cf0e64aab6febf7e7584&amp;chksm=fa237985cd54f0937f9c3c2d3df40b1136602b00d253d2104452ef72319bae6ca7ffcc4f1183&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">关于HashMap你需要知道的一些细节</a></p>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&mid=2247483757&idx=1&sn=f8cf2e5f82b6cf0e64aab6febf7e7584&chksm=fa237985cd54f0937f9c3c2d3df40b1136602b00d253d2104452ef72319bae6ca7ffcc4f1183&token=1938879438&lang=zh_CN#rd">关于HashMap你需要知道的一些细节</a></p>
 </blockquote>
 <p>在官方文档中的描述：</p>
 <blockquote>
@@ -312,7 +316,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#ConcurrentHashMap">
+  <a href="/tags#ConcurrentHashMap" >
     <span class="tag-code">ConcurrentHashMap</span>
   </a>
 
@@ -320,9 +324,9 @@
       <div class="article-summary">
         
           <blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483797&amp;idx=1&amp;sn=cb28703e574bbf5df4563d3aef65be01&amp;chksm=fa23797dcd54f06b34b405d4eef74a14df420fcc16b6b1e42fb16060972ea20c8695ee8c5f29&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">ConcurrentHashMap是如何保证线程安全的</a></p>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&mid=2247483797&idx=1&sn=cb28703e574bbf5df4563d3aef65be01&chksm=fa23797dcd54f06b34b405d4eef74a14df420fcc16b6b1e42fb16060972ea20c8695ee8c5f29&token=1938879438&lang=zh_CN#rd">ConcurrentHashMap是如何保证线程安全的</a></p>
 </blockquote>
-<p>之前分析过HashMap的一些实现细节，<a href="https://blog.csdn.net/H_Gao/article/details/90746413" target="_blank" rel="noopener">关于HashMap你需要知道的一些细节</a>, 今天我们从源码角度来看看ConcurrentHashMap是如何实现线程安全的，其实网上这类文章分析特别多，秉着”纸上得来终觉浅，绝知此事要躬行“的原则，我们尝试自己去分析下，希望这样对于ConcurrentHashMap有一个更深刻的理解。</p>
+<p>之前分析过HashMap的一些实现细节，<a href="https://blog.csdn.net/H_Gao/article/details/90746413">关于HashMap你需要知道的一些细节</a>, 今天我们从源码角度来看看ConcurrentHashMap是如何实现线程安全的，其实网上这类文章分析特别多，秉着”纸上得来终觉浅，绝知此事要躬行“的原则，我们尝试自己去分析下，希望这样对于ConcurrentHashMap有一个更深刻的理解。</p>
         
       </div>
       <a class="more" href="/2020/05/21/how-does-ConcurrentHashMap-work/">Read more</a>
@@ -335,7 +339,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#红黑树，TreeMap">
+  <a href="/tags#红黑树，TreeMap" >
     <span class="tag-code">红黑树，TreeMap</span>
   </a>
 
@@ -343,12 +347,12 @@
       <div class="article-summary">
         
           <blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483855&amp;idx=1&amp;sn=673e581b766d6ec80ec6151e5d732a32&amp;chksm=fa237927cd54f031d5df25b8783551d889200ddab408d1cc5c12533b9d5ab85f99ba78d07b06&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">我画了近百张图来理解红黑树</a>,文章略有修改。</p>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&mid=2247483855&idx=1&sn=673e581b766d6ec80ec6151e5d732a32&chksm=fa237927cd54f031d5df25b8783551d889200ddab408d1cc5c12533b9d5ab85f99ba78d07b06&token=1938879438&lang=zh_CN#rd">我画了近百张图来理解红黑树</a>,文章略有修改。</p>
 </blockquote>
 <p>之前在公司组内分享了红黑树的工作原理，今天把它整理下发出来，希望能对大家有所帮助，对自己也算是一个知识点的总结。</p>
 <p>这篇文章算是我写博客写公众号以来画图最多的一篇文章了，没有之一，我希望尽可能多地用图片来形象地描述红黑树的各种操作的前后变换原理，帮助大家来理解红黑树的工作原理，下面，多图预警开始了。<br>
         
-      </p></div>
+      </div>
       <a class="more" href="/2020/05/21/understand-treemap-by-using-imags/">Read more</a>
     </article>
   
@@ -359,7 +363,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#RecyclerView">
+  <a href="/tags#RecyclerView" >
     <span class="tag-code">RecyclerView</span>
   </a>
 
@@ -367,9 +371,9 @@
       <div class="article-summary">
         
           <blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483770&amp;idx=1&amp;sn=38b95c3cff51e216248c0eb860155437&amp;chksm=fa237992cd54f084802be4b0be2b52e4f5052019d51562f65245ca8b0faf3e0d61d296fc0e7d&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a></p>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&mid=2247483770&idx=1&sn=38b95c3cff51e216248c0eb860155437&chksm=fa237992cd54f084802be4b0be2b52e4f5052019d51562f65245ca8b0faf3e0d61d296fc0e7d&token=1938879438&lang=zh_CN#rd">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a></p>
 </blockquote>
-<h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57" target="_blank" rel="noopener">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
+<h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
         
       </div>
       <a class="more" href="/2020/05/21/The-tab's-sticky-effect./">Read more</a>
@@ -400,7 +404,7 @@
     
     
 
-    <br>
+    <br/>
     本站累计访问量<span id="busuanzi_value_site_pv"></span>,
     本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
@@ -417,11 +421,11 @@
     s.parentNode.insertBefore(o, s);
   }
 </script>
-<script>
+<!-- <script>
   async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
     FastClick.attach(document.body);
   })
-</script>
+</script> -->
 
 <script>
   var hasLine = 'true';
@@ -445,7 +449,9 @@
 </script>
 <!-- Baidu Tongji -->
 
+
 <script src="/js/script.js"></script>
+
 
   </body>
 </html>

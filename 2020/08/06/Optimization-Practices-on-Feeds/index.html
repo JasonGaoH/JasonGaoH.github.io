@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head><meta name="generator" content="Hexo 3.8.0">
+  <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
@@ -15,13 +15,15 @@
   </title>
  
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
   
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
   
   
 
@@ -29,10 +31,10 @@
   
     <script src="js/local-search.js"></script>
   
-<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+<meta name="generator" content="Hexo 7.0.0"><link rel="alternate" href="/atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
 <div class="wechat-share">
-  <img src="/css/images/logo.png">
+  <img src="/css/images/logo.png" />
 </div>
   <body>
     <header class="header fixed-header">
@@ -147,7 +149,9 @@
                 <i class="fa fa-search"></i>
             </span>
             <div class="search-input-container">
-                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
             </div>
             <span class="popup-btn-close">
                 <i class="fa fa-times-circle"></i>
@@ -175,9 +179,10 @@
   <!-- Article START -->
   <article class="post-article">
     <section class="markdown-content"><p>之前一直负责小红书的关注Feed的迭代工作，因为一直是在完成新功能的迭代工作，对于Feed的性能和消费体验就没有特别关注，加上对于这块业务的一些监控也没有落地，所以长期对于这块的性能基本上就是一个忽视的状态。随着业务越来越复杂，功能越来越多，收到好多反馈都是说关注页面的滑动体验很不好，于是决定对关注Feed做一个性能优化。</p>
- <a id="more"></a>
+ <span id="more"></span>
+
 <p>这里先从优化说起，之前在网上看到一个关于优化的分类，觉得很有道理。</p>
-<p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png" alt></p>
+<p>请看下面这张图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/uPic/optimization_category.png"></p>
 <h3 id="关于优化"><a href="#关于优化" class="headerlink" title="关于优化"></a>关于优化</h3><p>优化整体可以分为两大类，软优化和硬优化。那么什么是软优化呢？软优化并不会改变某段代码的执行效率，而是通过调整这段代码的执行时机，来优化整体代码的运行性能。软优化里由分为三大类，分别为预加载，异步加载和懒加载。</p>
 <h4 id="软优化"><a href="#软优化" class="headerlink" title="软优化"></a>软优化</h4><ul>
 <li>预加载<br>这几种加载方式都很好理解，改变的都是执行时机，预加载就是提前加载，把一些重要的数据提前加载好，等到合适的时机，就可以直接展示给用户，而不是在这个合适的时机才去加载数据，这种方式给用户地感觉是加载变快了。</li>
@@ -211,7 +216,7 @@
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#性能优化 RecyclerView缓存">
+  <a href="/tags#性能优化 RecyclerView缓存" >
     <span class="tag-code">性能优化 RecyclerView缓存</span>
   </a>
 
@@ -253,7 +258,12 @@
     
       <!-- Utterances START -->
       <div id="utterances"></div>
-      <script src="https://utteranc.es/client.js" repo="JasonGaoH/RepoForUtterances" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <script src="https://utteranc.es/client.js"
+        repo="JasonGaoH/RepoForUtterances"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
       <!-- Utterances END -->
     
   </article>
@@ -266,7 +276,7 @@
 
 <script>
   (function () {
-    var url = 'JasonGaoH.github.io/2020/08/06/Optimization-Practices-on-Feeds/';
+    var url = 'https://jasongaohui.top/2020/08/06/Optimization-Practices-on-Feeds/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -331,7 +341,7 @@
     
     
 
-    <br>
+    <br/>
     本站累计访问量<span id="busuanzi_value_site_pv"></span>,
     本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
@@ -348,11 +358,11 @@
     s.parentNode.insertBefore(o, s);
   }
 </script>
-<script>
+<!-- <script>
   async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
     FastClick.attach(document.body);
   })
-</script>
+</script> -->
 
 <script>
   var hasLine = 'true';
@@ -376,7 +386,9 @@
 </script>
 <!-- Baidu Tongji -->
 
+
 <script src="/js/script.js"></script>
+
 
   </body>
 </html>

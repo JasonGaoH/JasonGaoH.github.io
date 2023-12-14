@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head><meta name="generator" content="Hexo 3.8.0">
+  <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
@@ -15,13 +15,15 @@
   </title>
  
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
   
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
   
   
 
@@ -29,10 +31,10 @@
   
     <script src="js/local-search.js"></script>
   
-<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+<meta name="generator" content="Hexo 7.0.0"><link rel="alternate" href="/atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
 <div class="wechat-share">
-  <img src="/css/images/logo.png">
+  <img src="/css/images/logo.png" />
 </div>
   <body>
     <header class="header fixed-header">
@@ -147,7 +149,9 @@
                 <i class="fa fa-search"></i>
             </span>
             <div class="search-input-container">
-                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
             </div>
             <span class="popup-btn-close">
                 <i class="fa fa-times-circle"></i>
@@ -175,10 +179,11 @@
   <!-- Article START -->
   <article class="post-article">
     <section class="markdown-content"><blockquote>
-<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&amp;mid=2247483770&amp;idx=1&amp;sn=38b95c3cff51e216248c0eb860155437&amp;chksm=fa237992cd54f084802be4b0be2b52e4f5052019d51562f65245ca8b0faf3e0d61d296fc0e7d&amp;token=1938879438&amp;lang=zh_CN#rd" target="_blank" rel="noopener">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a></p>
+<p>文章已同步发表于微信公众号JasonGaoH，<a href="https://mp.weixin.qq.com/s?__biz=MzUyNTE2OTAzMQ==&mid=2247483770&idx=1&sn=38b95c3cff51e216248c0eb860155437&chksm=fa237992cd54f084802be4b0be2b52e4f5052019d51562f65245ca8b0faf3e0d61d296fc0e7d&token=1938879438&lang=zh_CN#rd">仿京东、淘宝首页，通过两层嵌套的RecyclerView实现tab的吸顶效果</a></p>
 </blockquote>
-<h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57" target="_blank" rel="noopener">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
-<a id="more"></a>
+<h3 id="为什么会有这篇文章"><a href="#为什么会有这篇文章" class="headerlink" title="为什么会有这篇文章"></a>为什么会有这篇文章</h3><p>之前写过一篇文章<a href="https://juejin.im/post/5d233cc86fb9a07ec42b7f57">使用CoordinatorLayout过程中遇到的两个问题以及浅析CoordinatorLayout工作机制</a>，这篇文章上主要讲了通过CoordinatorLayout实现tab吸顶的效果时遇到的问题，效果跟京东、淘宝首页类似，只不过实现方法不同而已，但是使用CoordinatorLayout来实现是会有不少细节问题是很难处理好的，下面会详细介绍。</p>
+<span id="more"></span>
+
 <p>首先我们可以简单看下京东首页的效果gif，来看看我们到底是要实现什么样的效果：</p>
 <p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/jingdong.gif" alt="image"></p>
 <p>京东首页的tab筛选区将feed分为两个部分，上面是各种不同item，tab的下半部分可以左右横滑，并且下拉可以加重更多，只要网络有数据的情况下理论上是可以无限下拉的。</p>
@@ -190,9 +195,9 @@
 <p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/coordinatorlayout_fix.gif" alt="image"></p>
 <p>从gif图大致可以看到AppBarLayout滑上去之后惯性消失了，tab下面的区域是不能接着滚动的。</p>
 <blockquote>
-<p>这个惯性消失的问题，我在网上找到了一个一篇解决惯性消失的文章如下<a href="https://blog.kyleduo.com/2017/07/21/alipay-home-3-alipay-home/" target="_blank" rel="noopener">支付宝首页交互三部曲3实现支付宝首页交互</a>,实现方式大致是自己把CoordinatorLayout这套机制再实现了一遍，因为是自己实现的，里面的一些机制是比较方便改动的，它处理惯性这个问题的逻辑大致是将AppBarLayout中未消费的y轴偏移量拿出来再交由RecyclerView去滑动，代码如下：</p>
+<p>这个惯性消失的问题，我在网上找到了一个一篇解决惯性消失的文章如下<a href="https://blog.kyleduo.com/2017/07/21/alipay-home-3-alipay-home/">支付宝首页交互三部曲3实现支付宝首页交互</a>,实现方式大致是自己把CoordinatorLayout这套机制再实现了一遍，因为是自己实现的，里面的一些机制是比较方便改动的，它处理惯性这个问题的逻辑大致是将AppBarLayout中未消费的y轴偏移量拿出来再交由RecyclerView去滑动，代码如下：</p>
 </blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mHeaderView.setOnHeaderFlingUnConsumedListener(<span class="keyword">new</span> APHeaderView.OnHeaderFlingUnConsumedListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">onFlingUnConsumed</span><span class="params">(APHeaderView header, <span class="keyword">int</span> targetOffset, <span class="keyword">int</span> unconsumed)</span> </span>&#123;</span><br><span class="line">        APHeaderView.Behavior behavior = mHeaderView.getBehavior();</span><br><span class="line">        <span class="keyword">int</span> dy = -unconsumed;</span><br><span class="line">        <span class="keyword">if</span> (behavior != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mRecyclerView.scrollBy(<span class="number">0</span>, dy);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dy;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mHeaderView.setOnHeaderFlingUnConsumedListener(<span class="keyword">new</span> <span class="title class_">APHeaderView</span>.OnHeaderFlingUnConsumedListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">onFlingUnConsumed</span><span class="params">(APHeaderView header, <span class="type">int</span> targetOffset, <span class="type">int</span> unconsumed)</span> &#123;</span><br><span class="line">        APHeaderView.<span class="type">Behavior</span> <span class="variable">behavior</span> <span class="operator">=</span> mHeaderView.getBehavior();</span><br><span class="line">        <span class="type">int</span> <span class="variable">dy</span> <span class="operator">=</span> -unconsumed;</span><br><span class="line">        <span class="keyword">if</span> (behavior != <span class="literal">null</span>) &#123;</span><br><span class="line">            mRecyclerView.scrollBy(<span class="number">0</span>, dy);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dy;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>这里由于篇幅原因，就不展开详细介绍了，感兴趣地同学可以点开上面的链接去研究研究，文章中也贴出了GitHub地址。</p>
 </blockquote>
@@ -208,7 +213,7 @@
 <p>如果只是构造出这个布局出来，我们发现内部的RecyclerView都不会显示出来，因为滑动完全由外部RecyclerView接管了。</p>
 <p>那么重点来了，这种情况如何处理？</p>
 <p>其实RecyclerView的LayoutManager中有这两个方法用于判断RecyclerView在水平方向上和竖直方向上是否可以滚动的。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public boolean canScrollHorizontally() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public boolean canScrollVertically() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public boolean canScrollHorizontally() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public boolean canScrollVertically() &#123;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>然后LayoutManager有各种不同的实现LinearLayoutManager，StaggeredGridLayoutManager等</p>
 <p>这个LayoutManager中的canScrollVertically和canScrollHorizontally在RecyclerView的onInterceptTouchEvent中是会拿来作判断，判断当前RecyclerView是否需要处理滑动事件的。</p>
 <blockquote>
@@ -216,10 +221,14 @@
 </blockquote>
 <p>其实上面已经说出了如何处理嵌套RecyclerView的最重要的点，其他的部分相当于都是一些细节的处理了。</p>
 <p>在外部RecyclerView(下面成ParentRecyclerView)中的重写LayoutManager的canScrollVertically方法如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">fun initLayoutManager() &#123;</span><br><span class="line">    val linearLayoutManager = object :LinearLayoutManager(context) &#123;</span><br><span class="line"></span><br><span class="line">        override fun canScrollVertically():Boolean &#123;</span><br><span class="line">            //找到当前的childRecyclerView</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            //只有当前childRecyclerView滑动到顶部才认为ParentRecyclerView是可以竖直方向是可以滚动的</span><br><span class="line">            return childRecyclerView == null || childRecyclerView.isScrollTop()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    linearLayoutManager.orientation = LinearLayoutManager.VERTICAL</span><br><span class="line">    layoutManager = linearLayoutManager</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在内部RecyclerView(以下称ChildRecyclerView)中定义了isScrollTop()，用于判断ChildRecyclerView是否滚动到顶部。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fun isScrollTop(): Boolean &#123;</span><br><span class="line">    //RecyclerView.canScrollVertically(-1)的值表示是否能向下滚动，false表示已经滚动到顶部</span><br><span class="line">    return !canScrollVertically(-1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>另外，在ParentRecyclerView的onTouchEvent方法中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">override fun onTouchEvent(e: MotionEvent): Boolean &#123;</span><br><span class="line">        if(lastY == 0f) &#123;</span><br><span class="line">            lastY = e.y</span><br><span class="line">        &#125;</span><br><span class="line">        if(isScrollEnd()) &#123;</span><br><span class="line">            //如果父RecyclerView已经滑动到底部，需要让子RecyclerView滑动剩余的距离</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            childRecyclerView?.run &#123;</span><br><span class="line">                val deltaY = (lastY - e.y).toInt()</span><br><span class="line">                if(deltaY != 0) &#123;</span><br><span class="line">                    scrollBy(0,deltaY)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        lastY = e.y</span><br><span class="line">        return try &#123;</span><br><span class="line">            super.onTouchEvent(e)</span><br><span class="line">        &#125; catch (e: Exception) &#123;</span><br><span class="line">            e.printStackTrace()</span><br><span class="line">            false</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
-<p>关于滑动事件主要代码就是上面这些，具体可以可以看看项目代码<a href="https://github.com/JasonGaoH/NestedRecyclerView" target="_blank" rel="noopener">NestedRecyclerView</a>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">fun initLayoutManager() &#123;</span><br><span class="line">    val linearLayoutManager = object :LinearLayoutManager(context) &#123;</span><br><span class="line"></span><br><span class="line">        override fun canScrollVertically():Boolean &#123;</span><br><span class="line">            //找到当前的childRecyclerView</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            //只有当前childRecyclerView滑动到顶部才认为ParentRecyclerView是可以竖直方向是可以滚动的</span><br><span class="line">            return childRecyclerView == null || childRecyclerView.isScrollTop()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    linearLayoutManager.orientation = LinearLayoutManager.VERTICAL</span><br><span class="line">    layoutManager = linearLayoutManager</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在内部RecyclerView(以下称ChildRecyclerView)中定义了isScrollTop()，用于判断ChildRecyclerView是否滚动到顶部。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fun isScrollTop(): Boolean &#123;</span><br><span class="line">    //RecyclerView.canScrollVertically(-1)的值表示是否能向下滚动，false表示已经滚动到顶部</span><br><span class="line">    return !canScrollVertically(-1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，在ParentRecyclerView的onTouchEvent方法中：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">override fun onTouchEvent(e: MotionEvent): Boolean &#123;</span><br><span class="line">        if(lastY == 0f) &#123;</span><br><span class="line">            lastY = e.y</span><br><span class="line">        &#125;</span><br><span class="line">        if(isScrollEnd()) &#123;</span><br><span class="line">            //如果父RecyclerView已经滑动到底部，需要让子RecyclerView滑动剩余的距离</span><br><span class="line">            val childRecyclerView = findNestedScrollingChildRecyclerView()</span><br><span class="line">            childRecyclerView?.run &#123;</span><br><span class="line">                val deltaY = (lastY - e.y).toInt()</span><br><span class="line">                if(deltaY != 0) &#123;</span><br><span class="line">                    scrollBy(0,deltaY)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        lastY = e.y</span><br><span class="line">        return try &#123;</span><br><span class="line">            super.onTouchEvent(e)</span><br><span class="line">        &#125; catch (e: Exception) &#123;</span><br><span class="line">            e.printStackTrace()</span><br><span class="line">            false</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>关于滑动事件主要代码就是上面这些，具体可以可以看看项目代码<a href="https://github.com/JasonGaoH/NestedRecyclerView">NestedRecyclerView</a>。</p>
 <p>还有关于RecyclerView的fling部分，在RecyclerView的onScrollStateChanged回调中监听y轴的总的偏移量totalDy，然后在RecyclerView不滚动的时候交由内部或者外部RecyclerView去fling，这里就不赘述了，具体可以看项目的代码。</p>
 <p>最后贴上项目的运行gif图展示：</p>
 <p><img src="https://raw.githubusercontent.com/JasonGaoH/NestedRecyclerView/master/gif/nested_recyclerview_1.gif" alt="image"></p>
@@ -231,7 +240,7 @@
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#RecyclerView">
+  <a href="/tags#RecyclerView" >
     <span class="tag-code">RecyclerView</span>
   </a>
 
@@ -273,7 +282,12 @@
     
       <!-- Utterances START -->
       <div id="utterances"></div>
-      <script src="https://utteranc.es/client.js" repo="JasonGaoH/RepoForUtterances" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <script src="https://utteranc.es/client.js"
+        repo="JasonGaoH/RepoForUtterances"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
       <!-- Utterances END -->
     
   </article>
@@ -286,7 +300,7 @@
 
 <script>
   (function () {
-    var url = 'JasonGaoH.github.io/2020/05/21/The-tab&#39;s-sticky-effect./';
+    var url = 'https://jasongaohui.top/2020/05/21/The-tab&#39;s-sticky-effect./';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -351,7 +365,7 @@
     
     
 
-    <br>
+    <br/>
     本站累计访问量<span id="busuanzi_value_site_pv"></span>,
     本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
@@ -368,11 +382,11 @@
     s.parentNode.insertBefore(o, s);
   }
 </script>
-<script>
+<!-- <script>
   async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
     FastClick.attach(document.body);
   })
-</script>
+</script> -->
 
 <script>
   var hasLine = 'true';
@@ -396,7 +410,9 @@
 </script>
 <!-- Baidu Tongji -->
 
+
 <script src="/js/script.js"></script>
+
 
   </body>
 </html>

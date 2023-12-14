@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head><meta name="generator" content="Hexo 3.8.0">
+  <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
@@ -15,13 +15,15 @@
   </title>
  
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
   
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
   
   
 
@@ -29,10 +31,10 @@
   
     <script src="js/local-search.js"></script>
   
-<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+<meta name="generator" content="Hexo 7.0.0"><link rel="alternate" href="/atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
 <div class="wechat-share">
-  <img src="/css/images/logo.png">
+  <img src="/css/images/logo.png" />
 </div>
   <body>
     <header class="header fixed-header">
@@ -147,7 +149,9 @@
                 <i class="fa fa-search"></i>
             </span>
             <div class="search-input-container">
-                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
             </div>
             <span class="popup-btn-close">
                 <i class="fa fa-times-circle"></i>
@@ -173,7 +177,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#UI">
+  <a href="/tags#UI" >
     <span class="tag-code">UI</span>
   </a>
 
@@ -194,7 +198,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#Android">
+  <a href="/tags#Android" >
     <span class="tag-code">Android</span>
   </a>
 
@@ -202,9 +206,9 @@
       <div class="article-summary">
         
           <p>android中，在进行耗时操作更新UI用到最多的方法就是Handler了，一般在子线程中进行耗时操作（访问网络等），然后发送消息到UI线程（主线程），使得界面得以更新。</p>
-<p>对于Handler的用法，相信大家都比较熟悉了，那么Handler机制的原理是什么呢？我们今天从源码角度来分析下Handler机制的原理。<br>
+<p>对于Handler的用法，相信大家都比较熟悉了，那么Handler机制的原理是什么呢？我们今天从源码角度来分析下Handler机制的原理。</p>
         
-      </p></div>
+      </div>
       <a class="more" href="/2020/05/21/how-handler-works/">Read more</a>
     </article>
   
@@ -215,7 +219,7 @@
       <p class="article-date">May 21, 2020</p>
       
         
-  <a href="/tags#Android">
+  <a href="/tags#Android" >
     <span class="tag-code">Android</span>
   </a>
 
@@ -236,11 +240,11 @@
       <p class="article-date">March 23, 2019</p>
       
         
-  <a href="/tags#Android">
+  <a href="/tags#Android" >
     <span class="tag-code">Android</span>
   </a>
 
-  <a href="/tags#AsyncTask">
+  <a href="/tags#AsyncTask" >
     <span class="tag-code">AsyncTask</span>
   </a>
 
@@ -252,9 +256,9 @@
 </ol>
 <hr>
 <p>AsyncTask 即 asynchronous task，异步任务。</p>
-<p>AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。<br>
+<h2 id="AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。-2-AsyncTask的简单使用"><a href="#AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。-2-AsyncTask的简单使用" class="headerlink" title="AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。 2. AsyncTask的简单使用"></a>AsyncTask实际上是围绕Thread和Handler设计的一个辅助类，在内部是对Thread和Handler的一种封装。AsyncTask的异步体现在由后台线程进行运算（访问网络等比较耗时的操作），然后将结果发布到用户界面上来更新UI，使用AsyncTask使得我不用操作Thread和Handler。<br>
         
-      </p></div>
+      </div>
       <a class="more" href="/2019/03/23/analys-of-AsyncTask/">Read more</a>
     </article>
   
@@ -265,18 +269,18 @@
       <p class="article-date">March 22, 2019</p>
       
         
-  <a href="/tags#Android">
+  <a href="/tags#Android" >
     <span class="tag-code">Android</span>
   </a>
 
-  <a href="/tags#TabLayout">
+  <a href="/tags#TabLayout" >
     <span class="tag-code">TabLayout</span>
   </a>
 
       
       <div class="article-summary">
         
-          <p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
+          <p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q">关于TabLayout的indicator宽度的一次探索</a></p>
 <blockquote>
 <p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
 </blockquote>
@@ -310,7 +314,7 @@
     
     
 
-    <br>
+    <br/>
     本站累计访问量<span id="busuanzi_value_site_pv"></span>,
     本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
@@ -327,11 +331,11 @@
     s.parentNode.insertBefore(o, s);
   }
 </script>
-<script>
+<!-- <script>
   async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
     FastClick.attach(document.body);
   })
-</script>
+</script> -->
 
 <script>
   var hasLine = 'true';
@@ -355,7 +359,9 @@
 </script>
 <!-- Baidu Tongji -->
 
+
 <script src="/js/script.js"></script>
+
 
   </body>
 </html>

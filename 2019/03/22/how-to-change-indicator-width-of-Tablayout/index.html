@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head><meta name="generator" content="Hexo 3.8.0">
+  <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   <meta name="description" content="坚持输出，坚持书写，才可以持续成长">
@@ -15,13 +15,15 @@
   </title>
  
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
   
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
   
   
 
@@ -29,10 +31,10 @@
   
     <script src="js/local-search.js"></script>
   
-<link rel="alternate" href="atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
+<meta name="generator" content="Hexo 7.0.0"><link rel="alternate" href="/atom.xml" title="JasonGao Thoughts" type="application/atom+xml">
 </head>
 <div class="wechat-share">
-  <img src="/css/images/logo.png">
+  <img src="/css/images/logo.png" />
 </div>
   <body>
     <header class="header fixed-header">
@@ -147,7 +149,9 @@
                 <i class="fa fa-search"></i>
             </span>
             <div class="search-input-container">
-                <input autocomplete="off" autocapitalize="off" placeholder="Please enter your keyword(s) to search." spellcheck="false" type="search" class="search-input">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
             </div>
             <span class="popup-btn-close">
                 <i class="fa fa-times-circle"></i>
@@ -174,27 +178,30 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q" target="_blank" rel="noopener">关于TabLayout的indicator宽度的一次探索</a></p>
+    <section class="markdown-content"><p>本文的微信公众号链接：<a href="https://mp.weixin.qq.com/s/wzVlPHYkgVEEjw5dF5RK-Q">关于TabLayout的indicator宽度的一次探索</a></p>
 <blockquote>
 <p>关于TabLayout，做过android开发的都知道，在android开发中应用特别广泛。这里来简单记录一下前不久遇到的关于TabLayout的一个问题。</p>
 </blockquote>
- <a id="more"></a>
+ <span id="more"></span>
+
 <h3 id="先来看看下面一张图，"><a href="#先来看看下面一张图，" class="headerlink" title="先来看看下面一张图，"></a>先来看看下面一张图，</h3><p><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_1.png" alt="这里写图片描述"><br> 这是我们app首页顶部的部分截图，典型的TabLayout的应用场景，现在遇到一个问题，设计需要TabLayout的indicator的宽度能够与Tab的文字等宽，甚至需要比文字的宽度短。</p>
 <p>那么现在就需要想办法解决这个问题了，另外需要注意的是，这里的TabLayout是与ViewPager绑定的，需要兼容原来的TabLayout的的逻辑。</p>
 <p>首先，想想能否在原生TabLayout的基础上，做一些调整。查看TabLayout的源码，我们发现TabLayout的有一个私有内部类SlidingTabStrip，这个SlidingTabLayout继承自LinearLayout，TabLayout的每个Tab的indicator就是由这个类负责绘制的。</p>
 <p><strong>SlidingTabStrip的draw方法</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_0.png" alt="这里写图片描述"></p>
-<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left = selectedTitle.getLeft();   right = selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
-<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3" target="_blank" rel="noopener">方法一</a></p>
-<p><strong>主要代码如下：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，Tab的indicator的是SlidingTabStrip绘制的一个Rect，这个Rect的宽度是由IndicatorLeft和mIndicatorRight来决定的，看到上面截图的第一个箭头所指的地方，注意到这两行代码left &#x3D; selectedTitle.getLeft();   right &#x3D; selectedTitle.getRight();基本可以确定每个Indicator的宽度是和每个Tab的宽度确定的。所以，可以考虑针对这个特点做点调整。</p>
+<h3 id="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"><a href="#第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。" class="headerlink" title="第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。"></a>第一种方法：通过反射设置TabLayout每个Tab的Margin值来实现压缩Tab的indicator宽度的效果。</h3><p>链接地址：<a href="https://www.jianshu.com/p/8c7ddfbb2fa3">方法一</a></p>
+<p><strong>主要代码如下：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">tabLayoutThree.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Class&lt;?&gt; tablayout = tabLayoutThree.getClass();</span><br><span class="line">                    Field tabStrip = tablayout.getDeclaredField(&quot;mTabStrip&quot;);</span><br><span class="line">                    tabStrip.setAccessible(true);</span><br><span class="line">                    LinearLayout ll_tab= (LinearLayout) tabStrip.get(tabLayoutThree);</span><br><span class="line">                    for (int i = 0; i &lt; ll_tab.getChildCount(); i++) &#123;</span><br><span class="line">                        View child = ll_tab.getChildAt(i);</span><br><span class="line">                        child.setPadding(0,0,0,0);</span><br><span class="line">                        LinearLayout.LayoutParams params = new</span><br><span class="line">                        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1);</span><br><span class="line">                        params.setMarginStart(dip2px(MainActivity.this,1f));</span><br><span class="line">                        params.setMarginEnd(dip2px(MainActivity.this,15f));</span><br><span class="line">                        child.setLayoutParams(params);</span><br><span class="line">                        child.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
 <p>这种情况下，需要指定TabLayout的tabMode为fixed，如果设置为scrollable，那么这段代码是不生效的。</p>
 <p>来看看这段代码的运行效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_3.png" alt="这里写图片描述"><br>这种情况下基本可以满足需求，这里的indicator的宽度基本和Tab的文字是等宽的。这种解决方法勉强可以达到这种需求，但是这里有个问题是当Tab的文字不统一的时候，Indicator的宽度会由最大的那个Tab的宽度决定。</p>
 <p>可以看到下面这个截图的效果：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_4.png" alt="这里写图片描述"></p>
 <p>如上截图，我们发现，当第二个tab的文字变长的时候，第一个tab的Indicator的宽度马上就超过了tab文字的宽度，作为一个追求完美的程序员，这样还是显得很别扭，所以接下来我们再来看看第二种方法。</p>
-<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903" target="_blank" rel="noopener">方法二</a></p>
+<h3 id="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"><a href="#第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。" class="headerlink" title="第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。"></a>第二种方法：同样是通过反射，这里的处理方式不是设置每个SlidingTabStrip的margin，而是通过反射改变TabLayout中的每个Tab中的TabView的margin来达到这种效果，这样我们每个Tab的Indicator的宽度不会是由最大的那个Tab文字宽度决定的。</h3><p>链接地址：<a href="https://blog.csdn.net/u013134391/article/details/70833903">方法二</a></p>
 <p>贴上链接地址，这个作者针对第一种方式做了一些改善，我觉得文章写得很不错，不仅针对第一种方式给出了具体的方法，而且分析了为什么采取这种方式。</p>
 <p>这里简单总结下，你也可以点击上面的链接看原作者的分析。我们注意到，TabLayout内部对Tab的宽度有个特殊的处理，在onMeasure方法中，如下面的截图，首先循环遍历，取出Tab的最大宽度，然后再循环将最大的宽度设置为每个Tab的宽度，这样tab的宽度总是以所有tab中最大宽度的那个值来决定，而我们每个Tab的Indicator的width是和每个Tab的宽度相关的.<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_5.png" alt="这里写图片描述"></p>
 <p>我们来看下关键代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">tabLayoutTwo.post(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //了解源码得知 线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                    LinearLayout mTabStrip = (LinearLayout) tabLayoutTwo.getChildAt(0);</span><br><span class="line">                    int dp10 = dip2px(tabLayoutTwo.getContext(), 10);</span><br><span class="line"></span><br><span class="line">                    for (int i = 0; i &lt; mTabStrip.getChildCount(); i++) &#123;</span><br><span class="line">                        View tabView = mTabStrip.getChildAt(i);</span><br><span class="line"></span><br><span class="line">                        //拿到tabView的mTextView属性  tab的字数不固定一定用反射取mTextView</span><br><span class="line">                        Field mTextViewField =</span><br><span class="line">                                tabView.getClass().getDeclaredField(&quot;mTextView&quot;);</span><br><span class="line">                        mTextViewField.setAccessible(true);</span><br><span class="line"></span><br><span class="line">                        TextView mTextView = (TextView) mTextViewField.get(tabView);</span><br><span class="line"></span><br><span class="line">                        tabView.setPadding(0, 0, 0, 0);</span><br><span class="line"></span><br><span class="line">                        //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度</span><br><span class="line">                        int width = 0;</span><br><span class="line">                        width = mTextView.getWidth();</span><br><span class="line">                        if (width == 0) &#123;</span><br><span class="line">                            mTextView.measure(0, 0);</span><br><span class="line">                            width = mTextView.getMeasuredWidth();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        //设置tab左右间距为10dp  注意这里不能使用Padding</span><br><span class="line">                        // 因为源码中线的宽度是根据 tabView的宽度来设置的</span><br><span class="line">                        LinearLayout.LayoutParams params =</span><br><span class="line">                                (LinearLayout.LayoutParams) tabView.getLayoutParams();</span><br><span class="line">                        params.width = width ;</span><br><span class="line">                        params.leftMargin = dp10;</span><br><span class="line">                        params.rightMargin = dp10;</span><br><span class="line">                        tabView.setLayoutParams(params);</span><br><span class="line"></span><br><span class="line">                        tabView.invalidate();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+
 <p>通过反射拿到每个TabView的宽度，拿到TabView中每个TextView宽度，将TextView的宽度设置给每个TabView，这样我们的Tab的宽度就被压缩了，同时，每个Tab的Indicator的宽度就能和Tab的文字部分保持同样的宽度了。</p>
 <p>这种方式的效果截图如下：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_6.png" alt="这里写图片描述"></p>
 <p>这样看，是不是就没有上面的问题了。每个Tab的Indicator的width基本可以合Tab的文字宽度保持一致了。但是这里还有一个问题，就是采用这种方法虽然可以解决每个Tab的Indicator宽度太长的问题，但是，上面两种方法都有一个特点，就是通过反射将每个tab的padding设置为0，这样会导致每个tab的可点击区域变得很小，我么打开开发者模式里面显示布局边距这个选项来看下我们刚才的解决方法运行的截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_7.png" alt="这里写图片描述"><br>通过上面的截图可以清楚地发现每个tab的可点击区域被压缩得很窄。虽然这个在某些方面看来是可以接受的，但是我们来看文章最开始这张图。</p>
@@ -204,7 +211,7 @@
 <p>接下来我们需要改原生TabLayout的一些逻辑，在保留原生TabLayout一些自定义属性的基础上，添加可以自定义Indicator的width的属性，<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_9.png" alt="这里写图片描述"></p>
 <p><strong>在代码中主要改两个地方，第一个地方如下</strong>：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_10.png" alt="这里写图片描述"></p>
 <p>在updateIndicatorPosition方法中，这里在处理Indicator的宽度的时候不是以Tab的左边坐标来算，将Indicator的left和right进行如下设置。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">left = selectedTitle.getLeft() + (selectedTitle.getWidth() - mSelectedIndicatorWidth) / 2;</span><br><span class="line">right = left + mSelectedIndicatorWidth;</span><br></pre></td></tr></table></figure>
 <p>并且，对于Indicator滑动中的状态也做相应的处理，即当mSelectionOffset大于0时对Indicator的left和right做同样的处理。</p>
 <p><strong>第二个改动的地方:</strong><br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_11.png" alt="这里写图片描述"></p>
 <p>这里改动的是animateIndicatorToPosition方法，根据名字就可以基本知道这个是对Tab切换时Indicator的动画处理。</p>
@@ -212,7 +219,7 @@
 <p>接下来我们可以验证下我们这样的改动方法是否有效，简单看下效果图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_12.png" alt="这里写图片描述"></p>
 <p>可以看到，我们可以让TabLayout的Tab的可点击区域保持不变，并且可以修改Tab下面的Indicator的宽度，这里我们提供了TabLayout的Indicator的width的自定义。</p>
 <p>不多说，最后看下统一的效果截图：<br><img src="https://raw.githubusercontent.com/JasonGaoH/Images/master/tablayout_13.png" alt="这里写图片描述"></p>
-<p><a href="https://github.com/JasonGaoH/XTabLayout/" target="_blank" rel="noopener">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
+<p><a href="https://github.com/JasonGaoH/XTabLayout/">Demo地址</a>，如果觉得看文章不是特别清楚，可以直接去看Demo中的代码。</p>
 <p>最后，感谢大家阅读这篇文章，如果觉得写得还不错的话，点个赞呗，实在不行，留个言也可以接受。</p>
 </section>
     <!-- Tags START -->
@@ -220,11 +227,11 @@
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#Android">
+  <a href="/tags#Android" >
     <span class="tag-code">Android</span>
   </a>
 
-  <a href="/tags#TabLayout">
+  <a href="/tags#TabLayout" >
     <span class="tag-code">TabLayout</span>
   </a>
 
@@ -259,7 +266,12 @@
     
       <!-- Utterances START -->
       <div id="utterances"></div>
-      <script src="https://utteranc.es/client.js" repo="JasonGaoH/RepoForUtterances" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>    
+      <script src="https://utteranc.es/client.js"
+        repo="JasonGaoH/RepoForUtterances"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>    
       <!-- Utterances END -->
     
   </article>
@@ -272,7 +284,7 @@
 
 <script>
   (function () {
-    var url = 'JasonGaoH.github.io/2019/03/22/how-to-change-indicator-width-of-Tablayout/';
+    var url = 'https://jasongaohui.top/2019/03/22/how-to-change-indicator-width-of-Tablayout/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -337,7 +349,7 @@
     
     
 
-    <br>
+    <br/>
     本站累计访问量<span id="busuanzi_value_site_pv"></span>,
     本站累计访客数<span id="busuanzi_value_site_uv"></span>
   </p>
@@ -354,11 +366,11 @@
     s.parentNode.insertBefore(o, s);
   }
 </script>
-<script>
+<!-- <script>
   async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
     FastClick.attach(document.body);
   })
-</script>
+</script> -->
 
 <script>
   var hasLine = 'true';
@@ -382,7 +394,9 @@
 </script>
 <!-- Baidu Tongji -->
 
+
 <script src="/js/script.js"></script>
+
 
   </body>
 </html>
